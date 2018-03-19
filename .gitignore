@@ -1,0 +1,13 @@
+\#*
+*~
+.~*
+\.*.sw?
+*-
+*.ps
+*.orig
+*.rej
+*.diff
+*.patch
+*.log
+*.hex
+*.bin
