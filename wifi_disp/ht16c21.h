@@ -18,7 +18,7 @@ void ht16c21_setup() {
 }
 void disp(char *str) {
   uint8_t dot, str0[22];
-  const uint8_t _abcdefgh[20] = { //字符到7段码的对应
+  const uint8_t _abcdefgh[30] = { //字符到7段码的对应
     B11111100, //0
     B01100000, //1
     B11011010, //2
@@ -37,7 +37,7 @@ void disp(char *str) {
     B10001110, //16 F
     B00000010, //17 '-'
     B01111100,  //18 'U'
-    //B11111100 //19 'O';
+    B00011110 //19 'T';
   };
   const uint8_t convert[5 * 8] = { //高位是ram地址(0,3,4,7,8未用)，低位是ram字节的位，a-g是8字的7个段吗， h是小数点，
     //a     b     c     d     e    f      g     h
@@ -105,6 +105,10 @@ void disp(char *str) {
       case 'c':
         dispbyte = 12;
         break;
+      case 'O':
+      case 'o':
+        dispbyte = 0; //O=0
+        break;
       case '-':
         dispbyte = 16;
         break;
@@ -118,6 +122,10 @@ void disp(char *str) {
       case 'F':
       case 'f':
         dispbyte = 15;
+        break;
+      case 'T':
+      case 't':
+        dispbyte = 19;
         break;
       case 'U':
       case 'u':

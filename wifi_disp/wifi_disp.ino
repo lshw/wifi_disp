@@ -1,6 +1,9 @@
 #include <FS.h>
-#define VER "1.0"
+#define VER "1.1"
 #define HOSTNAME "disp_"
+extern "C" {
+#include "user_interface.h"
+}
 char disp_buf[22];
 uint32_t next_disp = 120; //下次开机
 String hostname = HOSTNAME;
@@ -17,12 +20,6 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 #include "ap_web.h"
 #include "ht16c21.h"
 #include "http_update.h"
-
-extern "C" {
-#include "user_interface.h"
-}
-
-
 
 bool power_in = false;
 void setup()
@@ -56,11 +53,7 @@ void setup()
       Serial.println("外接电源");
     }
   }
-
-  Wire.beginTransmission(HT1621);
-  Wire.write(byte(0x84));
-  Wire.write(byte(3));  //0-关闭  3-开启
-  Wire.endTransmission();
+  ht16c21_cmd(0x84,3);  //0-关闭  3-开启
   if (!load_ram() && !load_ram() && !load_ram()) {
     ram_buf[0] = 0xff; //读取错误
     ram_buf[7] = 0; // 1 充电， 0 不充电
@@ -72,7 +65,7 @@ void setup()
       disp("H UP ");
       break;
     case OTA_MODE:
-      ram_buf[0] = 0;//ota以后，
+      ram_buf[0] = HTTP_UPDATE_MODE;//ota以后，
       disp(" OTA ");
       break;
     case AP_MODE:
@@ -102,6 +95,7 @@ void setup()
     poweroff(1200);
     return;
   }
+  ht16c21_cmd(0x88, 0); //停止闪烁
   if (proc == AP_MODE) return;
   if (proc == OTA_MODE) {
     ota_setup();
@@ -118,7 +112,7 @@ void setup()
   }
   uint16_t httpCode = http_get();
   if (httpCode >= 400) {
-    Serial.print("sleep 20minute\r\nuptime=");
+    Serial.print("不能链接到web\r\n20分钟后再试试\r\n本次上电时长");
     Serial.print(millis());
     Serial.println("ms");
     poweroff(1200);
