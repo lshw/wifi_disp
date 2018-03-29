@@ -118,6 +118,10 @@ void setup()
     poweroff(1200);
     return;
   }
+  if (v < 3.6)
+    ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
+  else
+    ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
   Serial.print("uptime=");
   Serial.print(millis());
   if (next_disp == 0) next_disp = 120;

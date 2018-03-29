@@ -77,12 +77,6 @@ void disp(char *str) {
 
   //ht16c21_cmd(0x86,0); //内部刷新频率  0-80hz 1-160hz
 
-  if (v < 3.6)
-    ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
-  else
-    ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
-
-
   ram_buf[1] = 0;
   ram_buf[2] = 0;
   ram_buf[5] = 0;
