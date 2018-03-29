@@ -67,20 +67,6 @@ bool wifi_connect() {
       }
     }
   }
-  pinMode(13, OUTPUT);
-  if (v < 3.8) {
-    ram_buf[7] |= 1; //电压低于3.8V 充电
-    digitalWrite(13, LOW);
-  } else if (v > 4.17) {
-    ram_buf[7] &= ~1; //电压高于于4.17V 停止充电
-    digitalWrite(13, HIGH);
-  } else { //按照以前的设置
-    if (ram_buf[7] & 1)
-      digitalWrite(13, LOW);
-    else
-      digitalWrite(13, HIGH);
-  }
-  set_ram_check();
   Serial.println("正在连接wifi.");
   // ... Give ESP 10 seconds to connect to station.
   unsigned long startTime = millis();

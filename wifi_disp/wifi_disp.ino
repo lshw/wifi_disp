@@ -36,23 +36,11 @@ void setup()
   Serial.flush();
   ds_init();
   ht16c21_setup();
-  pinMode(13, OUTPUT);
-  digitalWrite(13, HIGH);
   get_batt();
-  v0 = v;
   Serial.print("电池电压");
   Serial.println(v);
-  digitalWrite(13, LOW);
-  get_batt();
-  digitalWrite(13, HIGH);
-  if (v - v0 > 0.1) { //有外接电源
-    v0 = v;
-    get_batt();
-    if (v0 - v > 0.1) {
-      power_in = true;
-      Serial.println("外接电源");
-    }
-  }
+  if(power_in) Serial.println("外接电源");
+  if(ram_buf[7]&1) Serial.println("充电中");
   ht16c21_cmd(0x84,3);  //0-关闭  3-开启
   if (!load_ram() && !load_ram() && !load_ram()) {
     ram_buf[0] = 0xff; //读取错误
@@ -169,8 +157,35 @@ void poweroff(uint32_t sec) {
   //system_deep_sleep((uint64_t)1000000 * sec);
   power_off = true;
 }
-
-float get_batt() {//锂电池电压
+float get_batt(){
+  pinMode(13, OUTPUT);
+  digitalWrite(13, HIGH); //不充电
+  delay(1);
+  get_batt0();
+  v0 = v;
+  digitalWrite(13, LOW); //充电
+  delay(1);
+  get_batt0();
+  if (v - v0 > 0.1) { //有外接电源
+    v0 = v;
+    digitalWrite(13, HIGH); //不充电
+    delay(1);
+    get_batt0();
+    if (v0 - v > 0.1)
+      power_in = true;
+  }
+  if(v < 3.8)
+    ram_buf[7] |= 1;
+  else if(v > 4.17)
+    ram_buf[7] &= ~1;
+  set_ram_check();
+  if(ram_buf[7] & 1)
+    digitalWrite(13,LOW);
+  else
+    digitalWrite(13,HIGH);
+  return v;
+}
+float get_batt0() {//锂电池电压
   uint32_t dat = analogRead(A0);
   dat = analogRead(A0)
         + analogRead(A0)
