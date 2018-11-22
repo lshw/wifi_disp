@@ -29,6 +29,7 @@ void disp(char *str) {
     B11100000, //7
     B11111110, //8
     B11110110,//9
+    B01101110, //10 H
     B11101110,//11 A
     B11001110,//12 P
     B10011100,//13 C
@@ -89,33 +90,36 @@ void disp(char *str) {
     switch (dispbyte) {
       case 'A':
       case 'a':
-        dispbyte = 10;
+        dispbyte = 11;
         break;
       case 'P':
       case 'p':
-        dispbyte = 11;
+        dispbyte = 12;
         break;
       case 'C':
       case 'c':
-        dispbyte = 12;
+        dispbyte = 13;
         break;
+      case 'H':
+      case 'h':
+        dispbyte = 10; //O=0
       case 'O':
       case 'o':
         dispbyte = 0; //O=0
         break;
       case '-':
-        dispbyte = 16;
+        dispbyte = 17;
         break;
       case ' ':
-        dispbyte = 13;
+        dispbyte = 14;
         break;
       case 'E':
       case 'e':
-        dispbyte = 14;
+        dispbyte = 15;
         break;
       case 'F':
       case 'f':
-        dispbyte = 15;
+        dispbyte = 16;
         break;
       case 'T':
       case 't':

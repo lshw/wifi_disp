@@ -25,7 +25,6 @@ bool power_in = false;
 void setup()
 {
   uint8_t i;
-  float v0;
   Serial.begin(115200);
   Serial.println();
   Serial.println("Software Ver=" VER);
@@ -158,6 +157,7 @@ void poweroff(uint32_t sec) {
   power_off = true;
 }
 float get_batt(){
+  float v0;
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH); //不充电
   delay(1);
