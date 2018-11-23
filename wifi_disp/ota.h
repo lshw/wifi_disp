@@ -3,7 +3,7 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-
+char ip_buf[30],ip_offset,ip_len;
 extern void disp(char *);
 void ota_setup() {
 
@@ -52,17 +52,39 @@ void ota_setup() {
     }
   });
   ArduinoOTA.begin();
+  snprintf(ip_buf,sizeof(ip_buf),"OTP %s ",WiFi.localIP().toString().c_str());
+  ip_len = strlen(ip_buf);
+  ip_offset = 0;
   Serial.println("Ready");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+  Serial.println(ip_len);
 }
 uint16_t sec0,sec1;
 void ota_loop() {
+  uint8_t i,i0,i1;
   if (millis() < 600000) {
     sec0=millis()/1000;
     if(sec0!=sec1){
-    sprintf(disp_buf, "0 %03d", 600-sec0);
+      i=ip_offset;
+      i0=0;
+      i1=0;
+      while(i1<5) {
+	i=i%ip_len;
+	disp_buf[i0]=ip_buf[i];
+        disp_buf[i0+1]=0;
+        i++;
+        i0++;
+	if(ip_buf[i]!='.') i1++;
+        else if(i1==1)  { //第一个数字，第2个数字，都不能带小数点
+        disp_buf[i0-1]=' ';
+        disp_buf[i0]=' ';
+}
+      }
+      ip_offset++;
+      ip_offset%=ip_len;
     sec1=sec0;
+    //最后一个点要消掉
+    i0=strlen(disp_buf);
+    if(disp_buf[i0-1]=='.')disp_buf[i0-1]=0;
     disp(disp_buf);
     }
     ArduinoOTA.handle();
