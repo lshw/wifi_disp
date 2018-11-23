@@ -103,6 +103,7 @@ void disp(char *str) {
       case 'H':
       case 'h':
         dispbyte = 10; //O=0
+        break;
       case 'O':
       case 'o':
         dispbyte = 0; //O=0

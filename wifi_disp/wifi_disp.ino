@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.1"
+#define VER "1.2"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -118,6 +118,7 @@ void setup()
 }
 bool power_off = false;
 void poweroff(uint32_t sec) {
+  if(sec < 60) sec = 60;
   wdt_disable();
   if (ram_buf[7] & 1) {
     digitalWrite(13, LOW);

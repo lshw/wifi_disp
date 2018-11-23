@@ -80,7 +80,8 @@ void httpsave() {
   Serial.print(millis());
   Serial.println("ms");
   Serial.println("reboot");
-  poweroff(1);
+  Serial.flush();
+  ESP.restart();
 }
 void AP() {
   // Go into software AP mode.
@@ -148,7 +149,7 @@ void ap_loop() {
       ht16c21_cmd(0x84, 0);
       server.close();
       ESP.reset();
-      poweroff(9999);
+      poweroff(9999); //关机
     }
   }
 }
