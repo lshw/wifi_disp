@@ -26,8 +26,11 @@ grep "Global vari" /tmp/build/info.log |awk -F[ '{printf $2}'|tr -d ']'|awk -F' 
 grep "Sketch uses" /tmp/build/info.log |awk -F[ '{printf $2}'|tr -d ']'|awk -F' ' '{print "ROM：使用"$1"字节,"$3"%"}'
 
 if [ $? == 0 ] ; then
-chmod -R og+w /tmp/build /tmp/cache
-cp -a /tmp/build/wifi_disp.ino.bin lib/wifi_disp.bin
-
-$arduino/hardware/esp8266com/esp8266/tools/esptool/esptool -vv -cd nodemcu -cb 115200 -cp /dev/ttyUSB0 -ca 0x00000 -cf lib/wifi_disp.bin
+ chmod -R og+w /tmp/build /tmp/cache
+ cp -a /tmp/build/wifi_disp.ino.bin lib/wifi_disp.bin
+ if [ "a%1" != "a"  ] ;then
+  $arduino/hardware/esp8266com/esp8266/tools/espota.py -i $1 -f lib/wifi_disp.bin
+ else
+  $arduino/hardware/esp8266com/esp8266/tools/esptool/esptool -vv -cd nodemcu -cb 115200 -cp /dev/ttyUSB0 -ca 0x00000 -cf lib/wifi_disp.bin
+ fi
 fi

@@ -58,33 +58,36 @@ void ota_setup() {
   Serial.println("Ready");
   Serial.println(ip_len);
 }
+void zmd(){
+  uint8_t i,i0,i1;
+  i=ip_offset;
+  i0=0;
+  i1=0;
+  while(i1<5) {
+    i=i%ip_len;
+    disp_buf[i0]=ip_buf[i];
+    disp_buf[i0+1]=0;
+    i++;
+    i0++;
+    if(ip_buf[i]!='.') i1++;
+  }
+  i=strlen(disp_buf)-1;
+  if(disp_buf[i]=='.') disp_buf[i]=0; //最后一个数字不能带小数点 //显示屏的最后一个数字无小数点
+    if(disp_buf[1]=='.')  { //第一个数字，带小数点的要清掉 显示屏的第一个数字无小数点
+      disp_buf[0]=' ';
+      disp_buf[1]=' ';
+    }
+  ip_offset=(ip_offset+1)%ip_len;
+  while(ip_buf[ip_offset]=='.')
+    ip_offset=(ip_offset+1)%ip_len;//第一个字符是点，跳过
+}
 uint16_t sec0,sec1;
 void ota_loop() {
-  uint8_t i,i0,i1;
   if (millis() < 600000) {
     sec0=millis()/1000;
     if(sec0!=sec1){
-      i=ip_offset;
-      i0=0;
-      i1=0;
-      while(i1<5) {
-	i=i%ip_len;
-	disp_buf[i0]=ip_buf[i];
-        disp_buf[i0+1]=0;
-        i++;
-        i0++;
-	if(ip_buf[i]!='.') i1++;
-        else if(i1==1)  { //第一个数字，第2个数字，都不能带小数点
-        disp_buf[i0-1]=' ';
-        disp_buf[i0]=' ';
-}
-      }
-      ip_offset++;
-      ip_offset%=ip_len;
-    sec1=sec0;
-    //最后一个点要消掉
-    i0=strlen(disp_buf);
-    if(disp_buf[i0-1]=='.')disp_buf[i0-1]=0;
+      zmd(); //"OTA 192.168.12.126  " 走马灯填充disp_buf  
+      sec1=sec0;
     disp(disp_buf);
     }
     ArduinoOTA.handle();

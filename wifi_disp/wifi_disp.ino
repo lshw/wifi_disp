@@ -92,6 +92,8 @@ void setup()
     if (http_update() == true) {
       ram_buf[0] = 0;
       send_ram();
+      disp("HUP O");
+      delay(2000);
     }
 
     ESP.restart();
@@ -172,9 +174,14 @@ float get_batt(){
     digitalWrite(13, HIGH); //不充电
     delay(1);
     get_batt0();
-    if (v0 - v > 0.1)
-      power_in = true;
-  }
+    if (v0 - v > 0.1){
+      if(!power_in) {
+	power_in = true;
+	Serial.println("测得电源插入");
+      }
+    }else power_in = false;
+  }else 
+    power_in = false;
   if(v < 3.8)
     ram_buf[7] |= 1;
   else if(v > 4.17)

@@ -14,7 +14,6 @@ bool http_update()
       USE_SERIAL.printf("HTTP_UPDATE_FAILD Error (%d): %s\r\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
       ram_buf[0]=0;
       ESP.restart();
-      return true;
       break;
 
     case HTTP_UPDATE_NO_UPDATES:
@@ -23,6 +22,7 @@ bool http_update()
 
     case HTTP_UPDATE_OK:
       USE_SERIAL.println("HTTP_UPDATE_OK");
+      return true;
       break;
   }
   delay(1000);
