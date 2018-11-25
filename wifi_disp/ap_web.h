@@ -70,7 +70,7 @@ void httpsave() {
     }
   }
   server.send(200, "text/plain", "OK!");
-  ram_buf[0] = 1;
+  ram_buf[0] = 0;
   set_ram_check();
   send_ram();
   delay(2000);
@@ -87,7 +87,7 @@ void AP() {
   // Go into software AP mode.
   struct softap_config cfgESP;
   disp("  AP ");
-  ram_buf[0] = 3; //ota
+  ram_buf[0] = OTA_MODE; //ota
   send_ram();
 
   Serial.println("AP模式启动.\r\nssid:disp\r\npasswd:none");

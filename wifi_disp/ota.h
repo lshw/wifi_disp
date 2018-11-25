@@ -53,7 +53,7 @@ void ota_setup() {
     }
   });
   ArduinoOTA.begin();
-  snprintf(ip_buf,sizeof(ip_buf),"OTP %s ",WiFi.localIP().toString().c_str());
+  snprintf(ip_buf,sizeof(ip_buf),"OTA %s ",WiFi.localIP().toString().c_str());
   ip_len = strlen(ip_buf);
   ip_offset = 0;
   Serial.println("Ready");
@@ -75,8 +75,11 @@ void zmd(){
   i=strlen(disp_buf)-1;
   if(disp_buf[i]=='.') disp_buf[i]=0; //最后一个数字不能带小数点 //显示屏的最后一个数字无小数点
     if(disp_buf[1]=='.')  { //第一个数字，带小数点的要清掉 显示屏的第一个数字无小数点
-      disp_buf[0]=' ';
       disp_buf[1]=' ';
+      i0=strlen(disp_buf);
+      for(i=0;i<i0-2;i++) 
+	disp_buf[i]=disp_buf[i+1];
+      disp_buf[i0-2]=0;
     }
   ip_offset=(ip_offset+1)%ip_len;
   while(ip_buf[ip_offset]=='.')
