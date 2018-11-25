@@ -48,14 +48,19 @@ void setup()
   proc = ram_buf[0];
   switch (proc) {
     case HTTP_UPDATE_MODE: //http_update
+      wdt_disable();
+      ram_buf[7]|=1; //充电
       ram_buf[0] = 0;
       disp("H UP ");
       break;
     case OTA_MODE:
+      wdt_disable();
+      ram_buf[7]|=1; //充电
       ram_buf[0] = HTTP_UPDATE_MODE;//ota以后，
       disp(" OTA ");
       break;
     case AP_MODE:
+      ram_buf[7]|=1; //充电
       ram_buf[0] = OTA_MODE; //ota
       send_ram();
       AP();
@@ -121,7 +126,10 @@ void setup()
 bool power_off = false;
 void poweroff(uint32_t sec) {
   if(sec < 60) sec = 60;
-  wdt_disable();
+  if(v>4.17){
+    ram_buf[7]&=~1;
+    send_ram();
+  }
   if (ram_buf[7] & 1) {
     digitalWrite(13, LOW);
   } else {
@@ -157,6 +165,7 @@ void poweroff(uint32_t sec) {
   Serial.println("秒");
   Serial.println("bye!");
   Serial.flush();
+  wdt_disable();
   system_deep_sleep_set_option(0);
   digitalWrite(LED_BUILTIN, LOW);
   ESP.deepSleep((uint64_t) 1000000 * sec, WAKE_RF_DEFAULT);
@@ -230,8 +239,6 @@ void loop()
       ota_loop();
       break;
     case AP_MODE:
-      ram_buf[7]|=1; //充电
-      set_ram_check();
       digitalWrite(13,LOW);
       ap_loop();
       break;

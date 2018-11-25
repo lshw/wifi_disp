@@ -5,6 +5,7 @@
 #include <ArduinoOTA.h>
 char ip_buf[30],ip_offset,ip_len;
 extern void disp(char *);
+extern float get_batt();
 void ota_setup() {
 
   // Port defaults to 8266
