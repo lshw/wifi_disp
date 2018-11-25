@@ -214,6 +214,9 @@ void loop()
       ota_loop();
       break;
     case AP_MODE:
+      ram_buf[7]|=1; //充电
+      set_ram_check();
+      digitalWrite(13,LOW);
       ap_loop();
       break;
   }
