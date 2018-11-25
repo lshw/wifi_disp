@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.2"
+#define VER "1.3"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -127,11 +127,8 @@ void poweroff(uint32_t sec) {
   } else {
     digitalWrite(13, HIGH);
   }
-
   if (power_in) { //如果外面接了电， 就进入LIGHT_SLEEP模式 电流0.8ma， 保持充电
     sec = sec / 2;
-    if (ram_buf[7] & 1)
-      Serial.println("充电中");
     wifi_set_sleep_type(LIGHT_SLEEP_T);
     Serial.print("休眠");
     if (sec > 60) {
@@ -140,8 +137,15 @@ void poweroff(uint32_t sec) {
     }
     Serial.print(sec % 60);
     Serial.println("秒");
-    delay(sec * 1000); //空闲时进入LIGHT_SLEEP_T模式
+    if (ram_buf[7] & 1){
+      digitalWrite(13,LOW);
+      Serial.println("充电中");
+    }
+    for(uint32_t i=0;i<sec;i++) {
+    delay(1000); //空闲时进入LIGHT_SLEEP_T模式
+    system_soft_wdt_feed ();
   }
+}
   if (ram_buf[7] & 1)
     Serial.println("充电结束");
   Serial.print("关机");
@@ -169,19 +173,31 @@ float get_batt(){
   digitalWrite(13, LOW); //充电
   delay(1);
   get_batt0();
-  if (v - v0 > 0.1) { //有外接电源
+  if (v > v0) { //有外接电源
     v0 = v;
     digitalWrite(13, HIGH); //不充电
     delay(1);
     get_batt0();
-    if (v0 - v > 0.1){
-      if(!power_in) {
-	power_in = true;
-	Serial.println("测得电源插入");
-      }
+    if (v0 > v){
+      v0 = v;
+      digitalWrite(13, LOW); //充电
+      delay(1);
+      get_batt0();
+      if(v > v0){
+	v0 = v;
+	digitalWrite(13, HIGH); //不充电
+	delay(1);
+	get_batt0();
+	if (v0 > v){
+	  if(!power_in) {
+	    power_in = true;
+	    Serial.println("测得电源插入");
+	  }
+	}else power_in=false;
+      }else power_in=false;
     }else power_in = false;
-  }else 
-    power_in = false;
+  }else power_in = false;
+
   if(v < 3.8)
     ram_buf[7] |= 1;
   else if(v > 4.17)

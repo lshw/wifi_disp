@@ -7,6 +7,8 @@
 
 bool http_update()
 {
+  USE_SERIAL.print("下载firmware from ");
+  USE_SERIAL.println("http://www.bjlx.org.cn/wifi_disp.bin");
   t_httpUpdate_return  ret = ESPhttpUpdate.update("http://www.bjlx.org.cn/wifi_disp.bin");
 
   switch (ret) {

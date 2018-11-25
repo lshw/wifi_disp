@@ -126,6 +126,7 @@ void ap_loop() {
   server.handleClient();
 
   if (ms0 < millis()) {
+    get_batt();
     system_soft_wdt_feed ();
     Serial.print("batt:");
     Serial.print(get_batt());

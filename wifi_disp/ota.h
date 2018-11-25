@@ -86,6 +86,7 @@ void ota_loop() {
   if (millis() < 600000) {
     sec0=millis()/1000;
     if(sec0!=sec1){
+      get_batt();
       zmd(); //"OTA 192.168.12.126  " 走马灯填充disp_buf  
       sec1=sec0;
     disp(disp_buf);
