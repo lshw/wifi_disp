@@ -61,8 +61,8 @@ bool wifi_connect() {
         }
       }
       if (ssid != "" && passwd != "") {
-        Serial.print("ssid:"); Serial.println(ssid);
-        Serial.print("passwd:"); Serial.println(passwd);
+        Serial.print("Ssid:"); Serial.println(ssid);
+        Serial.print("Passwd:"); Serial.println(passwd);
         WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
       }
     }
@@ -128,6 +128,7 @@ uint16_t http_get() {
   digitalWrite(12, LOW);
   digitalWrite(14, LOW);
   String url = "http://www.bjlx.org.cn/lxy.php?ver="  VER  "&sn=" + hostname
+               + "&ssid=" + String(WiFi.SSID())
                + "&key=" + String(key)
                + "&batt=" + String(v)
                + "&temp=" + String(temp)

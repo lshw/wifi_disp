@@ -3,7 +3,8 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-char ip_buf[30],ip_offset,ip_len;
+char ip_buf[30];
+uint8_t ip_offset,ip_len;
 extern void disp(char *);
 extern float get_batt();
 void ota_setup() {
@@ -53,7 +54,7 @@ void ota_setup() {
     }
   });
   ArduinoOTA.begin();
-  snprintf(ip_buf,sizeof(ip_buf),"OTA %s ",WiFi.localIP().toString().c_str());
+  snprintf(ip_buf,sizeof(ip_buf),"OTA %s     ",WiFi.localIP().toString().c_str());
   ip_len = strlen(ip_buf);
   ip_offset = 0;
   Serial.println("Ready");
@@ -74,15 +75,8 @@ void zmd(){
   }
   i=strlen(disp_buf)-1;
   if(disp_buf[i]=='.') disp_buf[i]=0; //最后一个数字不能带小数点 //显示屏的最后一个数字无小数点
-    if(disp_buf[1]=='.')  { //第一个数字，带小数点的要清掉 显示屏的第一个数字无小数点
-      disp_buf[1]=' ';
-      i0=strlen(disp_buf);
-      for(i=0;i<i0-2;i++) 
-	disp_buf[i]=disp_buf[i+1];
-      disp_buf[i0-2]=0;
-    }
   ip_offset=(ip_offset+1)%ip_len;
-  while(ip_buf[ip_offset]=='.')
+  while(ip_buf[ip_offset]=='.' || ip_buf[ip_offset+1]=='.')
     ip_offset=(ip_offset+1)%ip_len;//第一个字符是点，跳过
 }
 uint16_t sec0,sec1;
@@ -94,6 +88,7 @@ void ota_loop() {
       zmd(); //"OTA 192.168.12.126  " 走马灯填充disp_buf  
       sec1=sec0;
     disp(disp_buf);
+    system_soft_wdt_feed ();
     }
     ArduinoOTA.handle();
   } else

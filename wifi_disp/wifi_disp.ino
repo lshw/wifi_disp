@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.3"
+#define VER "1.5"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -77,6 +77,11 @@ void setup()
   ht16c21_cmd(0x88, 1); //闪烁
 
   if (wifi_connect() == false) {
+    if(proc == OTA_MODE || proc == HTTP_UPDATE_MODE) {
+      ram_buf[0]=0;
+      send_ram();
+      ESP.restart(); 
+    }
     ram_buf[9] |= 0x10; //x1
     ram_buf[0] = 0;
     send_ram();
