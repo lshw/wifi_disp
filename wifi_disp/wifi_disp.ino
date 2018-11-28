@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.5"
+#define VER "1.6"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -33,7 +33,7 @@ void setup()
   Serial.println("Hostname: " + hostname);
   delay(100);
   Serial.flush();
-  ds_init();
+  if(!ds_init() && !ds_init()) ds_init();
   ht16c21_setup();
   get_batt();
   Serial.print("电池电压");
@@ -85,12 +85,22 @@ void setup()
     ram_buf[9] |= 0x10; //x1
     ram_buf[0] = 0;
     send_ram();
-
     Serial.print("不能链接到AP\r\n20分钟后再试试\r\n本次上电时长");
     Serial.print(millis());
     Serial.println("ms");
     poweroff(1200);
     return;
+  }
+  if(temp==85.00 || temp<=-300){
+    delay(1000);
+    get_temp();
+    if(temp==85.00){
+      ds.reset();
+      ds.select(dsn);
+      ds.write(0x44, 1);
+      delay(1000);
+      get_temp();
+    }
   }
   ht16c21_cmd(0x88, 0); //停止闪烁
   if (proc == AP_MODE) return;

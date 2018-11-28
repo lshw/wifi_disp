@@ -7,7 +7,7 @@ float temp = -999;
 byte dsn[9]; //ds1820 sn
 char key[19]; //ds1820 sn 字符串
 
-void ds_init() {
+bool ds_init() {
   uint8_t i;
   pinMode(14, OUTPUT);
   digitalWrite(14, LOW);
@@ -21,16 +21,17 @@ void ds_init() {
     Serial.println("没找到ds1820.");
     Serial.println();
     ds.reset_search();
-    return;
+    return false;
   }
   dsn[8] = 0;
   Serial.print("DS1820 =");
   sprintf(key, "%02x%02x%02x%02x%02x%02x%02x%02x", dsn[0], dsn[1], dsn[2], dsn[3], dsn[4], dsn[5], dsn[6], dsn[7]);
   Serial.println(key);
-  if (OneWire::crc8(dsn, 8), HEX);
+  if (OneWire::crc8(dsn, 7)!=dsn[7]) return false;
   ds.reset();
   ds.select(dsn);
   ds.write(0x44, 1);
+  return true;
 }
 
 float get_temp() {

@@ -71,19 +71,18 @@ bool wifi_connect() {
   // ... Give ESP 10 seconds to connect to station.
   unsigned long startTime = millis();
   i = 0;
-  temp = -999.0;
   while (WiFiMulti.run() != WL_CONNECTED && millis() - startTime < 40000)
   {
     Serial.write('.');
     //Serial.print(WiFi.status());
-    delay(500);
-    if (temp == -999.0) {
+    delay(1000);
+    if (temp == 85.00) { //85度时，是ds1820未完成测试
       i++;
       if (i == 2) {
         i = 0;
         temp = get_temp();
         if (temp < -300.0) {
-          delay(100);
+          delay(100); //crc error;
           ds_init();
         }
       }
@@ -132,7 +131,7 @@ uint16_t http_get() {
                + "&key=" + String(key)
                + "&batt=" + String(v)
                + "&temp=" + String(temp)
-               + "&change=" + String(ram_buf[7] & 1);
+               + "&charge=" + String(ram_buf[7] & 1);
 
   Serial.println( url); //串口输出
   http.begin( url ); //HTTP提交
