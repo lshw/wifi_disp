@@ -131,6 +131,7 @@ uint16_t http_get() {
                + "&ssid=" + String(WiFi.SSID())
                + "&key=" + String(key)
                + "&batt=" + String(v)
+               + "&rssi=" + String(WiFi.RSSI());
                + "&temp=" + String(temp)
                + "&charge=" + String(ram_buf[7] & 1);
 
