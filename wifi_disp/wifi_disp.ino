@@ -1,9 +1,10 @@
 #include <FS.h>
-#define VER "1.6"
+#define VER "1.8"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
 }
+void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 char disp_buf[22];
 uint32_t next_disp = 120; //下次开机
 String hostname = HOSTNAME;
@@ -12,7 +13,7 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 //0,1-正常 2-AP 3-OTA  4-http update
 #define AP_MODE 2
 #define OTA_MODE 3
-#define HTTP_UPDATE_MODE 4
+#define OFF_MODE 4
 
 #include "ota.h"
 #include "ds1820.h"
@@ -47,16 +48,20 @@ void setup()
   }
   proc = ram_buf[0];
   switch (proc) {
-    case HTTP_UPDATE_MODE: //http_update
+    case OFF_MODE: //OFF
       wdt_disable();
-      ram_buf[7]|=1; //充电
       ram_buf[0] = 0;
-      disp("H UP ");
+      disp(" OFF ");
+      delay(5000);
+      disp("     ");
+      ht16c21_cmd(0x84,0x02);//关闭ht16c21
+      poweroff(0);
+      return;
       break;
     case OTA_MODE:
       wdt_disable();
       ram_buf[7]|=1; //充电
-      ram_buf[0] = HTTP_UPDATE_MODE;//ota以后，
+      ram_buf[0] = OFF_MODE;//ota以后，
       disp(" OTA ");
       break;
     case AP_MODE:
@@ -77,7 +82,7 @@ void setup()
   ht16c21_cmd(0x88, 1); //闪烁
 
   if (wifi_connect() == false) {
-    if(proc == OTA_MODE || proc == HTTP_UPDATE_MODE) {
+    if(proc == OTA_MODE || proc == OFF_MODE) {
       ram_buf[0]=0;
       send_ram();
       ESP.restart(); 
@@ -108,7 +113,7 @@ void setup()
     ota_setup();
     return;
   }
-  if (proc == HTTP_UPDATE_MODE) {
+  if (proc == OFF_MODE) {
     if (http_update() == true) {
       ram_buf[0] = 0;
       send_ram();
@@ -140,7 +145,6 @@ void setup()
 }
 bool power_off = false;
 void poweroff(uint32_t sec) {
-  if(sec < 60) sec = 60;
   if(v>4.17){
     ram_buf[7]&=~1;
     send_ram();
@@ -183,6 +187,7 @@ void poweroff(uint32_t sec) {
   wdt_disable();
   system_deep_sleep_set_option(0);
   digitalWrite(LED_BUILTIN, LOW);
+  if(sec==0) ht16c21_cmd(0x84,0x2); //lcd off
   ESP.deepSleep((uint64_t) 1000000 * sec, WAKE_RF_DEFAULT);
   //system_deep_sleep((uint64_t)1000000 * sec);
   power_off = true;

@@ -6,6 +6,7 @@
 //#include <WiFiClientSecure.h>
 #include <ESP8266WiFiMulti.h>
 extern char ram_buf[10];
+bool http_update();
 void AP();
 void send_ram();
 void set_ram_check();
@@ -162,8 +163,8 @@ uint16_t http_get() {
 	    &&disp_buf[3]=='A' 
 	    &&disp_buf[4]=='T' 
 	    &&disp_buf[5]=='E') {
-	  ram_buf[0]=HTTP_UPDATE_MODE;
-	  send_ram();
+	  if (http_update() == false)
+	    http_update();
 	  Serial.flush();
 	  ESP.restart();	
 	} 

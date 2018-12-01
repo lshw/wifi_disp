@@ -13,21 +13,6 @@ void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 
 DNSServer dnsServer;
 ESP8266WebServer server(80);
-//extent
-void handle_http_update() {
-  ram_buf[0] = HTTP_UPDATE_MODE;
-  server.send(200, "text/html", "<html>"
-              "head"
-              "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
-              "</head>"
-              "<body>"
-              "现在开始升级firmware<br>"
-              "url:http://www.bjlx.org.cn/wifi_disp.bin"
-              "</body></html>"
-             );
-  disp("UUUUU");
-  ESP.restart();
-}
 void http204() {
   server.send(204, "", "");
   server.client().stop();
@@ -46,7 +31,6 @@ void handleRoot() {
               "<input type=submit name=submit value=save>"
               "</form>"
               "<hr>"
-              "<a href=/update.php onclick=return confirm('要升级固件吗?');><button>升级固件</button></a>"
               "</body>"
               "</html>");
   server.client().stop();
@@ -111,7 +95,6 @@ void AP() {
 
   server.on("/", handleRoot);
   server.on("/save.php", httpsave); //保存设置
-  server.on("/update.php",handle_http_update); //升级固件
   server.on("/generate_204", http204);//安卓上网检测
 
   server.onNotFound(http204);
