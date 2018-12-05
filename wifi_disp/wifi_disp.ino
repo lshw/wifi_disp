@@ -1,12 +1,12 @@
 #include <FS.h>
-#define VER "1.9"
+#define VER "1.11"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
 }
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 char disp_buf[22];
-uint32_t next_disp = 120; //下次开机
+uint32_t next_disp = 1200; //下次开机
 String hostname = HOSTNAME;
 float v;
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
@@ -145,7 +145,7 @@ void setup()
 }
 bool power_off = false;
 void poweroff(uint32_t sec) {
-  if(v>4.17){
+  if(v>4.20){
     ram_buf[7]&=~1;
     send_ram();
   }
@@ -156,7 +156,7 @@ void poweroff(uint32_t sec) {
   }
   if (power_in) { //如果外面接了电， 就进入LIGHT_SLEEP模式 电流0.8ma， 保持充电
     sec = sec / 2;
-    wifi_set_sleep_type(LIGHT_SLEEP_T);
+    wifi_set_sleep_type(MODEM_SLEEP_T);
     Serial.print("休眠");
     if (sec > 60) {
       Serial.print(sec / 60);
@@ -168,21 +168,27 @@ void poweroff(uint32_t sec) {
       digitalWrite(13,LOW);
       Serial.println("充电中");
     }
+    wdt_disable();
+  //  delay(1000*sec);
     for(uint32_t i=0;i<sec;i++) {
     delay(1000); //空闲时进入LIGHT_SLEEP_T模式
+   // Serial.println(i);
     system_soft_wdt_feed ();
   }
-}
-  if (ram_buf[7] & 1)
+  }
+    wifi_set_sleep_type(LIGHT_SLEEP_T);
+    if ((ram_buf[7] & 1)&&power_in)
     Serial.println("充电结束");
   Serial.print("关机");
-  if (sec > 60) {
-    Serial.print(sec / 60);
-    Serial.print("分钟");
+  if(sec>0) {
+    if (sec > 60) {
+      Serial.print(sec / 60);
+      Serial.print("分钟");
+    }
+    Serial.print(sec % 60);
+    Serial.println("秒");
+    Serial.println("bye!");
   }
-  Serial.print(sec % 60);
-  Serial.println("秒");
-  Serial.println("bye!");
   Serial.flush();
   wdt_disable();
   system_deep_sleep_set_option(0);

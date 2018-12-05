@@ -6,6 +6,7 @@
 //#include <WiFiClientSecure.h>
 #include <ESP8266WiFiMulti.h>
 extern char ram_buf[10];
+extern bool power_in;
 bool http_update();
 void AP();
 void send_ram();
@@ -131,7 +132,8 @@ uint16_t http_get() {
                + "&ssid=" + String(WiFi.SSID())
                + "&key=" + String(key)
                + "&batt=" + String(v)
-               + "&rssi=" + String(WiFi.RSSI());
+               + "&rssi=" + String(WiFi.RSSI())
+               + "&power=" + String(power_in)
                + "&temp=" + String(temp)
                + "&charge=" + String(ram_buf[7] & 1);
 
