@@ -110,14 +110,22 @@ bool wifi_connect() {
 }
 
 uint16_t http_get() {
-  if(temp<=-300) {
-    digitalWrite(12, LOW);
-    digitalWrite(14, LOW);
-    delay(10);
-    ds_init();
-    delay(1000);
-    get_temp();
-  } else if(temp==85.00){
+  if (temp < -300.0) {
+    temp = get_temp();
+    if (temp < -300.0) {
+      delay(10);
+      temp = get_temp();
+      if (temp < -300.0) {
+        digitalWrite(12, LOW);
+        digitalWrite(14, LOW);
+        delay(10);
+        ds_init();
+        delay(500);
+        temp = get_temp();
+      }
+    }
+  }
+  if(temp==85.00){
     ds.reset();
     ds.select(dsn);
     ds.write(0x44, 1);

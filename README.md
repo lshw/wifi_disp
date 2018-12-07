@@ -19,3 +19,6 @@
 
 lib下的脚本，是linux下，不用arduino集成环境， 直接用命令行进行编译或者ota或者线刷的脚本
 
+这里有个taobao链接， 提供全套散件，这个小小的套件， 可以体验学习如下诸多内容: 嵌入式开发，wifi开发, arduino,http开发，制作ap接入点，物联网应用，3D打印外壳，基于单片机dns泛域名解析， mdns发现，基于单片机的web服务器，好多内容， 适合于大中小学生玩耍。 https://item.taobao.com/item.htm?id=583649099297  
+
+
