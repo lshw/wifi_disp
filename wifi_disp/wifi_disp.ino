@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.12"
+#define VER "1.14"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -170,8 +170,9 @@ void poweroff(uint32_t sec) {
     }
     wdt_disable();
   //  delay(1000*sec);
-    for(uint32_t i=0;i<sec;i++) {
-    delay(1000); //空闲时进入LIGHT_SLEEP_T模式
+    for(uint32_t i=0;i<sec/2;i++) {
+    delay(2000); //空闲时进入LIGHT_SLEEP_T模式
+    get_batt();
    // Serial.println(i);
     system_soft_wdt_feed ();
   }
@@ -233,11 +234,16 @@ float get_batt(){
     }else power_in = false;
   }else power_in = false;
 
-  if(v < 3.8)
+  if(v < 3.8){
     ram_buf[7] |= 1;
-  else if(v > 4.17)
-    ram_buf[7] &= ~1;
-  set_ram_check();
+    send_ram();
+  }else if(v > 4.21) {
+    delay(1);
+    if(get_batt0() > 4.21) {
+      ram_buf[7] &= ~1;
+      send_ram();
+    }
+  }
   if(ram_buf[7] & 1)
     digitalWrite(13,LOW);
   else
