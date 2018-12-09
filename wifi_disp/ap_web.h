@@ -108,15 +108,17 @@ void AP() {
   cfgESP.authmode = AUTH_OPEN;//无密码模式
   wifi_softap_set_config(&cfgESP);
   delay(10);
-
   WiFi.softAP("disp", "");
   Serial.print("IP地址: ");
   Serial.println(WiFi.softAPIP());
-
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(53, "*", WiFi.softAPIP());
   Serial.println("泛域名dns服务器启动");
   wifi_set_sleep_type(LIGHT_SLEEP_T);
+
+  http_listen();
+}
+void http_listen() {
 
   server.on("/", handleRoot);
   server.on("/save.php", httpsave); //保存设置
@@ -126,13 +128,13 @@ void AP() {
   server.begin();
   Serial.println("HTTP服务器启动");
 }
-
+void http_loop() {
+  server.handleClient();
+}
 uint32_t ms0;
 void ap_loop() {
-
   dnsServer.processNextRequest();
-  server.handleClient();
-
+  http_loop();
   if (ms0 < millis()) {
     get_batt();
     system_soft_wdt_feed ();

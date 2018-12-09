@@ -6,6 +6,8 @@
 char ip_buf[30];
 uint8_t ip_offset,ip_len;
 extern void disp(char *);
+extern void http_listen();
+extern void http_loop();
 extern float get_batt();
 void ota_setup() {
 
@@ -21,6 +23,8 @@ void ota_setup() {
   // Password can be set with it's md5 value as well
   // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
   // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+  http_listen();
 
   ArduinoOTA.onStart([]() {
     String type;
@@ -91,6 +95,8 @@ void ota_loop() {
     system_soft_wdt_feed ();
     }
     ArduinoOTA.handle();
+    http_loop();
+    wifi_set_sleep_type(LIGHT_SLEEP_T);
   } else
     ESP.restart();
   return;
