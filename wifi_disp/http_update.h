@@ -7,6 +7,12 @@
 
 bool http_update()
 {
+  if(get_batt()<3.6) {
+    Serial.println("电压太低,不做升级");
+    ESP.restart();
+    return false;
+  }
+
   disp(" H UP");
   USE_SERIAL.print("下载firmware from ");
   USE_SERIAL.println("http://www.bjlx.org.cn/wifi_disp.bin");

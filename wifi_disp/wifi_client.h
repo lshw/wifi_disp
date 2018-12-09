@@ -68,6 +68,7 @@ bool wifi_connect() {
         WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
       }
     }
+  fp.close();
   }
   Serial.println("正在连接wifi.");
   // ... Give ESP 10 seconds to connect to station.
