@@ -1,11 +1,13 @@
 #include <FS.h>
 #define VER "1.14"
 #define HOSTNAME "disp_"
+#define DEFAULT_URL "http://www.bjlx.org.cn/wifi_disp.php"
 extern "C" {
 #include "user_interface.h"
 }
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 char disp_buf[22];
+String url;
 uint32_t next_disp = 1200; //下次开机
 String hostname = HOSTNAME;
 float v;
@@ -15,6 +17,7 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 #define OTA_MODE 3
 #define OFF_MODE 4
 
+#include "fs.h"
 #include "ota.h"
 #include "ds1820.h"
 #include "wifi_client.h"
@@ -46,6 +49,9 @@ void setup()
     ram_buf[0] = 0xff; //读取错误
     ram_buf[7] = 0; // 1 充电， 0 不充电
   }
+  get_url(); //载入url
+  if(url.length()==0)
+    url=String(DEFAULT_URL);
   proc = ram_buf[0];
   switch (proc) {
     case OFF_MODE: //OFF

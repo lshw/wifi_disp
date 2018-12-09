@@ -25,9 +25,10 @@ void handleRoot() {
               "</head>"
               "<body>"
               "<form action=/save.php method=post>"
-              "输入ssid:passwd(可以多行)"
+              "输入ssid:passwd(可以多行多个)"
               "<input type=submit value=save><br>"
-              "<textarea  style='width:500px;height:80px;' name=data></textarea><br>"
+              "<textarea  style='width:500px;height:80px;' name=data>"+get_ssid()+"</textarea><br>"
+              "url:<input maxlength=100 type=text value='"+get_url()+"' name=url>(如果不知道此设置的作用，请不要修改)<br>"
               "<input type=submit name=submit value=save>"
               "</form>"
               "<hr>"
@@ -37,19 +38,43 @@ void handleRoot() {
   ap_on_time = millis() + 200000;
 }
 void httpsave() {
+  File fp;
+  SPIFFS.begin();
   for (uint8_t i = 0; i < server.args(); i++) {
     if (server.argName(i).compareTo("data") == 0) {
-      Serial.print("data:[");
-      Serial.print(server.arg(i));
-      Serial.println("]");
-      SPIFFS.begin();
-      fp = SPIFFS.open("/ssid.txt", "w");
-      fp.println(server.arg(i));
-      fp.close();
-      fp = SPIFFS.open("/ssid.txt", "r");
-      Serial.print("保存wifi设置到文件/ssid.txt ");
-      Serial.print(fp.size());
-      Serial.println("字节");
+      String data=server.arg(i);
+      data.trim();
+      if(data.length()>8) {
+	Serial.println("data:["+data+"]");
+	//  Serial.print(data);
+	// Serial.println("]");
+	fp = SPIFFS.open("/ssid.txt", "w");
+	fp.println(server.arg(i));
+	fp.close();
+	fp = SPIFFS.open("/ssid.txt", "r");
+	Serial.print("保存wifi设置到文件/ssid.txt ");
+	Serial.print(fp.size());
+	Serial.println("字节");
+	fp.close();
+      }
+    }
+    if (server.argName(i).compareTo("url") == 0) {
+      url=server.arg(i);
+      url.trim();
+      if(url.length()==0) {
+	Serial.println("删除url设置");
+	SPIFFS.remove("/url.txt");
+      }else{
+	Serial.print("url:[");
+	Serial.print(url);
+	Serial.println("]");
+	fp = SPIFFS.open("/url.txt", "w");
+	fp.println(url);
+	fp = SPIFFS.open("/url.txt", "r");
+	Serial.print("保存url设置到文件/url.txt ");
+	Serial.print(fp.size());
+	Serial.println("字节");
+      }
       fp.close();
     }
   }

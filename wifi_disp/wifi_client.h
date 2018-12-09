@@ -6,6 +6,7 @@
 //#include <WiFiClientSecure.h>
 #include <ESP8266WiFiMulti.h>
 extern char ram_buf[10];
+extern String url;
 extern bool power_in;
 bool http_update();
 void AP();
@@ -14,8 +15,8 @@ void set_ram_check();
 void ht16c21_cmd(uint8_t cmd,uint8_t dat);
 ESP8266WiFiMulti WiFiMulti;
 HTTPClient http;
-File fp;
 bool wifi_connect() {
+  File fp;
   uint32_t i;
   WiFi.mode(WIFI_STA);
   delay(10);
@@ -145,8 +146,8 @@ uint16_t http_get() {
                + "&temp=" + String(temp)
                + "&charge=" + String(ram_buf[7] & 1);
 
-  Serial.println( url); //串口输出
-  http.begin( url ); //HTTP提交
+  Serial.println( url0); //串口输出
+  http.begin( url0 ); //HTTP提交
 
   int httpCode;
 
