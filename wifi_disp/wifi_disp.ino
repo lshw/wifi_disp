@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.18"
+#define VER "1.19"
 #define HOSTNAME "disp_"
 #define DEFAULT_URL "http://www.bjlx.org.cn/wifi_disp.php"
 extern "C" {
@@ -158,12 +158,8 @@ void poweroff(uint32_t sec) {
       send_ram();
     }
   }
-  if (ram_buf[7] & 1) {
+  if (power_in && (ram_buf[7] & 1)) { //如果外面接了电， 就进入LIGHT_SLEEP模式 电流0.8ma， 保持充电
     digitalWrite(13, LOW);
-  } else {
-    digitalWrite(13, HIGH);
-  }
-  if (power_in) { //如果外面接了电， 就进入LIGHT_SLEEP模式 电流0.8ma， 保持充电
     sec = sec / 2;
     wifi_set_sleep_type(MODEM_SLEEP_T);
     Serial.print("休眠");
@@ -189,6 +185,7 @@ void poweroff(uint32_t sec) {
       system_soft_wdt_feed ();
     }
   }
+  digitalWrite(13, HIGH);
   wifi_set_sleep_type(LIGHT_SLEEP_T);
   if ((ram_buf[7] & 1) && power_in)
     Serial.println("充电结束");
