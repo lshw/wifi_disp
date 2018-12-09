@@ -175,11 +175,14 @@ void poweroff(uint32_t sec) {
       Serial.println("充电中");
     }
     wdt_disable();
-    //  delay(1000*sec);
     for (uint32_t i = 0; i < sec / 2; i++) {
       delay(2000); //空闲时进入LIGHT_SLEEP_T模式
       get_batt();
-      // Serial.println(i);
+      if(!power_in) {
+        Serial.println("外接电源断开， 已经充电"+String(i+i)+"秒");
+        sec = sec + sec - i - i;
+        break;
+      }
       system_soft_wdt_feed ();
     }
   }
@@ -202,7 +205,6 @@ void poweroff(uint32_t sec) {
   digitalWrite(LED_BUILTIN, LOW);
   if (sec == 0) ht16c21_cmd(0x84, 0x2); //lcd off
   ESP.deepSleep((uint64_t) 1000000 * sec, WAKE_RF_DEFAULT);
-  //system_deep_sleep((uint64_t)1000000 * sec);
   power_off = true;
 }
 float get_batt() {
@@ -240,13 +242,9 @@ float get_batt() {
     } else power_in = false;
   } else power_in = false;
 
-  if (v < 3.8) {
-    ram_buf[7] |= 1;
-    send_ram();
-  } else if (v > 4.21) {
-    delay(1);
-    if (get_batt0() > 4.21) {
-      ram_buf[7] &= ~1;
+  if((ram_buf[7] & 1) == 0){
+    if (v < 3.8) {
+      ram_buf[7] |= 1;
       send_ram();
     }
   }
