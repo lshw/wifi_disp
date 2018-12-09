@@ -12,7 +12,8 @@ bool http_update()
     ESP.restart();
     return false;
   }
-
+  ram_buf[7] |= 1; //开充电模式
+  send_ram();
   disp(" H UP");
   String update_url = url + "?p=update&sn=" + String(hostname) + "&ver=" VER;
   USE_SERIAL.print("下载firmware from ");

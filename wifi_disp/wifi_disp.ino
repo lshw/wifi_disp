@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.15"
+#define VER "1.18"
 #define HOSTNAME "disp_"
 #define DEFAULT_URL "http://www.bjlx.org.cn/wifi_disp.php"
 extern "C" {
@@ -151,9 +151,12 @@ void setup()
 }
 bool power_off = false;
 void poweroff(uint32_t sec) {
-  if (v > 4.20) {
-    ram_buf[7] &= ~1;
-    send_ram();
+  if(ram_buf[7] & 1){
+    if (v > 4.20) {
+      Serial.println("v="+String(v)+",停止充电");
+      ram_buf[7] &= ~1;
+      send_ram();
+    }
   }
   if (ram_buf[7] & 1) {
     digitalWrite(13, LOW);
