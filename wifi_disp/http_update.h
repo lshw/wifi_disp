@@ -14,9 +14,10 @@ bool http_update()
   }
 
   disp(" H UP");
+ String update_url= url+"?p=update&sn="+String(hostname)+"&ver=" VER;
   USE_SERIAL.print("下载firmware from ");
-  USE_SERIAL.println("http://www.bjlx.org.cn/wifi_disp.bin");
-  t_httpUpdate_return  ret = ESPhttpUpdate.update("http://www.bjlx.org.cn/wifi_disp.bin");
+  USE_SERIAL.println(update_url);
+  t_httpUpdate_return  ret = ESPhttpUpdate.update(update_url);
 
   switch (ret) {
     case HTTP_UPDATE_FAILED:

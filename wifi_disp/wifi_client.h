@@ -137,7 +137,7 @@ uint16_t http_get() {
 
   digitalWrite(12, LOW);
   digitalWrite(14, LOW);
-  String url = "http://www.bjlx.org.cn/lxy.php?ver="  VER  "&sn=" + hostname
+  String url0 = url + "?ver="  VER  "&sn=" + hostname
                + "&ssid=" + String(WiFi.SSID())
                + "&key=" + String(key)
                + "&batt=" + String(v)
