@@ -13,8 +13,8 @@ void ht16c21_cmd(uint8_t cmd, uint8_t dat) {
 void ht16c21_setup() {
   Wire.begin(4, 5);
   ht16c21_cmd(0x84, 3); //1621文档20页 系统模式命令 开关ht1621时钟/显示  0-关闭  3-开启
-  ht16c21_cmd(0x8A,B00110001);//LCD电压 后4位，16种电压 0000-关闭
-  ht16c21_cmd(0x82,0);//LCD电压 后4位，16种电压 0000-关闭
+  ht16c21_cmd(0x8A, B00110001); //LCD电压 后4位，16种电压 0000-关闭
+  ht16c21_cmd(0x82, 0); //LCD电压 后4位，16种电压 0000-关闭
 }
 void disp(char *str) {
   uint8_t dot, str0[22];

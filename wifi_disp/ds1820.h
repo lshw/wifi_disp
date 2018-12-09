@@ -11,11 +11,11 @@ bool ds_init() {
   uint8_t i;
   pinMode(14, OUTPUT);
   digitalWrite(14, LOW);
-  i=digitalRead(12);
-  digitalWrite(12,LOW);
+  i = digitalRead(12);
+  digitalWrite(12, LOW);
   delay(100);
-  digitalWrite(14,HIGH);
-  digitalWrite(12,i);
+  digitalWrite(14, HIGH);
+  digitalWrite(12, i);
   delay(1);
   if ( !ds.search(dsn)) {
     Serial.println("没找到ds1820.");
@@ -27,7 +27,7 @@ bool ds_init() {
   Serial.print("DS1820 =");
   sprintf(key, "%02x%02x%02x%02x%02x%02x%02x%02x", dsn[0], dsn[1], dsn[2], dsn[3], dsn[4], dsn[5], dsn[6], dsn[7]);
   Serial.println(key);
-  if (OneWire::crc8(dsn, 7)!=dsn[7]) return false;
+  if (OneWire::crc8(dsn, 7) != dsn[7]) return false;
   ds.reset();
   ds.select(dsn);
   ds.write(0x44, 1);

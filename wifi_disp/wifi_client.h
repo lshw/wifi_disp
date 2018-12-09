@@ -12,7 +12,7 @@ bool http_update();
 void AP();
 void send_ram();
 void set_ram_check();
-void ht16c21_cmd(uint8_t cmd,uint8_t dat);
+void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 ESP8266WiFiMulti WiFiMulti;
 HTTPClient http;
 bool wifi_connect() {
@@ -30,7 +30,7 @@ bool wifi_connect() {
     fp = SPIFFS.open("/ssid.txt", "r");
     if (!fp) {
       AP();
-      proc=AP_MODE;
+      proc = AP_MODE;
       return true;
     }
     Serial.print("载入wifi设置文件:/ssid.txt ");
@@ -69,7 +69,7 @@ bool wifi_connect() {
         WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
       }
     }
-  fp.close();
+    fp.close();
   }
   Serial.println("正在连接wifi.");
   // ... Give ESP 10 seconds to connect to station.
@@ -93,7 +93,7 @@ bool wifi_connect() {
     }
   }
   Serial.println();
- ht16c21_cmd(0x88,0);//停止闪烁
+  ht16c21_cmd(0x88, 0); //停止闪烁
   if (WiFiMulti.run() == WL_CONNECTED)
   {
     ram_buf[0] = 0;
@@ -127,7 +127,7 @@ uint16_t http_get() {
       }
     }
   }
-  if(temp==85.00){
+  if (temp == 85.00) {
     ds.reset();
     ds.select(dsn);
     ds.write(0x44, 1);
@@ -138,13 +138,13 @@ uint16_t http_get() {
   digitalWrite(12, LOW);
   digitalWrite(14, LOW);
   String url0 = url + "?ver="  VER  "&sn=" + hostname
-               + "&ssid=" + String(WiFi.SSID())
-               + "&key=" + String(key)
-               + "&batt=" + String(v)
-               + "&rssi=" + String(WiFi.RSSI())
-               + "&power=" + String(power_in)
-               + "&temp=" + String(temp)
-               + "&charge=" + String(ram_buf[7] & 1);
+                + "&ssid=" + String(WiFi.SSID())
+                + "&key=" + String(key)
+                + "&batt=" + String(v)
+                + "&rssi=" + String(WiFi.RSSI())
+                + "&power=" + String(power_in)
+                + "&temp=" + String(temp)
+                + "&charge=" + String(ram_buf[7] & 1);
 
   Serial.println( url0); //串口输出
   http.begin( url0 ); //HTTP提交
@@ -165,21 +165,21 @@ uint16_t http_get() {
       // file found at server
       if (httpCode == HTTP_CODE_OK) {
         String payload = http.getString();
-	payload.toCharArray(disp_buf, 15); //.1.2.3.4.5,1800
-	uint8_t    i1 = payload.indexOf(',');
-	Serial.println(disp_buf);
-	Serial.println();
-	if(  disp_buf[0]=='U'
-	    &&disp_buf[1]=='P' 
-	    &&disp_buf[2]=='D' 
-	    &&disp_buf[3]=='A' 
-	    &&disp_buf[4]=='T' 
-	    &&disp_buf[5]=='E') {
-	  if (http_update() == false)
-	    http_update();
-	  Serial.flush();
-	  ESP.restart();	
-	} 
+        payload.toCharArray(disp_buf, 15); //.1.2.3.4.5,1800
+        uint8_t    i1 = payload.indexOf(',');
+        Serial.println(disp_buf);
+        Serial.println();
+        if (  disp_buf[0] == 'U'
+              && disp_buf[1] == 'P'
+              && disp_buf[2] == 'D'
+              && disp_buf[3] == 'A'
+              && disp_buf[4] == 'T'
+              && disp_buf[5] == 'E') {
+          if (http_update() == false)
+            http_update();
+          Serial.flush();
+          ESP.restart();
+        }
         next_disp = disp_buf[i1 + 1] & 0xf;
         if (disp_buf[i1 + 2] >= '0' && disp_buf[i1 + 2] <= '9') {
           next_disp = next_disp * 10 + (disp_buf[i1 + 2] & 0xf);

@@ -7,14 +7,14 @@
 
 bool http_update()
 {
-  if(get_batt()<3.6) {
+  if (get_batt() < 3.6) {
     Serial.println("电压太低,不做升级");
     ESP.restart();
     return false;
   }
 
   disp(" H UP");
- String update_url= url+"?p=update&sn="+String(hostname)+"&ver=" VER;
+  String update_url = url + "?p=update&sn=" + String(hostname) + "&ver=" VER;
   USE_SERIAL.print("下载firmware from ");
   USE_SERIAL.println(update_url);
   t_httpUpdate_return  ret = ESPhttpUpdate.update(update_url);
@@ -22,7 +22,7 @@ bool http_update()
   switch (ret) {
     case HTTP_UPDATE_FAILED:
       USE_SERIAL.printf("HTTP_UPDATE_FAILD Error (%d): %s\r\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-      ram_buf[0]=0;
+      ram_buf[0] = 0;
       ESP.restart();
       break;
 

@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.14"
+#define VER "1.15"
 #define HOSTNAME "disp_"
 #define DEFAULT_URL "http://www.bjlx.org.cn/wifi_disp.php"
 extern "C" {
@@ -37,21 +37,21 @@ void setup()
   Serial.println("Hostname: " + hostname);
   delay(100);
   Serial.flush();
-  if(!ds_init() && !ds_init()) ds_init();
+  if (!ds_init() && !ds_init()) ds_init();
   ht16c21_setup();
   get_batt();
   Serial.print("电池电压");
   Serial.println(v);
-  if(power_in) Serial.println("外接电源");
-  if(ram_buf[7]&1) Serial.println("充电中");
-  ht16c21_cmd(0x84,3);  //0-关闭  3-开启
+  if (power_in) Serial.println("外接电源");
+  if (ram_buf[7] & 1) Serial.println("充电中");
+  ht16c21_cmd(0x84, 3); //0-关闭  3-开启
   if (!load_ram() && !load_ram() && !load_ram()) {
     ram_buf[0] = 0xff; //读取错误
     ram_buf[7] = 0; // 1 充电， 0 不充电
   }
   get_url(); //载入url
-  if(url.length()==0)
-    url=String(DEFAULT_URL);
+  if (url.length() == 0)
+    url = String(DEFAULT_URL);
   proc = ram_buf[0];
   switch (proc) {
     case OFF_MODE: //OFF
@@ -60,18 +60,18 @@ void setup()
       disp(" OFF ");
       delay(5000);
       disp("     ");
-      ht16c21_cmd(0x84,0x02);//关闭ht16c21
+      ht16c21_cmd(0x84, 0x02); //关闭ht16c21
       poweroff(0);
       return;
       break;
     case OTA_MODE:
       wdt_disable();
-      ram_buf[7]|=1; //充电
+      ram_buf[7] |= 1; //充电
       ram_buf[0] = OFF_MODE;//ota以后，
       disp(" OTA ");
       break;
     case AP_MODE:
-      ram_buf[7]|=1; //充电
+      ram_buf[7] |= 1; //充电
       ram_buf[0] = OTA_MODE; //ota
       send_ram();
       AP();
@@ -88,10 +88,10 @@ void setup()
   ht16c21_cmd(0x88, 1); //闪烁
 
   if (wifi_connect() == false) {
-    if(proc == OTA_MODE || proc == OFF_MODE) {
-      ram_buf[0]=0;
+    if (proc == OTA_MODE || proc == OFF_MODE) {
+      ram_buf[0] = 0;
       send_ram();
-      ESP.restart(); 
+      ESP.restart();
     }
     ram_buf[9] |= 0x10; //x1
     ram_buf[0] = 0;
@@ -102,10 +102,10 @@ void setup()
     poweroff(1200);
     return;
   }
-  if(temp==85.00 || temp<=-300){
+  if (temp == 85.00 || temp <= -300) {
     delay(1000);
     get_temp();
-    if(temp==85.00){
+    if (temp == 85.00) {
       ds.reset();
       ds.select(dsn);
       ds.write(0x44, 1);
@@ -151,8 +151,8 @@ void setup()
 }
 bool power_off = false;
 void poweroff(uint32_t sec) {
-  if(v>4.20){
-    ram_buf[7]&=~1;
+  if (v > 4.20) {
+    ram_buf[7] &= ~1;
     send_ram();
   }
   if (ram_buf[7] & 1) {
@@ -170,24 +170,24 @@ void poweroff(uint32_t sec) {
     }
     Serial.print(sec % 60);
     Serial.println("秒");
-    if (ram_buf[7] & 1){
-      digitalWrite(13,LOW);
+    if (ram_buf[7] & 1) {
+      digitalWrite(13, LOW);
       Serial.println("充电中");
     }
     wdt_disable();
-  //  delay(1000*sec);
-    for(uint32_t i=0;i<sec/2;i++) {
-    delay(2000); //空闲时进入LIGHT_SLEEP_T模式
-    get_batt();
-   // Serial.println(i);
-    system_soft_wdt_feed ();
+    //  delay(1000*sec);
+    for (uint32_t i = 0; i < sec / 2; i++) {
+      delay(2000); //空闲时进入LIGHT_SLEEP_T模式
+      get_batt();
+      // Serial.println(i);
+      system_soft_wdt_feed ();
+    }
   }
-  }
-    wifi_set_sleep_type(LIGHT_SLEEP_T);
-    if ((ram_buf[7] & 1)&&power_in)
+  wifi_set_sleep_type(LIGHT_SLEEP_T);
+  if ((ram_buf[7] & 1) && power_in)
     Serial.println("充电结束");
   Serial.print("关机");
-  if(sec>0) {
+  if (sec > 0) {
     if (sec > 60) {
       Serial.print(sec / 60);
       Serial.print("分钟");
@@ -200,12 +200,12 @@ void poweroff(uint32_t sec) {
   wdt_disable();
   system_deep_sleep_set_option(0);
   digitalWrite(LED_BUILTIN, LOW);
-  if(sec==0) ht16c21_cmd(0x84,0x2); //lcd off
+  if (sec == 0) ht16c21_cmd(0x84, 0x2); //lcd off
   ESP.deepSleep((uint64_t) 1000000 * sec, WAKE_RF_DEFAULT);
   //system_deep_sleep((uint64_t)1000000 * sec);
   power_off = true;
 }
-float get_batt(){
+float get_batt() {
   float v0;
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH); //不充电
@@ -220,40 +220,40 @@ float get_batt(){
     digitalWrite(13, HIGH); //不充电
     delay(1);
     get_batt0();
-    if (v0 > v){
+    if (v0 > v) {
       v0 = v;
       digitalWrite(13, LOW); //充电
       delay(1);
       get_batt0();
-      if(v > v0){
-	v0 = v;
-	digitalWrite(13, HIGH); //不充电
-	delay(1);
-	get_batt0();
-	if (v0 > v){
-	  if(!power_in) {
-	    power_in = true;
-	    Serial.println("测得电源插入");
-	  }
-	}else power_in=false;
-      }else power_in=false;
-    }else power_in = false;
-  }else power_in = false;
+      if (v > v0) {
+        v0 = v;
+        digitalWrite(13, HIGH); //不充电
+        delay(1);
+        get_batt0();
+        if (v0 > v) {
+          if (!power_in) {
+            power_in = true;
+            Serial.println("测得电源插入");
+          }
+        } else power_in = false;
+      } else power_in = false;
+    } else power_in = false;
+  } else power_in = false;
 
-  if(v < 3.8){
+  if (v < 3.8) {
     ram_buf[7] |= 1;
     send_ram();
-  }else if(v > 4.21) {
+  } else if (v > 4.21) {
     delay(1);
-    if(get_batt0() > 4.21) {
+    if (get_batt0() > 4.21) {
       ram_buf[7] &= ~1;
       send_ram();
     }
   }
-  if(ram_buf[7] & 1)
-    digitalWrite(13,LOW);
+  if (ram_buf[7] & 1)
+    digitalWrite(13, LOW);
   else
-    digitalWrite(13,HIGH);
+    digitalWrite(13, HIGH);
   return v;
 }
 float get_batt0() {//锂电池电压
@@ -277,7 +277,7 @@ void loop()
       ota_loop();
       break;
     case AP_MODE:
-      digitalWrite(13,LOW);
+      digitalWrite(13, LOW);
       ap_loop();
       break;
   }
