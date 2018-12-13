@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.20"
+#define VER "1.21"
 #define HOSTNAME "disp_"
 #define DEFAULT_URL "http://www.bjlx.org.cn/wifi_disp.php"
 extern "C" {

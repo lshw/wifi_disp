@@ -9,6 +9,8 @@ extern void disp(char *);
 extern void http_listen();
 extern void http_loop();
 extern float get_batt();
+extern char ram_buf[10];
+void send_ram();
 void ota_setup() {
 
   // Port defaults to 8266
@@ -33,7 +35,8 @@ void ota_setup() {
     } else { // U_SPIFFS
       type = "filesystem";
     }
-
+    ram_buf[0]=0;
+    send_ram();
     // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
     Serial.println("Start updating " + type);
   });
@@ -42,6 +45,8 @@ void ota_setup() {
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
     Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    sprintf(disp_buf,"OTA.%02d",progress * 99 / total );
+    disp(disp_buf);
   });
   ArduinoOTA.onError([](ota_error_t error) {
     Serial.printf("Error[%u]: ", error);
