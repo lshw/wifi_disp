@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.19"
+#define VER "1.20"
 #define HOSTNAME "disp_"
 #define DEFAULT_URL "http://www.bjlx.org.cn/wifi_disp.php"
 extern "C" {
@@ -42,12 +42,9 @@ void setup()
   get_batt();
   Serial.print("电池电压");
   Serial.println(v);
-  if (power_in) Serial.println("外接电源");
-  if (ram_buf[7] & 1) Serial.println("充电中");
-  ht16c21_cmd(0x84, 3); //0-关闭  3-开启
-  if (!load_ram() && !load_ram() && !load_ram()) {
-    ram_buf[0] = 0xff; //读取错误
-    ram_buf[7] = 0; // 1 充电， 0 不充电
+  if (power_in) {
+    Serial.println("外接电源");
+    if (ram_buf[7] & 1) Serial.println("充电中");
   }
   get_url(); //载入url
   if (url.length() == 0)

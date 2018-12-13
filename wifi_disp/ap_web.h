@@ -80,7 +80,6 @@ void httpsave() {
   }
   server.send(200, "text/plain", "OK!");
   ram_buf[0] = 0;
-  set_ram_check();
   send_ram();
   delay(2000);
   server.close();

@@ -96,8 +96,6 @@ bool wifi_connect() {
   ht16c21_cmd(0x88, 0); //停止闪烁
   if (WiFiMulti.run() == WL_CONNECTED)
   {
-    ram_buf[0] = 0;
-    send_ram();
     Serial.println("wifi已链接");
     Serial.print("SSID: ");
     Serial.println(WiFi.SSID());
@@ -160,6 +158,8 @@ uint16_t http_get() {
     // httpCode will be negative on error
     if (httpCode >= 200 && httpCode <= 299) {
       // HTTP header has been send and Server response header has been handled
+      ram_buf[0] = 0;
+      send_ram();
       Serial.print("[HTTP] GET... code:");
       Serial.println(httpCode);
       // file found at server
