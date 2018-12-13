@@ -24,11 +24,12 @@ void handleRoot() {
               "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
               "</head>"
               "<body>"
+              "SN:"+hostname+"<br>"
               "<form action=/save.php method=post>"
               "输入ssid:passwd(可以多行多个)"
               "<input type=submit value=save><br>"
               "<textarea  style='width:500px;height:80px;' name=data>" + get_ssid() + "</textarea><br>"
-              "url:<input maxlength=100 type=text value='" + get_url() + "' name=url>(如果不知道此设置的作用，请不要修改)<br>"
+              "url:<input maxlength=100  size=50 type=text value='" + get_url() + "' name=url>(如果不知道此设置的作用，请不要修改)<br>"
               "<input type=submit name=submit value=save>"
               "</form>"
               "<hr>"
@@ -81,9 +82,9 @@ void httpsave() {
   server.send(200, "text/plain", "OK!");
   ram_buf[0] = 0;
   send_ram();
+  disp("00000");
   delay(2000);
   server.close();
-  disp("00000");
   Serial.print("uptime=");
   Serial.print(millis());
   Serial.println("ms");
