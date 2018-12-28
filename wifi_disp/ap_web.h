@@ -45,12 +45,15 @@ void httpsave() {
     if (server.argName(i).compareTo("data") == 0) {
       String data = server.arg(i);
       data.trim();
+      data.replace("\xef\xbc\x9a", ":"); //utf8 :
+      data.replace("\xa3\xba", ":"); //gbk :
+      data.replace("\xa1\x47", ":"); //big5 :
       if (data.length() > 8) {
         Serial.println("data:[" + data + "]");
         //  Serial.print(data);
         // Serial.println("]");
         fp = SPIFFS.open("/ssid.txt", "w");
-        fp.println(server.arg(i));
+        fp.println(data);
         fp.close();
         fp = SPIFFS.open("/ssid.txt", "r");
         Serial.print("保存wifi设置到文件/ssid.txt ");

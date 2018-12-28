@@ -1,7 +1,6 @@
 #include <FS.h>
-#define VER "1.21"
+#define VER "1.22"
 #define HOSTNAME "disp_"
-#define DEFAULT_URL "http://www.bjlx.org.cn/wifi_disp.php"
 extern "C" {
 #include "user_interface.h"
 }
@@ -24,6 +23,7 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 #include "ap_web.h"
 #include "ht16c21.h"
 #include "http_update.h"
+#define DEFAULT_URL "http://www.bjlx.org.cn/wifi_disp.php"
 
 bool power_in = false;
 void setup()
