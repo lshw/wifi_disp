@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.22"
+#define VER "1.24"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -7,7 +7,7 @@ extern "C" {
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 char disp_buf[22];
 String url;
-uint32_t next_disp = 1200; //下次开机
+uint32_t next_disp = 1800; //下次开机
 String hostname = HOSTNAME;
 float v;
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
@@ -93,10 +93,10 @@ void setup()
     ram_buf[9] |= 0x10; //x1
     ram_buf[0] = 0;
     send_ram();
-    Serial.print("不能链接到AP\r\n20分钟后再试试\r\n本次上电时长");
+    Serial.print("不能链接到AP\r\n30分钟后再试试\r\n本次上电时长");
     Serial.print(millis());
     Serial.println("ms");
-    poweroff(1200);
+    poweroff(1800);
     return;
   }
   if (temp == 85.00 || temp <= -300) {
@@ -129,10 +129,12 @@ void setup()
   }
   uint16_t httpCode = http_get();
   if (httpCode >= 400) {
-    Serial.print("不能链接到web\r\n20分钟后再试试\r\n本次上电时长");
+    Serial.print("不能链接到web\r\n30分钟后再试试\r\n本次上电时长");
+    ram_buf[0] = 0;
+    send_ram();
     Serial.print(millis());
     Serial.println("ms");
-    poweroff(1200);
+    poweroff(1800);
     return;
   }
   if (v < 3.6)
@@ -141,7 +143,7 @@ void setup()
     ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
   Serial.print("uptime=");
   Serial.print(millis());
-  if (next_disp == 0) next_disp = 120;
+  if (next_disp < 60) next_disp = 1800;
   Serial.print("ms,sleep=");
   Serial.println(next_disp);
   poweroff(next_disp);

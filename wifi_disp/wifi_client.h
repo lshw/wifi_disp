@@ -9,6 +9,7 @@ extern char ram_buf[10];
 extern String url;
 extern bool power_in;
 bool http_update();
+void poweroff(uint32_t);
 void AP();
 void send_ram();
 void set_ram_check();
@@ -177,8 +178,7 @@ uint16_t http_get() {
               && disp_buf[5] == 'E') {
           if (http_update() == false)
             http_update();
-          Serial.flush();
-          ESP.restart();
+          poweroff(1800);
         }
         next_disp = disp_buf[i1 + 1] & 0xf;
         if (disp_buf[i1 + 2] >= '0' && disp_buf[i1 + 2] <= '9') {

@@ -159,11 +159,11 @@ void ap_loop() {
       Serial.print("V,millis()=");
       Serial.println(millis());
       Serial.println("power down");
+      ram_buf[0] = 0;
       disp("00000");
       ht16c21_cmd(0x84, 0);
       server.close();
       ESP.reset();
-      poweroff(9999); //关机
     }
   }
 }
