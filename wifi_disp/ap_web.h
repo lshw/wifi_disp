@@ -29,7 +29,9 @@ void handleRoot() {
               "输入ssid:passwd(可以多行多个)"
               "<input type=submit value=save><br>"
               "<textarea  style='width:500px;height:80px;' name=data>" + get_ssid() + "</textarea><br>"
-              "url:<input maxlength=100  size=50 type=text value='" + get_url() + "' name=url>(如果不知道此设置的作用，请不要修改)<br>"
+              "如果不知道下面设置的作用，请不要修改<br>"
+              "url0:<input maxlength=100  size=30 type=text value='" + get_url(0) + "' name=url><br>"
+              "url1:<input maxlength=100  size=30 type=text value='" + get_url(1) + "' name=url1><br>"
               "<input type=submit name=submit value=save>"
               "</form>"
               "<hr>"
@@ -40,6 +42,7 @@ void handleRoot() {
 }
 void httpsave() {
   File fp;
+  String url;
   SPIFFS.begin();
   for (uint8_t i = 0; i < server.args(); i++) {
     if (server.argName(i).compareTo("data") == 0) {
@@ -61,25 +64,34 @@ void httpsave() {
         Serial.println("字节");
         fp.close();
       }
-    }
-    if (server.argName(i).compareTo("url") == 0) {
+    } else if (server.argName(i).compareTo("url") == 0) {
       url = server.arg(i);
       url.trim();
       if (url.length() == 0) {
-        Serial.println("删除url设置");
+        Serial.println("删除url0设置");
         SPIFFS.remove("/url.txt");
       } else {
-        Serial.print("url:[");
+        Serial.print("url0:[");
         Serial.print(url);
         Serial.println("]");
         fp = SPIFFS.open("/url.txt", "w");
         fp.println(url);
-        fp = SPIFFS.open("/url.txt", "r");
-        Serial.print("保存url设置到文件/url.txt ");
-        Serial.print(fp.size());
-        Serial.println("字节");
+        fp.close();
       }
-      fp.close();
+    } else if (server.argName(i).compareTo("url1") == 0) {
+      url = server.arg(i);
+      url.trim();
+      if (url.length() == 0) {
+        Serial.println("删除url1设置");
+        SPIFFS.remove("/url1.txt");
+      } else {
+        Serial.print("url1:[");
+        Serial.print(url);
+        Serial.println("]");
+        fp = SPIFFS.open("/url1.txt", "w");
+        fp.println(url);
+        fp.close();
+      }
     }
   }
   server.send(200, "text/plain", "OK!");

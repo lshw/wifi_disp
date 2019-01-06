@@ -1,23 +1,23 @@
 #ifndef __FS_H__
 #define __FS_H__
-extern String url;
-String get_url() {
+String get_url(uint8_t no) {
   File fp;
-  if (url.length() != 0)
-    return url;
+  char fn[20];
+  String ret;
+  if(no==0 || no=='0') ret=String(DEFAULT_URL0);
+  else ret=String(DEFAULT_URL1);
   if (SPIFFS.begin()) {
-    fp = SPIFFS.open("/url.txt", "r");
+    if(no==0 || no =='0')
+      fp = SPIFFS.open("/url.txt", "r");
+    else    
+      fp = SPIFFS.open("/url1.txt", "r");
     if (fp) {
-      url = fp.readStringUntil('\n');
-      url.trim();
+      ret = fp.readStringUntil('\n');
+      ret.trim();
       fp.close();
-    } else
-      Serial.println("/url.txt open error");
-  } else
-    Serial.println("SPIFFS begin error");
-  Serial.print("载入url设置:");
-  Serial.println(url);
-  return url;
+    }
+  }
+  return ret;
 }
 String get_ssid() {
   File fp;

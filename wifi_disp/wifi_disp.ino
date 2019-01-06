@@ -1,12 +1,11 @@
 #include <FS.h>
-#define VER "1.24"
+#define VER "1.25"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
 }
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 char disp_buf[22];
-String url;
 uint32_t next_disp = 1800; //下次开机
 String hostname = HOSTNAME;
 float v;
@@ -16,6 +15,8 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 #define OTA_MODE 3
 #define OFF_MODE 4
 
+#define DEFAULT_URL0 "http://www.bjlx.org.cn/wifi_disp.php"
+#define DEFAULT_URL1 "http://nas.bjlx.org.cn/wifi_disp.php"
 #include "fs.h"
 #include "ota.h"
 #include "ds1820.h"
@@ -23,7 +24,6 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 #include "ap_web.h"
 #include "ht16c21.h"
 #include "http_update.h"
-#define DEFAULT_URL "http://www.bjlx.org.cn/wifi_disp.php"
 
 bool power_in = false;
 void setup()
@@ -46,9 +46,6 @@ void setup()
     Serial.println("外接电源");
     if (ram_buf[7] & 1) Serial.println("充电中");
   }
-  get_url(); //载入url
-  if (url.length() == 0)
-    url = String(DEFAULT_URL);
   proc = ram_buf[0];
   switch (proc) {
     case OFF_MODE: //OFF
@@ -121,14 +118,17 @@ void setup()
     ESP.restart();
     return;
   }
-  uint16_t httpCode = http_get();
-  if (httpCode >= 400) {
-    Serial.print("不能链接到web\r\n30分钟后再试试\r\n本次上电时长");
+  uint16_t httpCode = http_get(0);
+  if (httpCode <200  || httpCode >=300) {
+httpCode = http_get(1); //试试url2
+}
+if(httpCode < 200 || httpCode>=400){
+    Serial.print("不能链接到web\r\n60分钟后再试试\r\n本次上电时长");
     ram_buf[0] = 0;
     send_ram();
     Serial.print(millis());
     Serial.println("ms");
-    poweroff(1800);
+    poweroff(3600);
     return;
   }
   if (v < 3.6)

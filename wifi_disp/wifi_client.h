@@ -6,7 +6,6 @@
 //#include <WiFiClientSecure.h>
 #include <ESP8266WiFiMulti.h>
 extern char ram_buf[10];
-extern String url;
 extern bool power_in;
 bool http_update();
 void poweroff(uint32_t);
@@ -107,9 +106,9 @@ bool wifi_connect() {
     return false;
 }
 
-uint16_t http_get() {
+uint16_t http_get(uint8_t no) {
   char key[17];
-  String url0 = url + "?ver="  VER  "&sn=" + hostname
+  String url0 = get_url(no) + "?ver="  VER  "&sn=" + hostname
                 + "&ssid=" + String(WiFi.SSID())
                 + "&batt=" + String(v)
                 + "&rssi=" + String(WiFi.RSSI())
