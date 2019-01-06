@@ -80,15 +80,15 @@ bool wifi_connect() {
     Serial.write('.');
     //Serial.print(WiFi.status());
     delay(1000);
-    if(i==2) {
-      get_temp();
+    if(i%2==0) {
+      if(temp_ok==false) temp_ok=get_temp();
     } else 
     i++;
   }
   Serial.println();
-  if(digitalRead(14) == HIGH) {
-    if(millis()<2000) delay(2000-millis());
-    get_temp();
+  if(temp_ok == false) {
+    if(millis()<(temp_start+2000)) delay(temp_start+2000-millis());
+    temp_ok=get_temp();
   }
   ht16c21_cmd(0x88, 0); //停止闪烁
   if (WiFiMulti.run() == WL_CONNECTED)

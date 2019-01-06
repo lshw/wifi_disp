@@ -1,9 +1,11 @@
 #include <FS.h>
-#define VER "1.25"
+#define VER "1.26"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
 }
+bool temp_ok=false;//测温ok
+uint32_t temp_start;
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 char disp_buf[22];
 uint32_t next_disp = 1800; //下次开机
@@ -97,9 +99,9 @@ void setup()
     return;
   }
   
-  if (digitalRead(14) == HIGH) {
-    delay(2000-millis());
-    get_temp();
+  if (temp_ok==false) {
+    delay(temp_start+2000-millis());
+    temp_ok=get_temp();
   }
   ht16c21_cmd(0x88, 0); //停止闪烁
   if (proc == AP_MODE) return;

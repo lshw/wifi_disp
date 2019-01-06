@@ -20,6 +20,7 @@ bool ds_init() {
   for(i=0;i<32;i++){
     if (!oneWire.search(dsn[i])) 
       break;
+    temp[i]=-999.0;
     Serial.print("DS18B20["+String(i)+"]=");
     sprintf(key, "%02x%02x%02x%02x%02x%02x%02x%02x", dsn[i][0], dsn[i][1], dsn[i][2], dsn[i][3], dsn[i][4], dsn[i][5], dsn[i][6], dsn[i][7]);
     Serial.println(key);
@@ -32,14 +33,22 @@ bool ds_init() {
   oneWire.reset();
   oneWire.skip(); //广播
   oneWire.write(0x44, 1);
+  temp_start=millis();
+ if(dsn[1][0]!=0) { //有多个探头时，外接探头是信号线供电， 测温期间，要对12进行上拉。
+  pinMode(12,OUTPUT);
+digitalWrite(12,HIGH);
+}
   return true;
 }
 
-void get_temp() {
+bool get_temp() {
   uint8_t i,n;
+  bool ret=true;
   byte data[12];
+  pinMode(12,INPUT);
   for(n=0;n<32;n++) {
     if(dsn[n][0]==0) continue;
+    if(temp[n]>-300 & temp[n]!=85.00) continue;
     oneWire.reset();
     oneWire.select(dsn[n]);
     oneWire.write(0xBE);         // Read Scratchpad
@@ -49,6 +58,9 @@ void get_temp() {
 
     if (OneWire::crc8(data, 8) != data[8]) {
       temp[n]=-999.0;
+      if(ret==true){
+	ret=false;
+      }
       continue;
     }
 
@@ -72,10 +84,28 @@ void get_temp() {
       //// default is 12 bit resolution, 750 ms conversion time
     }
     temp[n] = (float)raw / 16.0;
-    Serial.println("温度"+String(n)+"="+String(temp[n]));
+    if(temp[n]==85.0) { 
+      if(ret==true){
+	ret=false;	
+      }
+
+    }else
+      Serial.println("温度"+String(n)+"="+String(temp[n]));
   }
-  digitalWrite(12, LOW);
-  digitalWrite(14, LOW);
+  if(ret==true) {
+    digitalWrite(12, LOW);
+    digitalWrite(14, LOW);
+  }else{
+    oneWire.reset();
+    oneWire.skip(); //广播
+    oneWire.write(0x44, 1);//再读一次
+    temp_start=millis();
+    if(dsn[1][0]!=0) { //有多个探头时，外接探头是信号线供电， 测温期间，要对12进行上拉。
+      pinMode(12,OUTPUT);
+      digitalWrite(12,HIGH);
+    }
+  }
+  return ret;
 }
 
 #endif //__DS1820_H__

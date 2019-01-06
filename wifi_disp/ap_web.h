@@ -105,7 +105,7 @@ void httpsave() {
   Serial.println("ms");
   Serial.println("reboot");
   Serial.flush();
-  ESP.restart();
+  poweroff(2);
 }
 void AP() {
   // Go into software AP mode.
@@ -175,7 +175,7 @@ void ap_loop() {
       disp("00000");
       ht16c21_cmd(0x84, 0);
       server.close();
-      ESP.reset();
+      poweroff(3600);
     }
   }
 }
