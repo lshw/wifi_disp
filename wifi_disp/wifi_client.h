@@ -96,6 +96,7 @@ bool wifi_connect() {
     Serial.println("wifi已链接");
     Serial.print("SSID: ");
     Serial.println(WiFi.SSID());
+    Serial.println("BSSID: "+WiFi.BSSIDstr());
     Serial.print("PSK: ");
     Serial.println(WiFi.psk());
     Serial.print("IP address: ");
@@ -110,6 +111,7 @@ uint16_t http_get(uint8_t no) {
   char key[17];
   String url0 = get_url(no) + "?ver="  VER  "&sn=" + hostname
                 + "&ssid=" + String(WiFi.SSID())
+                + "&bssid=" +WiFi.BSSIDstr()
                 + "&batt=" + String(v)
                 + "&rssi=" + String(WiFi.RSSI())
 		+ "&power=" + String(power_in)
