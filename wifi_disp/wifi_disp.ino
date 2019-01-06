@@ -99,16 +99,10 @@ void setup()
     poweroff(1800);
     return;
   }
-  if (temp == 85.00 || temp <= -300) {
-    delay(1000);
+  
+  if (digitalRead(14) == HIGH) {
+    delay(2000-millis());
     get_temp();
-    if (temp == 85.00) {
-      ds.reset();
-      ds.select(dsn);
-      ds.write(0x44, 1);
-      delay(1000);
-      get_temp();
-    }
   }
   ht16c21_cmd(0x88, 0); //停止闪烁
   if (proc == AP_MODE) return;

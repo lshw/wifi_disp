@@ -81,19 +81,16 @@ bool wifi_connect() {
     Serial.write('.');
     //Serial.print(WiFi.status());
     delay(1000);
-    if (temp == 85.00) { //85度时，是ds1820未完成测试
-      i++;
-      if (i == 2) {
-        i = 0;
-        temp = get_temp();
-        if (temp < -300.0) {
-          delay(100); //crc error;
-          ds_init();
-        }
-      }
-    }
+    if(i==2) {
+      get_temp();
+    } else 
+    i++;
   }
   Serial.println();
+  if(digitalRead(14) == HIGH) {
+    if(millis()<2000) delay(2000-millis());
+    get_temp();
+  }
   ht16c21_cmd(0x88, 0); //停止闪烁
   if (WiFiMulti.run() == WL_CONNECTED)
   {
@@ -111,39 +108,24 @@ bool wifi_connect() {
 }
 
 uint16_t http_get() {
-  if (temp < -300.0) {
-    temp = get_temp();
-    if (temp < -300.0) {
-      delay(10);
-      temp = get_temp();
-      if (temp < -300.0) {
-        digitalWrite(12, LOW);
-        digitalWrite(14, LOW);
-        delay(10);
-        ds_init();
-        delay(500);
-        temp = get_temp();
-      }
-    }
-  }
-  if (temp == 85.00) {
-    ds.reset();
-    ds.select(dsn);
-    ds.write(0x44, 1);
-    delay(1000);
-    get_temp();
-  }
-
-  digitalWrite(12, LOW);
-  digitalWrite(14, LOW);
+  char key[17];
   String url0 = url + "?ver="  VER  "&sn=" + hostname
                 + "&ssid=" + String(WiFi.SSID())
-                + "&key=" + String(key)
                 + "&batt=" + String(v)
                 + "&rssi=" + String(WiFi.RSSI())
-                + "&power=" + String(power_in)
-                + "&temp=" + String(temp)
-                + "&charge=" + String(ram_buf[7] & 1);
+		+ "&power=" + String(power_in)
+		+ "&charge=" + String(ram_buf[7] & 1)
+                + "&temp=" + String(temp[0]);
+  if(dsn[1][0]!=0) {
+    url0 += "&temps=";
+    for(uint8_t i=0;i<32;i++) {
+      if(dsn[i][0]==0) continue;
+      if(i>0) 
+	url0 += ",";
+      sprintf(key,"%02x%02x%02x:",dsn[i][0],dsn[i][6],dsn[i][7]);
+      url0 += key+String(temp[i]);
+    }
+  }
 
   Serial.println( url0); //串口输出
   http.begin( url0 ); //HTTP提交
