@@ -24,28 +24,6 @@ void ht16c21_setup() {
 }
 void disp(char *str) {
   uint8_t dot, str0[22];
-  const uint8_t _abcdefgh[30] = { //字符到7段码的对应
-    B11111100, //0
-    B01100000, //1
-    B11011010, //2
-    B11110010, //3
-    B01100110, //4
-    B10110110, //5
-    B10111110, //6
-    B11100000, //7
-    B11111110, //8
-    B11110110,//9
-    B01101110, //10 H
-    B11101110,//11 A
-    B11001110,//12 P
-    B10011100,//13 C
-    B00000000,//14 ' '
-    B10011110,//15 'E'
-    B10001110, //16 F
-    B00000010, //17 '-'
-    B01111100,  //18 'U'
-    B00011110 //19 'T';
-  };
   const uint8_t convert[5 * 8] = { //高位是ram地址(0,3,4,7,8未用)，低位是ram字节的位，a-g是8字的7个段吗， h是小数点，
     //a     b     c     d     e    f      g     h
     0x51, 0x53, 0x52, 0x20, 0x22, 0x21, 0x23, 0x94, //第1位数字的段对应
@@ -82,8 +60,6 @@ void disp(char *str) {
     }
   }
 
-  //ht16c21_cmd(0x86,0); //内部刷新频率  0-80hz 1-160hz
-
   ram_buf[1] = 0;
   ram_buf[2] = 0;
   ram_buf[5] = 0;
@@ -91,55 +67,42 @@ void disp(char *str) {
   ram_buf[9] = 0;
   //0,3,4,7,8 未用
   for (i = 0; i < 5; i++) { //处理5个数字
-    //dispbyte=str[i];//从高位开始取每一个数字
-    dispbyte = str0[i];
-    switch (dispbyte) {
-      case 'A':
-      case 'a':
-        dispbyte = 11;
-        break;
-      case 'P':
-      case 'p':
-        dispbyte = 12;
-        break;
-      case 'C':
-      case 'c':
-        dispbyte = 13;
-        break;
-      case 'H':
-      case 'h':
-        dispbyte = 10; //O=0
-        break;
+    switch (str0[i]) {
+      case '0':
       case 'O':
-      case 'o':
-        dispbyte = 0; //O=0
-        break;
-      case '-':
-        dispbyte = 17;
-        break;
-      case ' ':
-        dispbyte = 14;
-        break;
+      case 'o': dispbyte = B11111100;break;
+      case '1': dispbyte = B01100000;break;
+      case '2': dispbyte = B11011010;break;
+      case '3': dispbyte = B11110010;break;
+      case '4': dispbyte = B01100110;break;
+      case 's':
+      case 'S':
+      case '5': dispbyte = B10110110;break;
+      case '6': dispbyte = B10111110;break;
+      case '7': dispbyte = B11100000;break;
+      case '8': dispbyte = B11111110;break;
+      case '9': dispbyte = B11110110;break;
+      case 'A':
+      case 'a':dispbyte = B11101110;break;
+      case 'C':
+      case 'c':dispbyte = B10011100;break;
       case 'E':
-      case 'e':
-        dispbyte = 15;
-        break;
+      case 'e':dispbyte = B10011110;break;
       case 'F':
-      case 'f':
-        dispbyte = 16;
-        break;
+      case 'f':dispbyte = B10001110;break;
+      case 'H':
+      case 'h':dispbyte = B01101110;break;
+      case 'P':
+      case 'p':dispbyte = B11001110;break;
       case 'T':
-      case 't':
-        dispbyte = 19;
-        break;
+      case 't':dispbyte = B00011110;break;
       case 'U':
-      case 'u':
-        dispbyte = 18;
-        break;
+      case 'u':dispbyte = B01111100;break;
+      case ' ':dispbyte = B00000000;break;
+      case '-':dispbyte = B00000010;break;
       default:
-        dispbyte = dispbyte & 0xf;
+        dispbyte = B00000000;
     }
-    dispbyte = _abcdefgh[dispbyte]; //转换成abcdefgh段码
     for (uint8_t i1 = 0; i1 < 8; i1++) {
       //处理每一个点，
       if ((dispbyte & (1 << (7 - i1))) != 0) {
