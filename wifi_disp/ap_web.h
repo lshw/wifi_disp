@@ -40,6 +40,31 @@ void handleRoot() {
   server.client().stop();
   ap_on_time = millis() + 200000;
 }
+void handleNotFound() {
+  File fp;
+  int ch;
+  String message;
+  SPIFFS.begin();
+  if(SPIFFS.exists(server.uri().c_str())){
+    fp=SPIFFS.open(server.uri().c_str(),"r");
+    if(fp) {
+      while(1) {
+	ch=fp.read();
+	if(ch==-1) break;
+	message+=(char)ch;
+      }
+      fp.close();
+      server.send ( 200, "text/plain", message );
+      server.client().stop();
+      return;
+    }
+  }
+  message = "File Not Found\n\n";
+  message += "URI: ";
+  message += server.uri();
+  server.send ( 404, "text/plain", message );
+  server.client().stop();
+}
 void httpsave() {
   File fp;
   String url;
@@ -139,7 +164,7 @@ void http_listen() {
   server.on("/save.php", httpsave); //保存设置
   server.on("/generate_204", http204);//安卓上网检测
 
-  server.onNotFound(http204);
+  server.onNotFound(handleNotFound);
   server.begin();
   Serial.println("HTTP服务器启动");
 }
