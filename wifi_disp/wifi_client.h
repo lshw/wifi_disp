@@ -225,6 +225,8 @@ uint16_t http_get(uint8_t no) {
     if (httpCode >= 200 && httpCode <= 299) {
       // HTTP header has been send and Server response header has been handled
       ram_buf[0] = 0;
+      if(no==0) ram_buf[7] &= ~2;
+        else ram_buf[7] |= 2; //bit2表示上次完成通讯用的是哪个url 0:url0 2:url1
       send_ram();
       save_wifi();
       Serial.print("[HTTP] GET... code:");

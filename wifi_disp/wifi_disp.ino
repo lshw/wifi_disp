@@ -120,9 +120,10 @@ void setup()
     ESP.restart();
     return;
   }
-  uint16_t httpCode = http_get(0);
+
+  uint16_t httpCode = http_get((ram_buf[7]>>1)&1); //先试试上次成功的url
   if (httpCode <200  || httpCode >=300) {
-httpCode = http_get(1); //试试url2
+httpCode = http_get((~ram_buf[7]>>1)&1); //再试试另一个的url
 }
 if(httpCode < 200 || httpCode>=400){
     SPIFFS.begin();
