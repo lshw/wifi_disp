@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.26"
+#define VER "1.27"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -199,7 +199,7 @@ void poweroff(uint32_t sec) {
   }
   Serial.flush();
   wdt_disable();
-  system_deep_sleep_set_option(0);
+  system_deep_sleep_set_option(4);
   digitalWrite(LED_BUILTIN, LOW);
   if (sec == 0) ht16c21_cmd(0x84, 0x2); //lcd off
   ESP.deepSleep((uint64_t) 1000000 * sec, WAKE_RF_DEFAULT);
