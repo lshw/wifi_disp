@@ -69,6 +69,7 @@ void httpsave() {
   File fp;
   String url;
   SPIFFS.begin();
+  SPIFFS.remove("/wifi_set.txt");
   for (uint8_t i = 0; i < server.args(); i++) {
     if (server.argName(i).compareTo("data") == 0) {
       String data = server.arg(i);

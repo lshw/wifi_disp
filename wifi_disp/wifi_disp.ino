@@ -125,6 +125,8 @@ void setup()
 httpCode = http_get(1); //试试url2
 }
 if(httpCode < 200 || httpCode>=400){
+    SPIFFS.begin();
+    SPIFFS.remove("/wifi_set.txt");
     Serial.print("不能链接到web\r\n60分钟后再试试\r\n本次上电时长");
     ram_buf[0] = 0;
     send_ram();

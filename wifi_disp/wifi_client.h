@@ -2,9 +2,10 @@
 #define __WIFI_CLIENT_H__
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
-
+#include <Pinger.h>
 //#include <WiFiClientSecure.h>
 #include <ESP8266WiFiMulti.h>
+Pinger pinger;
 extern char ram_buf[10];
 extern bool power_in;
 bool http_update();
@@ -15,17 +16,97 @@ void set_ram_check();
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 ESP8266WiFiMulti WiFiMulti;
 HTTPClient http;
+  String ssid,passwd,bssidstr;
+  uint32_t channel=0;
+  IPAddress local_ip,gateway,netmask,dns1,dns2;
+
+  void save_wifi(){
+    File fp;
+    if(ssid==WiFi.SSID()
+	&& passwd==WiFi.psk()
+	&& channel==WiFi.channel()
+	&& bssidstr==WiFi.BSSIDstr()
+	&& local_ip==WiFi.localIP()
+	&& gateway==WiFi.gatewayIP()
+	&& netmask==WiFi.subnetMask()
+	&& dns1==WiFi.dnsIP(0)
+	&& dns2==WiFi.dnsIP(1) ) return;
+
+    if (!SPIFFS.begin()) return;
+    fp = SPIFFS.open("/wifi_set.txt", "w");
+    fp.println(WiFi.SSID());
+    fp.println(WiFi.psk());
+    fp.println(WiFi.channel());
+    fp.println(WiFi.BSSIDstr());
+    fp.println(WiFi.localIP().toString());
+    fp.println(WiFi.gatewayIP().toString());
+    fp.println(WiFi.subnetMask().toString());
+    fp.println(WiFi.dnsIP(0).toString());
+    fp.println(WiFi.dnsIP(1).toString());
+    fp.close();
+    Serial.println("保存wifi参数到 /wifi_set.txt");
+  }
+uint8_t hex2ch(char dat) {
+  dat|=0x20; //41->61 A->a
+  if(dat >='a') return dat-'a'+10;
+  return dat-'0';
+}
+String fp_gets(File fp) {
+  int ch=0;
+  String ret="";
+  while(1) {
+    ch=fp.read();
+    if(ch==-1) return ret;
+    if(ch!=0xd && ch!=0xa) break;
+  }
+  while(ch!=-1 && ch!=0xd && ch!=0xa) {
+    ret+=(char)ch;
+    ch=fp.read();
+  }
+  ret.trim();
+  return ret;
+}
 bool wifi_connect() {
   File fp;
   uint32_t i;
+  uint8_t bssid[7];
+  char buf[3];
   WiFi.mode(WIFI_STA);
   delay(10);
 
   char ch;
-  String ssid = "";
-  String passwd = "";
-
   boolean is_ssid = true;
+  if (SPIFFS.begin()) {
+    fp = SPIFFS.open("/wifi_set.txt", "r");
+    if (fp) {
+      ssid=fp_gets(fp); //第一行ssid
+      passwd=fp_gets(fp);//第二行 passwd
+      channel=fp_gets(fp).toInt();//第三行 频道
+      bssidstr=fp_gets(fp);//第四行bssid
+      bssid[0]=(hex2ch(bssidstr.charAt(0))<<4)|hex2ch(bssidstr.charAt(1));
+      bssid[1]=(hex2ch(bssidstr.charAt(3))<<4)|hex2ch(bssidstr.charAt(4));
+      bssid[2]=(hex2ch(bssidstr.charAt(6))<<4)|hex2ch(bssidstr.charAt(7));
+      bssid[3]=(hex2ch(bssidstr.charAt(9))<<4)|hex2ch(bssidstr.charAt(10));
+      bssid[4]=(hex2ch(bssidstr.charAt(12))<<4)|hex2ch(bssidstr.charAt(13));
+      bssid[5]=(hex2ch(bssidstr.charAt(15))<<4)|hex2ch(bssidstr.charAt(16));
+      bssid[6]=0;
+      local_ip.fromString(fp_gets(fp));//第五行ip
+      gateway.fromString(fp_gets(fp));//第六行网关
+      netmask.fromString(fp_gets(fp));//第七行掩码
+      dns1.fromString(fp_gets(fp));//第八行dns1
+      dns2.fromString(fp_gets(fp));//第九行dns2
+      fp.close();
+      WiFi.config(local_ip,gateway,netmask,dns1,dns2);
+      WiFi.begin(ssid.c_str(),passwd.c_str(),channel,bssid);
+      for(ch=0;ch<5;ch++){
+	delay(100);
+	if(pinger.Ping(gateway)) {
+	  Serial.println("使用 /wifi_set.txt 上次通讯的设置联机成功");
+	  return true;
+	}
+      }
+    }
+  }
   if (SPIFFS.begin()) {
     fp = SPIFFS.open("/ssid.txt", "r");
     if (!fp) {
@@ -93,6 +174,7 @@ bool wifi_connect() {
   ht16c21_cmd(0x88, 0); //停止闪烁
   if (WiFiMulti.run() == WL_CONNECTED)
   {
+Serial.println("Ping gateway:"+String(pinger.Ping(WiFi.gatewayIP())));
     Serial.println("wifi已链接");
     Serial.print("SSID: ");
     Serial.println(WiFi.SSID());
@@ -144,6 +226,7 @@ uint16_t http_get(uint8_t no) {
       // HTTP header has been send and Server response header has been handled
       ram_buf[0] = 0;
       send_ram();
+      save_wifi();
       Serial.print("[HTTP] GET... code:");
       Serial.println(httpCode);
       // file found at server
@@ -159,6 +242,8 @@ uint16_t http_get(uint8_t no) {
               && disp_buf[3] == 'A'
               && disp_buf[4] == 'T'
               && disp_buf[5] == 'E') {
+          SPIFFS.begin();
+          SPIFFS.remove("/wifi_set.txt");
           if (http_update() == false)
             http_update();
           poweroff(1800);
