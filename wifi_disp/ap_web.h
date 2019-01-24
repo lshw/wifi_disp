@@ -24,6 +24,7 @@ void handleRoot() {
               "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
               "</head>"
               "<body>"
+              "VER:" VER "<br>"
               "SN:"+hostname+"<br>"
               "<form action=/save.php method=post>"
               "输入ssid:passwd(可以多行多个)"
