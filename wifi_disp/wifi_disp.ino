@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.28"
+#define VER "1.29"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -127,7 +127,17 @@ httpCode = http_get((~ram_buf[7]>>1)&1); //再试试另一个的url
 }
 if(httpCode < 200 || httpCode>=400){
     SPIFFS.begin();
-    SPIFFS.remove("/wifi_set.txt");
+    if(SPIFFS.exists("/wifi_set.txt")) {
+      SPIFFS.remove("/wifi_set.txt");
+      //换url;
+      if(ram_buf[7]&2) ram_buf[7] &= ~2;
+      else ram_buf[7]|=2;
+      Serial.print("不能链接到web\r\n清除上次配置文件，再试一次\r\n");
+      ram_buf[0] = 0;
+      send_ram();
+      poweroff(3);
+      return;
+    }
     Serial.print("不能链接到web\r\n60分钟后再试试\r\n本次上电时长");
     ram_buf[0] = 0;
     send_ram();

@@ -219,6 +219,7 @@ uint16_t http_get(uint8_t no) {
     httpCode = http.GET();
     if (httpCode < 0) {
       Serial.write('E');
+      delay(20);
       continue;
     }
     // httpCode will be negative on error
