@@ -116,7 +116,6 @@ void setup()
       disp("HUP O");
       delay(2000);
     }
-
     ESP.restart();
     return;
   }

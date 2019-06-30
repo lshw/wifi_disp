@@ -2,10 +2,11 @@
 #define __DS1820_H__
 #include <OneWire.h>
 
-OneWire  oneWire(12);
+OneWire  oneWire();
 
 byte dsn[32][8]; //ds1820 sn
 float temp[32];
+uint8_t ds1820_pin=12;
 
 bool ds_init() {
   uint8_t i;
@@ -17,7 +18,15 @@ bool ds_init() {
   digitalWrite(14, HIGH);
   delay(50);
   memset(dsn,0,sizeof(dsn));
-  for(i=0;i<32;i++){
+  oneWire.begin(ds1820_pin);
+  if(oneWire.search(dsn[0])) {
+    i=1;
+  }else{
+    ds1820_pin=0;
+    oneWire.begin(ds1820_pin);
+    i=0;
+  }
+  for(;i<32;i++){
     if (!oneWire.search(dsn[i])) 
       break;
     temp[i]=-999.0;
