@@ -1,29 +1,41 @@
 #ifndef __DS1820_H__
 #define __DS1820_H__
 #include <OneWire.h>
-
-OneWire  oneWire();
+#include "global.h"
+OneWire  oneWire(12);
 
 byte dsn[32][8]; //ds1820 sn
 float temp[32];
-uint8_t ds1820_pin=12;
+uint8_t ds_pin=12;
 
 bool ds_init() {
   uint8_t i;
+  File fp;
+  bool save=false;
   char key[17];
- temp[0]=-999.0;
+  SPIFFS.begin();
+  if(!SPIFFS.exists("/ds_pin.txt")) {
+    save=true;
+    ds_pin=12;
+  }else{
+    fp = SPIFFS.open("/ds_pin.txt", "r");
+    ds_pin=fp_gets(fp).toInt();
+  }
+  temp[0]=-999.0;
   pinMode(14, OUTPUT);
   digitalWrite(14, LOW);
   delay(50);
   digitalWrite(14, HIGH);
   delay(50);
   memset(dsn,0,sizeof(dsn));
-  oneWire.begin(ds1820_pin);
+  oneWire.begin(ds_pin);
   if(oneWire.search(dsn[0])) {
     i=1;
   }else{
-    ds1820_pin=0;
-    oneWire.begin(ds1820_pin);
+    if(ds_pin==12) ds_pin=0;
+    else ds_pin=12;
+    save=true;
+    oneWire.begin(ds_pin);
     i=0;
   }
   for(;i<32;i++){
@@ -43,10 +55,15 @@ bool ds_init() {
   oneWire.skip(); //广播
   oneWire.write(0x44, 1);
   temp_start=millis();
- if(dsn[1][0]!=0) { //有多个探头时，外接探头是信号线供电， 测温期间，要对12进行上拉。
-  pinMode(12,OUTPUT);
-digitalWrite(12,HIGH);
-}
+  if(dsn[1][0]!=0) { //有多个探头时，外接探头是信号线供电， 测温期间，要对12进行上拉。
+    pinMode(12,OUTPUT);
+    digitalWrite(12,HIGH);
+  }
+  if(save) {
+    fp = SPIFFS.open("/ds_pin.txt", "w");
+    fp.println(ds_pin);
+    fp.close();
+  }
   return true;
 }
 

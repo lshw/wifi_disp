@@ -98,7 +98,7 @@ void setup()
     poweroff(1800);
     return;
   }
-  
+
   if (temp_ok==false) {
     delay(temp_start+2000-millis());
     temp_ok=get_temp();
@@ -166,7 +166,8 @@ void poweroff(uint32_t sec) {
     }
   }
   if (power_in && (ram_buf[7] & 1)) { //如果外面接了电， 就进入LIGHT_SLEEP模式 电流0.8ma， 保持充电
-    digitalWrite(13, LOW);
+    if(ds_pin==12) digitalWrite(13, LOW);
+    else digitalWrite(15,HIGH);
     sec = sec / 2;
     wifi_set_sleep_type(MODEM_SLEEP_T);
     Serial.print("休眠");
@@ -177,8 +178,12 @@ void poweroff(uint32_t sec) {
     Serial.print(sec % 60);
     Serial.println("秒");
     if (ram_buf[7] & 1) {
-      digitalWrite(13, LOW);
+      Serial.print("ds_pin=");
+      Serial.println(ds_pin);
+      if(ds_pin==12) digitalWrite(13, LOW);
+      else digitalWrite(15,HIGH);
       Serial.println("充电中");
+      Serial.flush();
     }
     wdt_disable();
     for (uint32_t i = 0; i < sec / 2; i++) {
@@ -189,10 +194,12 @@ void poweroff(uint32_t sec) {
         sec = sec + sec - i - i;
         break;
       }
+      Serial.flush();
       system_soft_wdt_feed ();
     }
   }
-  digitalWrite(13, HIGH);
+  if(ds_pin==12) digitalWrite(13, HIGH);
+  else digitalWrite(15,LOW);
   wifi_set_sleep_type(LIGHT_SLEEP_T);
   if ((ram_buf[7] & 1) && power_in)
     Serial.println("充电结束");
@@ -216,28 +223,45 @@ void poweroff(uint32_t sec) {
 }
 float get_batt() {
   float v0;
-  pinMode(13, OUTPUT);
-  digitalWrite(13, HIGH); //不充电
+  if(ds_pin==12) {
+    pinMode(13, OUTPUT);
+    digitalWrite(13, HIGH); //不充电
+  }else{
+    pinMode(15,OUTPUT);
+    digitalWrite(15,LOW); //不充电
+  }
   delay(1);
   get_batt0();
   v0 = v;
-  digitalWrite(13, LOW); //充电
+  if(ds_pin==12)
+    digitalWrite(13, LOW); //充电
+  else
+    digitalWrite(15, HIGH); //充电
   delay(1);
   get_batt0();
   if (v > v0) { //有外接电源
     v0 = v;
-    digitalWrite(13, HIGH); //不充电
+    if(ds_pin==12)
+      digitalWrite(13, HIGH); //不充电
+    else
+      digitalWrite(15, LOW); //不充电
     delay(1);
     get_batt0();
     if (v0 > v) {
       v0 = v;
-      digitalWrite(13, LOW); //充电
+      if(ds_pin==12)
+	digitalWrite(13, LOW); //充电
+      else
+	digitalWrite(15, HIGH); //充电
       delay(1);
       get_batt0();
       if (v > v0) {
-        v0 = v;
-        digitalWrite(13, HIGH); //不充电
-        delay(1);
+	v0 = v;
+	if(ds_pin==12)
+	  digitalWrite(13, HIGH); //不充电
+	else
+	  digitalWrite(15, LOW); //不充电
+	delay(1);
         get_batt0();
         if (v0 > v) {
           if (!power_in) {
@@ -255,10 +279,17 @@ float get_batt() {
       send_ram();
     }
   }
-  if (ram_buf[7] & 1)
-    digitalWrite(13, LOW);
-  else
-    digitalWrite(13, HIGH);
+  if (ram_buf[7] & 1){
+    if(ds_pin == 12)
+    digitalWrite(13, LOW);  //充电
+    else
+    digitalWrite(15, HIGH); //充电
+  }else{
+    if(ds_pin == 12)
+    digitalWrite(13, HIGH); //不充电
+    else
+    digitalWrite(15, LOW); //不充电
+}
   return v;
 }
 float get_batt0() {//锂电池电压
@@ -282,7 +313,10 @@ void loop()
       ota_loop();
       break;
     case AP_MODE:
+      if(ds_pin == 12)
       digitalWrite(13, LOW);
+else
+      if(power_in) digitalWrite(15, HIGH);
       ap_loop();
       break;
   }

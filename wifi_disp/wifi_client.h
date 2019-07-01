@@ -5,6 +5,7 @@
 #include <Pinger.h>
 //#include <WiFiClientSecure.h>
 #include <ESP8266WiFiMulti.h>
+#include "global.h"
 Pinger pinger;
 extern char ram_buf[10];
 extern bool power_in;
@@ -50,21 +51,6 @@ uint8_t hex2ch(char dat) {
   dat|=0x20; //41->61 A->a
   if(dat >='a') return dat-'a'+10;
   return dat-'0';
-}
-String fp_gets(File fp) {
-  int ch=0;
-  String ret="";
-  while(1) {
-    ch=fp.read();
-    if(ch==-1) return ret;
-    if(ch!=0xd && ch!=0xa) break;
-  }
-  while(ch!=-1 && ch!=0xd && ch!=0xa) {
-    ret+=(char)ch;
-    ch=fp.read();
-  }
-  ret.trim();
-  return ret;
 }
 bool wifi_connect() {
   File fp;
