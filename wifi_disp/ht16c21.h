@@ -92,6 +92,8 @@ void disp(char *str) {
       case 'f':dispbyte = B10001110;break;
       case 'H':
       case 'h':dispbyte = B01101110;break;
+      case 'L':
+      case 'l':dispbyte = B00011100;break;
       case 'P':
       case 'p':dispbyte = B11001110;break;
       case 'T':

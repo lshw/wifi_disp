@@ -4,6 +4,7 @@
 extern "C" {
 #include "user_interface.h"
 }
+#include "default.h"
 bool temp_ok=false;//测温ok
 uint32_t temp_start;
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
@@ -17,8 +18,6 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 #define OTA_MODE 3
 #define OFF_MODE 4
 
-#define DEFAULT_URL0 "http://www.bjlx.org.cn/wifi_disp.php"
-#define DEFAULT_URL1 "http://nas.bjlx.org.cn/wifi_disp.php"
 #include "fs.h"
 #include "ota.h"
 #include "ds1820.h"
