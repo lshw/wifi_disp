@@ -6,6 +6,7 @@ extern "C" {
 }
 #include "default.h"
 bool temp_ok=false;//测温ok
+bool lcd_flash=false;
 uint32_t temp_start;
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 char disp_buf[22];
@@ -17,6 +18,8 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 #define AP_MODE 2
 #define OTA_MODE 3
 #define OFF_MODE 4
+#define LORA_RECEIVE_MODE 5
+#define LORA_SEND_MODE 6
 
 #include "fs.h"
 #include "ota.h"
@@ -25,7 +28,7 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 #include "ap_web.h"
 #include "ht16c21.h"
 #include "http_update.h"
-
+#include "lora.h"
 bool power_in = false;
 void setup()
 {
@@ -49,13 +52,36 @@ void setup()
   }
   proc = ram_buf[0];
   switch (proc) {
-    case OFF_MODE: //OFF
+    case LORA_RECEIVE_MODE:
       wdt_disable();
       ram_buf[0] = 0;
+      disp("Lo   ");
+      Serial.println("lora  接收模式");
+  send_ram();
+   lora_init();
+    wifi_station_disconnect();
+    wifi_set_opmode(NULL_MODE);
+ return;
+      break;
+    case LORA_SEND_MODE:
+      wdt_disable();
+      ram_buf[0] = LORA_RECEIVE_MODE;
+      disp("LoS  ");
+  send_ram();
+lora_init();
+    wifi_station_disconnect();
+    wifi_set_opmode(NULL_MODE);
+  return;
+      break;
+    case OFF_MODE: //OFF
+      wdt_disable();
+      ram_buf[0] = LORA_SEND_MODE;
       disp(" OFF ");
       delay(5000);
       disp("     ");
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
+      lora_init();
+      lora.sleep();
       poweroff(0);
       return;
       break;
@@ -76,6 +102,8 @@ void setup()
       ram_buf[0] = AP_MODE;
       sprintf(disp_buf, " %3.2f ", v);
       disp(disp_buf);
+      lora_init();
+      lora.sleep();
       break;
   }
   send_ram();
@@ -306,8 +334,18 @@ float get_batt0() {//锂电池电压
 }
 void loop()
 {
+    system_soft_wdt_feed ();
   if (power_off) return;
   switch (proc) {
+    case LORA_RECEIVE_MODE:
+    lora_init();
+lora_receive_loop();
+      break;
+    case LORA_SEND_MODE:
+    lora_init();
+      lora_send_loop();
+     delay(400);
+      break;
     case OTA_MODE:
       ota_loop();
       break;
