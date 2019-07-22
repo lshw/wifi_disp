@@ -41,6 +41,7 @@ void ota_setup() {
     Serial.println("Start updating " + type);
   });
   ArduinoOTA.onEnd([]() {
+  ht16c21_cmd(0x88, 1); //闪烁
     Serial.println("\nEnd");
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
@@ -102,8 +103,10 @@ void ota_loop() {
     ArduinoOTA.handle();
     http_loop();
     wifi_set_sleep_type(LIGHT_SLEEP_T);
-  } else
+  } else{
+  ht16c21_cmd(0x88, 0); //不闪烁
     ESP.restart();
+}
   return;
 }
 
