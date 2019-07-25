@@ -84,6 +84,24 @@ bool wifi_connect() {
       fp.close();
       WiFi.config(local_ip,gateway,netmask,dns1,dns2);
       WiFi.begin(ssid.c_str(),passwd.c_str(),channel,bssid);
+      Serial.print("ssid=");
+      Serial.println(ssid);
+      Serial.print("passwd=");
+      Serial.println(passwd);
+      Serial.print("channel=");
+      Serial.println(channel);
+      Serial.print("mac=");
+      Serial.println(bssid);
+      Serial.print("ip=");
+      Serial.println(local_ip);
+      Serial.print("netmask=");
+      Serial.println(netmask);
+      Serial.print("gateway=");
+      Serial.println(gateway);
+      Serial.print("dns1=");
+      Serial.println(dns1);
+      Serial.print("dns2=");
+      Serial.println(dns2);
       for(ch=0;ch<5;ch++){
 	delay(100);
 	if(pinger.Ping(gateway)) {
