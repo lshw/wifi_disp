@@ -52,6 +52,7 @@ uint8_t hex2ch(char dat) {
   if(dat >='a') return dat-'a'+10;
   return dat-'0';
 }
+bool aping;
 bool wifi_connect() {
   File fp;
   uint32_t i;
@@ -90,8 +91,8 @@ bool wifi_connect() {
       Serial.println(passwd);
       Serial.print("channel=");
       Serial.println(channel);
-      Serial.print("mac=");
-      Serial.println(bssid);
+      Serial.print("bssid=");
+      Serial.println(bssidstr);
       Serial.print("ip=");
       Serial.println(local_ip);
       Serial.print("netmask=");
@@ -102,15 +103,33 @@ bool wifi_connect() {
       Serial.println(dns1);
       Serial.print("dns2=");
       Serial.println(dns2);
-      for(ch=0;ch<5;ch++){
+      aping=false;
+      pinger.OnReceive([](const PingerResponse& response)
+	  {
+	  if (response.ReceivedResponse) {
+	  Serial.println("ping ok");
+	  aping=true;
+	  return false;
+	  }else
+	  Serial.println("ping timeout");
+	  // Return true to continue the ping sequence.
+	  // If current event returns false, the ping sequence is interrupted.
+	  return true;
+	  });
+
+      pinger.Ping(gateway,2,1000);
+      for(ch=0;ch<20;ch++){
 	delay(100);
-	if(pinger.Ping(gateway)) {
+	if(aping) {
 	  Serial.println("使用 /wifi_set.txt 上次通讯的设置联机成功");
 	  return true;
 	}
+	Serial.print('.');
       }
     }
   }
+  Serial.print("ping gateway=");
+  Serial.println(aping);
   if (SPIFFS.begin()) {
     fp = SPIFFS.open("/ssid.txt", "r");
     if (!fp) {
@@ -178,7 +197,6 @@ bool wifi_connect() {
   ht16c21_cmd(0x88, 0); //停止闪烁
   if (WiFiMulti.run() == WL_CONNECTED)
   {
-Serial.println("Ping gateway:"+String(pinger.Ping(WiFi.gatewayIP())));
     Serial.println("wifi已链接");
     Serial.print("SSID: ");
     Serial.println(WiFi.SSID());
