@@ -31,7 +31,7 @@ void setup()
 {
   uint8_t i;
   Serial.begin(115200);
-  Serial.println();
+  Serial.println("\x0c\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b");
   Serial.println("Software Ver=" VER);
   hostname += String(ESP.getChipId(), HEX);
   WiFi.hostname(hostname);
