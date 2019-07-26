@@ -138,39 +138,41 @@ bool wifi_connect() {
       return true;
     }
     Serial.print("载入wifi设置文件:/ssid.txt ");
+    ssid="";
+    passwd="";
     if (fp) {
       uint16_t Fsize = fp.size();
       Serial.print(Fsize);
       Serial.println("字节");
       for (i = 0; i < Fsize; i++) {
-        ch = fp.read();
-        switch (ch) {
-          case 0xd:
-          case 0xa:
-            if (ssid != "") {
-              Serial.print("Ssid:"); Serial.println(ssid);
-              Serial.print("Passwd:"); Serial.println(passwd);
-              WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
-            }
-            is_ssid = true;
-            ssid = "";
-            passwd = "";
-            break;
-          case ' ':
-          case ':':
-            is_ssid = false;
-            break;
-          default:
-            if (is_ssid)
-              ssid = ssid + String(ch);
-            else
-              passwd = passwd + String(ch);
-        }
+	ch = fp.read();
+	switch (ch) {
+	  case 0xd:
+	  case 0xa:
+	    if (ssid != "") {
+	      Serial.print("Ssid:"); Serial.println(ssid);
+	      Serial.print("Passwd:"); Serial.println(passwd);
+	      WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
+	    }
+	    is_ssid = true;
+	    ssid = "";
+	    passwd = "";
+	    break;
+	  case ' ':
+	  case ':':
+	    is_ssid = false;
+	    break;
+	  default:
+	    if (is_ssid)
+	      ssid = ssid + String(ch);
+	    else
+	      passwd = passwd + String(ch);
+	}
       }
       if (ssid != "" && passwd != "") {
-        Serial.print("Ssid:"); Serial.println(ssid);
-        Serial.print("Passwd:"); Serial.println(passwd);
-        WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
+	Serial.print("Ssid:"); Serial.println(ssid);
+	Serial.print("Passwd:"); Serial.println(passwd);
+	WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
       }
     }
     fp.close();
