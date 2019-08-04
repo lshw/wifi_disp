@@ -1,0 +1,3 @@
+[submodule "libraries/LoRa"]
+	path = libraries/LoRa
+	url = https://github.com/846354866/LoRa
