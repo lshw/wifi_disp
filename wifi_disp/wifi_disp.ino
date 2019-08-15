@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.29"
+#define VER "1.31"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -207,7 +207,7 @@ void poweroff(uint32_t sec) {
     if (ram_buf[7] & 1) {
       Serial.print("ds_pin=");
       Serial.println(ds_pin);
-      if(ds_pin==12) digitalWrite(13, LOW);
+      if(ds_pin==12) digitalWrite(13, LOW); //v1.0硬件
       else digitalWrite(15,HIGH);
       Serial.println("充电中");
       Serial.flush();
@@ -225,7 +225,7 @@ void poweroff(uint32_t sec) {
       system_soft_wdt_feed ();
     }
   }
-  if(ds_pin==12) digitalWrite(13, HIGH);
+  if(ds_pin==12) digitalWrite(13, HIGH); //v1.0硬件
   else digitalWrite(15,LOW);
   wifi_set_sleep_type(LIGHT_SLEEP_T);
   if ((ram_buf[7] & 1) && power_in)
@@ -250,19 +250,19 @@ void poweroff(uint32_t sec) {
 }
 float get_batt() {
   float v0;
-  if(ds_pin==12) {
+  if(ds_pin==12) { //v1.0硬件
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH); //不充电
-  }else{
+  }else{ //v2.0硬件
     pinMode(15,OUTPUT);
     digitalWrite(15,LOW); //不充电
   }
   delay(1);
   get_batt0();
   v0 = v;
-  if(ds_pin==12)
+  if(ds_pin==12) //v1.0硬件
     digitalWrite(13, LOW); //充电
-  else
+  else //v2.0硬件
     digitalWrite(15, HIGH); //充电
   delay(1);
   get_batt0();
@@ -329,7 +329,11 @@ float get_batt0() {//锂电池电压
         + analogRead(A0)
         + analogRead(A0)
         + analogRead(A0);
+
+  if(ds_pin==12)  //V1.0硬件分压电阻 499k 97.6k
   v = dat / 8 * (499 + 97.6) / 97.6 / 1023 ;
+ else    //V2.0硬件 分压电阻 470k/100k
+  v = dat / 8 * (470 + 100) / 100 / 1023 ;
   return v;
 }
 void loop()
