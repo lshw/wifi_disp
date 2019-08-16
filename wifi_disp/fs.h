@@ -27,8 +27,13 @@ String get_ssid() {
     if (fp) {
       ssid = fp.readString();
       fp.close();
-    } else
+    } else {
       Serial.println("/ssid.txt open error");
+        fp = SPIFFS.open("/ssid.txt", "w");
+        ssid="test:cfido.com";
+        fp.println(ssid);
+	fp.close();
+    }
   } else
     Serial.println("SPIFFS begin error");
   Serial.print("载入ssid设置:");
