@@ -70,38 +70,38 @@ void disp(char *str) {
     switch (str0[i]) {
       case '0':
       case 'O':
-      case 'o': dispbyte = B11111100;break;
-      case '1': dispbyte = B01100000;break;
-      case '2': dispbyte = B11011010;break;
-      case '3': dispbyte = B11110010;break;
-      case '4': dispbyte = B01100110;break;
+      case 'o': dispbyte = B11111100; break;
+      case '1': dispbyte = B01100000; break;
+      case '2': dispbyte = B11011010; break;
+      case '3': dispbyte = B11110010; break;
+      case '4': dispbyte = B01100110; break;
       case 's':
       case 'S':
-      case '5': dispbyte = B10110110;break;
-      case '6': dispbyte = B10111110;break;
-      case '7': dispbyte = B11100000;break;
-      case '8': dispbyte = B11111110;break;
-      case '9': dispbyte = B11110110;break;
+      case '5': dispbyte = B10110110; break;
+      case '6': dispbyte = B10111110; break;
+      case '7': dispbyte = B11100000; break;
+      case '8': dispbyte = B11111110; break;
+      case '9': dispbyte = B11110110; break;
       case 'A':
-      case 'a':dispbyte = B11101110;break;
+      case 'a': dispbyte = B11101110; break;
       case 'C':
-      case 'c':dispbyte = B10011100;break;
+      case 'c': dispbyte = B10011100; break;
       case 'E':
-      case 'e':dispbyte = B10011110;break;
+      case 'e': dispbyte = B10011110; break;
       case 'F':
-      case 'f':dispbyte = B10001110;break;
+      case 'f': dispbyte = B10001110; break;
       case 'H':
-      case 'h':dispbyte = B01101110;break;
+      case 'h': dispbyte = B01101110; break;
       case 'L':
-      case 'l':dispbyte = B00011100;break;
+      case 'l': dispbyte = B00011100; break;
       case 'P':
-      case 'p':dispbyte = B11001110;break;
+      case 'p': dispbyte = B11001110; break;
       case 'T':
-      case 't':dispbyte = B00011110;break;
+      case 't': dispbyte = B00011110; break;
       case 'U':
-      case 'u':dispbyte = B01111100;break;
-      case ' ':dispbyte = B00000000;break;
-      case '-':dispbyte = B00000010;break;
+      case 'u': dispbyte = B01111100; break;
+      case ' ': dispbyte = B00000000; break;
+      case '-': dispbyte = B00000010; break;
       default:
         dispbyte = B00000000;
     }

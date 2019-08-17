@@ -4,12 +4,12 @@ String get_url(uint8_t no) {
   File fp;
   char fn[20];
   String ret;
-  if(no==0 || no=='0') ret=String(DEFAULT_URL0);
-  else ret=String(DEFAULT_URL1);
+  if (no == 0 || no == '0') ret = String(DEFAULT_URL0);
+  else ret = String(DEFAULT_URL1);
   if (SPIFFS.begin()) {
-    if(no==0 || no =='0')
+    if (no == 0 || no == '0')
       fp = SPIFFS.open("/url.txt", "r");
-    else    
+    else
       fp = SPIFFS.open("/url1.txt", "r");
     if (fp) {
       ret = fp.readStringUntil('\n');
@@ -29,10 +29,10 @@ String get_ssid() {
       fp.close();
     } else {
       Serial.println("/ssid.txt open error");
-        fp = SPIFFS.open("/ssid.txt", "w");
-        ssid="test:cfido.com";
-        fp.println(ssid);
-	fp.close();
+      fp = SPIFFS.open("/ssid.txt", "w");
+      ssid = "test:cfido.com";
+      fp.println(ssid);
+      fp.close();
     }
   } else
     Serial.println("SPIFFS begin error");

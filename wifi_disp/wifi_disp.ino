@@ -5,8 +5,8 @@ extern "C" {
 #include "user_interface.h"
 }
 #include "default.h"
-bool temp_ok=false;//测温ok
-bool lcd_flash=false;
+bool temp_ok = false; //测温ok
+bool lcd_flash = false;
 uint32_t temp_start;
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 char disp_buf[22];
@@ -48,8 +48,8 @@ void setup()
   Serial.println(v);
   if (power_in) {
     Serial.println("外接电源");
-    if (ram_buf[7] & 1) Serial.println("充电中");
   }
+  Serial.flush();
   proc = ram_buf[0];
   switch (proc) {
     case LORA_RECEIVE_MODE:
@@ -57,21 +57,21 @@ void setup()
       ram_buf[0] = 0;
       disp("Lo   ");
       Serial.println("lora  接收模式");
-  send_ram();
-   lora_init();
-    wifi_station_disconnect();
-    wifi_set_opmode(NULL_MODE);
- return;
+      send_ram();
+      lora_init();
+      wifi_station_disconnect();
+      wifi_set_opmode(NULL_MODE);
+      return;
       break;
     case LORA_SEND_MODE:
       wdt_disable();
       ram_buf[0] = LORA_RECEIVE_MODE;
       disp("LoS  ");
-  send_ram();
-lora_init();
-    wifi_station_disconnect();
-    wifi_set_opmode(NULL_MODE);
-  return;
+      send_ram();
+      lora_init();
+      wifi_station_disconnect();
+      wifi_set_opmode(NULL_MODE);
+      return;
       break;
     case OFF_MODE: //OFF
       wdt_disable();
@@ -126,9 +126,9 @@ lora_init();
     return;
   }
 
-  if (temp_ok==false) {
-    delay(temp_start+2000-millis());
-    temp_ok=get_temp();
+  if (temp_ok == false) {
+    delay(temp_start + 2000 - millis());
+    temp_ok = get_temp();
   }
   ht16c21_cmd(0x88, 0); //停止闪烁
   if (proc == AP_MODE) return;
@@ -147,17 +147,17 @@ lora_init();
     return;
   }
 
-  uint16_t httpCode = http_get((ram_buf[7]>>1)&1); //先试试上次成功的url
-  if (httpCode <200  || httpCode >=300) {
-httpCode = http_get((~ram_buf[7]>>1)&1); //再试试另一个的url
-}
-if(httpCode < 200 || httpCode>=400){
+  uint16_t httpCode = http_get((ram_buf[7] >> 1) & 1); //先试试上次成功的url
+  if (httpCode < 200  || httpCode >= 300) {
+    httpCode = http_get((~ram_buf[7] >> 1) & 1); //再试试另一个的url
+  }
+  if (httpCode < 200 || httpCode >= 400) {
     SPIFFS.begin();
-    if(SPIFFS.exists("/wifi_set.txt")) {
+    if (SPIFFS.exists("/wifi_set.txt")) {
       SPIFFS.remove("/wifi_set.txt");
       //换url;
-      if(ram_buf[7]&2) ram_buf[7] &= ~2;
-      else ram_buf[7]|=2;
+      if (ram_buf[7] & 2) ram_buf[7] &= ~2;
+      else ram_buf[7] |= 2;
       Serial.print("不能链接到web\r\n清除上次配置文件，再试一次\r\n");
       ram_buf[0] = 0;
       send_ram();
@@ -250,7 +250,7 @@ void poweroff(uint32_t sec) {
 }
 float get_batt() {
   float v0;
-  if(ds_pin==12) { //v1.0硬件
+  if (ds_pin == 12) { //v1.0硬件
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH); //不充电
   }else{ //v2.0硬件
@@ -260,15 +260,15 @@ float get_batt() {
   delay(1);
   get_batt0();
   v0 = v;
-  if(ds_pin==12) //v1.0硬件
+  if (ds_pin == 12) //v1.0硬件
     digitalWrite(13, LOW); //充电
   else //v2.0硬件
-    digitalWrite(15, HIGH); //充电
+    digitalWrite(1, HIGH); //充电
   delay(1);
   get_batt0();
   if (v > v0) { //有外接电源
     v0 = v;
-    if(ds_pin==12)
+    if (ds_pin == 12)
       digitalWrite(13, HIGH); //不充电
     else
       digitalWrite(15, LOW); //不充电
@@ -276,8 +276,8 @@ float get_batt() {
     get_batt0();
     if (v0 > v) {
       v0 = v;
-      if(ds_pin==12)
-	digitalWrite(13, LOW); //充电
+      if (ds_pin == 12)
+        digitalWrite(13, LOW); //充电
       else
 	digitalWrite(15, HIGH); //充电
       delay(1);
@@ -300,7 +300,7 @@ float get_batt() {
     } else power_in = false;
   } else power_in = false;
 
-  if((ram_buf[7] & 1) == 0){
+  if ((ram_buf[7] & 1) == 0) {
     if (v < 3.8) {
       ram_buf[7] |= 1;
       send_ram();
@@ -330,25 +330,25 @@ float get_batt0() {//锂电池电压
         + analogRead(A0)
         + analogRead(A0);
 
-  if(ds_pin==12)  //V1.0硬件分压电阻 499k 97.6k
-  v = (float) dat / 8 * (499 + 97.6) / 97.6 / 1023 ;
- //else    //V2.0硬件 分压电阻 470k/100k
+  if (ds_pin == 12) //V1.0硬件分压电阻 499k 97.6k
+    v = (float) dat / 8 * (499 + 97.6) / 97.6 / 1023 ;
+  //else    //V2.0硬件 分压电阻 470k/100k
   v = (float) dat / 8 * (470.0 + 100.0) / 100.0 / 1023 ;
   return v;
 }
 void loop()
 {
-    system_soft_wdt_feed ();
+  system_soft_wdt_feed ();
   if (power_off) return;
   switch (proc) {
     case LORA_RECEIVE_MODE:
-    lora_init();
-lora_receive_loop();
+      lora_init();
+      lora_receive_loop();
       break;
     case LORA_SEND_MODE:
-    lora_init();
+      lora_init();
       lora_send_loop();
-     delay(400);
+      delay(400);
       break;
     case OTA_MODE:
       ota_loop();

@@ -25,7 +25,7 @@ void handleRoot() {
               "</head>"
               "<body>"
               "VER:" VER "<br>"
-              "SN:"+hostname+"<br>"
+              "SN:" + hostname + "<br>"
               "<form action=/save.php method=post>"
               "输入ssid:passwd(可以多行多个)"
               "<input type=submit value=save><br>"
@@ -46,13 +46,13 @@ void handleNotFound() {
   int ch;
   String message;
   SPIFFS.begin();
-  if(SPIFFS.exists(server.uri().c_str())){
-    fp=SPIFFS.open(server.uri().c_str(),"r");
-    if(fp) {
-      while(1) {
-	ch=fp.read();
-	if(ch==-1) break;
-	message+=(char)ch;
+  if (SPIFFS.exists(server.uri().c_str())) {
+    fp = SPIFFS.open(server.uri().c_str(), "r");
+    if (fp) {
+      while (1) {
+        ch = fp.read();
+        if (ch == -1) break;
+        message += (char)ch;
       }
       fp.close();
       server.send ( 200, "text/plain", message );

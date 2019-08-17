@@ -35,18 +35,18 @@ void ota_setup() {
     } else { // U_SPIFFS
       type = "filesystem";
     }
-    ram_buf[0]=0;
+    ram_buf[0] = 0;
     send_ram();
     // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
     Serial.println("Start updating " + type);
   });
   ArduinoOTA.onEnd([]() {
-  ht16c21_cmd(0x88, 1); //闪烁
+    ht16c21_cmd(0x88, 1); //闪烁
     Serial.println("\nEnd");
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
     Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-    sprintf(disp_buf,"OTA.%02d",progress * 99 / total );
+    sprintf(disp_buf, "OTA.%02d", progress * 99 / total );
     disp(disp_buf);
   });
   ArduinoOTA.onError([](ota_error_t error) {
@@ -103,10 +103,10 @@ void ota_loop() {
     ArduinoOTA.handle();
     http_loop();
     wifi_set_sleep_type(LIGHT_SLEEP_T);
-  } else{
-  ht16c21_cmd(0x88, 0); //不闪烁
+  } else {
+    ht16c21_cmd(0x88, 0); //不闪烁
     ESP.restart();
-}
+  }
   return;
 }
 
