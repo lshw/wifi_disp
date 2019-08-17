@@ -204,6 +204,15 @@ void ap_loop() {
       server.close();
       poweroff(3600);
     }
+    if (power_in == 1) {
+      if (ds_pin == 12) digitalWrite(13, HIGH);
+      else {
+        Serial.flush();
+        Serial.end();
+        pinMode(1, OUTPUT);
+        digitalWrite(1, HIGH);
+      }
+    }
   }
 }
 #endif //__AP_WEB_H__
