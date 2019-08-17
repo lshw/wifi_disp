@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.31"
+#define VER "1.32"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -35,7 +35,7 @@ void setup()
   uint8_t i;
   Serial.begin(115200);
   Serial.println("\x0c\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b");
-  Serial.println("Software Ver=" VER);
+  Serial.println("Software Ver=" VER "\r\nBuildtime=" __DATE__ " " __TIME__);
   hostname += String(ESP.getChipId(), HEX);
   WiFi.hostname(hostname);
   Serial.println("Hostname: " + hostname);
@@ -212,11 +212,11 @@ void poweroff(uint32_t sec) {
     Serial.println("充电中");
     Serial.flush();
     wdt_disable();
-    if(ds_pin == 12) digitalWrite(13,LOW);
-    else{
+    if (ds_pin == 12) digitalWrite(13, LOW);
+    else {
       Serial.end();
-      pinMode(1,OUTPUT);
-      digitalWrite(1,HIGH);
+      pinMode(1, OUTPUT);
+      digitalWrite(1, HIGH);
     }
     for (uint32_t i = 0; i < sec / 2; i++) {
       system_soft_wdt_feed ();

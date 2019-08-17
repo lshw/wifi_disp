@@ -7,21 +7,22 @@ date=`git log --date=short -1 |grep ^Date: |awk '{print $2}' |tr -d '-'`
 ver=$date-${a:0:7}
 echo $ver
 export COMMIT=$ver
-mkdir -p /tmp/build
-chmod 777 /tmp/build
-arduino=/opt/arduino-1.8.5
-home=/home/liushiwei
-sketchbook=./wifi_disp
+arduino=/opt/arduino-1.8.9
+arduinoset=~/.arduino15
+sketchbook=~/sketchbook
 mkdir -p /tmp/build /tmp/cache
 chmod 777 /tmp/build /tmp/cache
 chown liushiwei /tmp/build /tmp/cache
-$arduino/arduino-builder -dump-prefs -logger=machine -hardware "$arduino/hardware" -hardware "$home/.arduino15/packages" -tools "$arduino/tools-builder" -tools "$arduino/hardware/tools/avr" -tools "$home/.arduino15/packages" -built-in-libraries "$arduino/libraries" -libraries "$home/sketchbook/libraries" \
--fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,CpuFrequency=80,FlashSize=4M3M,LwIPVariant=v2mss536,Debug=Disabled,DebugLevel=None____,FlashErase=none,UploadSpeed=115200 \
--ide-version=10805 -build-path /tmp/build -warnings=none -build-cache /tmp/cache -prefs=build.warn_data_percentage=75 -verbose "$sketchbook/wifi_disp.ino"
+touch /tmp/build/info.log
+$arduino/arduino-builder -dump-prefs -logger=machine -hardware $arduino/hardware -hardware $arduinoset/packages -tools $arduino/tools-builder -tools $arduino/hardware/tools/avr -tools $arduinoset/packages -built-in-libraries $arduino/libraries -libraries $sketchbook/libraries \
+-fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,xtal=80,vt=flash,exception=disabled,eesz=4M3M,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200 \
+-ide-version=10809 -build-path /tmp/build -warnings=none -build-cache /tmp/cache -prefs=build.warn_data_percentage=75 -verbose ./wifi_disp/wifi_disp.ino
 
-$arduino/arduino-builder -compile -logger=machine -hardware "$arduino/hardware" -hardware "$home/.arduino15/packages" -tools "$arduino/tools-builder" -tools "$arduino/hardware/tools/avr" -tools "$home/.arduino15/packages" -built-in-libraries "$arduino/libraries" -libraries "$home/sketchbook/libraries" \
--fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,CpuFrequency=80,FlashSize=4M3M,LwIPVariant=v2mss536,Debug=Disabled,DebugLevel=None____,FlashErase=none,UploadSpeed=115200 \
--ide-version=10609 -build-path "/tmp/build" -build-cache /tmp/cache -warnings=none -prefs=build.warn_data_percentage=75 -verbose "$sketchbook/wifi_disp.ino"|tee /tmp/build/info.log
+$arduino/arduino-builder -compile -logger=machine -hardware $arduino/hardware -hardware $arduinoset/packages -tools $arduino/tools-builder -tools $arduino/hardware/tools/avr -tools $arduinoset/packages -built-in-libraries $arduino/libraries -libraries $sketchbook/libraries \
+-fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,xtal=80,vt=flash,exception=disabled,eesz=4M3M,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200 \
+-ide-version=10809 -build-path /tmp/build -warnings=none -build-cache /tmp/cache -prefs=build.warn_data_percentage=75 -verbose ./wifi_disp/wifi_disp.ino \
+|tee  /tmp/build/info.log
+
 if [ $? == 0 ] ; then
  chown -R liushiwei /tmp/build /tmp/cache
  chmod -R og+w /tmp/build /tmp/cache

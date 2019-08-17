@@ -25,6 +25,7 @@ void handleRoot() {
               "</head>"
               "<body>"
               "VER:" VER "<br>"
+              "Build:" __DATE__ " " __TIME__ "<br>"
               "SN:" + hostname + "<br>"
               "<form action=/save.php method=post>"
               "输入ssid:passwd(可以多行多个)"

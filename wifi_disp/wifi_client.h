@@ -2,11 +2,11 @@
 #define __WIFI_CLIENT_H__
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
-#include <Pinger.h>
+//#include <Pinger.h>
 //#include <WiFiClientSecure.h>
 #include <ESP8266WiFiMulti.h>
 #include "global.h"
-Pinger pinger;
+//Pinger pinger;
 extern char ram_buf[10];
 extern bool power_in;
 bool http_update();
@@ -103,7 +103,8 @@ bool wifi_connect() {
       Serial.println(dns1);
       Serial.print("dns2=");
       Serial.println(dns2);
-      aping = false;
+   /*
+   aping = false;
       pinger.OnReceive([](const PingerResponse & response)
       {
         if (response.ReceivedResponse) {
@@ -126,6 +127,8 @@ bool wifi_connect() {
         }
         Serial.print('.');
       }
+
+*/
     }
   }
   Serial.print("ping gateway=");

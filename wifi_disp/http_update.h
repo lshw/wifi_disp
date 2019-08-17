@@ -15,9 +15,10 @@ bool http_update()
   ram_buf[7] |= 1; //开充电模式
   send_ram();
   disp(" H UP");
-  String update_url = get_url((ram_buf[7] >> 1) & 1) + "?p=update&sn=" + String(hostname) + "&ver=" VER;
+  String update_url ="http://www.anheng.com.cn/wifi_disp.bin";// get_url((ram_buf[7] >> 1) & 1) + "?p=update&sn=" + String(hostname) + "&ver=" VER;
   USE_SERIAL.print("下载firmware from ");
   USE_SERIAL.println(update_url);
+
   t_httpUpdate_return  ret = ESPhttpUpdate.update(update_url);
 
   switch (ret) {
@@ -29,7 +30,7 @@ bool http_update()
 
     case HTTP_UPDATE_NO_UPDATES:
       USE_SERIAL.println("HTTP_UPDATE_NO_UPDATES");
-      break;
+     break;
 
     case HTTP_UPDATE_OK:
       USE_SERIAL.println("HTTP_UPDATE_OK");
