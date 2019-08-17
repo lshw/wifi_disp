@@ -123,9 +123,11 @@ void disp(char *str) {
     ram_buf[6] |= 1; //5p
   if (dot & 8)
     ram_buf[9] |= 0x10; //x1
-  if (dot & 0x10)
-    ram_buf[5] |= 1; //x2
+  //if (dot & 0x10)
+  //  ram_buf[5] |= 1; //x2
   //0,3,4,7,8 未用
+  if (power_in)
+    ram_buf[5] |= 1; //x2
   send_ram();
 }
 void set_ram_check() {
