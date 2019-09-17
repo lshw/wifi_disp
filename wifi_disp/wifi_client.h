@@ -239,7 +239,7 @@ uint16_t http_get(uint8_t no) {
 
   Serial.println( url0); //串口输出
   http.begin( url0 ); //HTTP提交
-  http.setTimeout(2000);
+  http.setTimeout(4000);
   int httpCode;
   for (uint8_t i = 0; i < 10; i++) {
     httpCode = http.GET();
