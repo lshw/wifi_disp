@@ -28,13 +28,12 @@ void lora_receive_loop() {
     len = lora.receivePackage(rxBuf);
     Serial.write(rxBuf, len);
     Serial.println();
-    rxBuf[0] = 'L';
-    lora.rxInit();
-    int8_t rssi = lora.readRSSI();
-    sprintf(disp_buf, "%02d-%c%c", rssi, rxBuf[3], rxBuf[4]);
+    uint8_t rssi = 137 - lora.readRSSI();
+    sprintf(disp_buf, "%03d.%c%c", rssi, rxBuf[3], rxBuf[4]);
     disp(disp_buf);
     Serial.print("with RSSI ");
-    Serial.println(rssi);
+    Serial.print(rssi);
+    Serial.println("dBm");
   }
 }
 bool lora_state = false;
