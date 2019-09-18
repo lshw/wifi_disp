@@ -64,7 +64,7 @@ bool wifi_connect() {
   char ch;
   boolean is_ssid = true;
   if (SPIFFS.begin()) {
-   if(proc==OTA_MODE)
+    if (proc == OTA_MODE)
       SPIFFS.remove("/wifi_set.txt");
     fp = SPIFFS.open("/wifi_set.txt", "r");
     if (fp) {
@@ -105,32 +105,32 @@ bool wifi_connect() {
       Serial.println(dns1);
       Serial.print("dns2=");
       Serial.println(dns2);
-   /*
-   aping = false;
-      pinger.OnReceive([](const PingerResponse & response)
-      {
-        if (response.ReceivedResponse) {
-          Serial.println("ping ok");
-          aping = true;
-          return false;
-        } else
-          Serial.println("ping timeout");
-        // Return true to continue the ping sequence.
-        // If current event returns false, the ping sequence is interrupted.
-        return true;
-      });
+      /*
+        aping = false;
+         pinger.OnReceive([](const PingerResponse & response)
+         {
+           if (response.ReceivedResponse) {
+             Serial.println("ping ok");
+             aping = true;
+             return false;
+           } else
+             Serial.println("ping timeout");
+           // Return true to continue the ping sequence.
+           // If current event returns false, the ping sequence is interrupted.
+           return true;
+         });
 
-      pinger.Ping(gateway, 2, 1000);
-      for (ch = 0; ch < 20; ch++) {
-        delay(100);
-        if (aping) {
-          Serial.println("使用 /wifi_set.txt 上次通讯的设置联机成功");
-          return true;
-        }
-        Serial.print('.');
-      }
+         pinger.Ping(gateway, 2, 1000);
+         for (ch = 0; ch < 20; ch++) {
+           delay(100);
+           if (aping) {
+             Serial.println("使用 /wifi_set.txt 上次通讯的设置联机成功");
+             return true;
+           }
+           Serial.print('.');
+         }
 
-*/
+      */
     }
   }
   Serial.print("ping gateway=");

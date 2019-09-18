@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.33"
+#define VER "1.34"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -55,22 +55,24 @@ void setup()
     case LORA_RECEIVE_MODE:
       wdt_disable();
       ram_buf[0] = 0;
-      disp("Lo   ");
+      disp("L" VER " ");
       Serial.println("lora  接收模式");
       send_ram();
       lora_init();
       wifi_station_disconnect();
       wifi_set_opmode(NULL_MODE);
+      delay(1000);
       return;
       break;
     case LORA_SEND_MODE:
       wdt_disable();
       ram_buf[0] = LORA_RECEIVE_MODE;
-      disp("LoS  ");
+      disp("S" VER " ");
       send_ram();
       lora_init();
       wifi_station_disconnect();
       wifi_set_opmode(NULL_MODE);
+      delay(1000);
       return;
       break;
     case OFF_MODE: //OFF

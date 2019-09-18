@@ -29,22 +29,23 @@ void lora_receive_loop() {
     Serial.write(rxBuf, len);
     Serial.println();
     rxBuf[0] = 'L';
-    disp((char *)rxBuf);
     lora.rxInit();
-
+    int8_t rssi = lora.readRSSI();
+    sprintf(disp_buf, "%02d-%c%c", rssi, rxBuf[3], rxBuf[4]);
+    disp(disp_buf);
     Serial.print("with RSSI ");
-    Serial.println(lora.readRSSI());
+    Serial.println(rssi);
   }
 }
 bool lora_state = false;
 void lora_init() {
   if (lora_state) return;
-  lora_state = lora.init(2,1);
+  lora_state = lora.init(2, 1);
   lora.sleep();    // turn to standby mode
-    lora.setFrequency(434E6); //434Mhz
-    lora.setRFpara(LR_BW_7p8k,LR_CODINGRATE_2,12,LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC
-    // preamble length is 6~65535
-    lora.setPreambleLen(12);
-    // mode LR_IMPLICIT_HEADER_MODE or LR_EXPLICIT_HEADER_MODE
-    lora.setHeaderMode(LR_EXPLICIT_HEADER_MODE);
+  lora.setFrequency(434E6); //434Mhz
+  lora.setRFpara(LR_BW_7p8k, LR_CODINGRATE_2, 12, LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC
+  // preamble length is 6~65535
+  lora.setPreambleLen(12);
+  // mode LR_IMPLICIT_HEADER_MODE or LR_EXPLICIT_HEADER_MODE
+  lora.setHeaderMode(LR_EXPLICIT_HEADER_MODE);
 }
