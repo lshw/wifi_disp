@@ -64,6 +64,8 @@ bool wifi_connect() {
   char ch;
   boolean is_ssid = true;
   if (SPIFFS.begin()) {
+   if(proc==OTA_MODE)
+      SPIFFS.remove("/wifi_set.txt");
     fp = SPIFFS.open("/wifi_set.txt", "r");
     if (fp) {
       ssid = fp_gets(fp); //第一行ssid
