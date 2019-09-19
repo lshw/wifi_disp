@@ -28,7 +28,7 @@ void lora_receive_loop() {
     len = lora.receivePackage(rxBuf);
     Serial.write(rxBuf, len);
     Serial.println();
-    uint8_t rssi = 137 - lora.readRSSI();
+    uint8_t rssi = 137 - lora.readRSSI(1);
     sprintf(disp_buf, "%03d.%c%c", rssi, rxBuf[3], rxBuf[4]);
     disp(disp_buf);
     Serial.print("with RSSI ");
@@ -41,10 +41,12 @@ void lora_init() {
   if (lora_state) return;
   lora_state = lora.init(2, 1);
   lora.sleep();    // turn to standby mode
-  lora.setFrequency(434E6); //434Mhz
-  lora.setRFpara(LR_BW_7p8k, LR_CODINGRATE_2, 12, LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC
+  lora.setFrequency(434500000); //434.5Mhz
+  lora.setRFpara(LR_BW_250k, LR_CODINGRATE_2, 12, LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC
   // preamble length is 6~65535
-  lora.setPreambleLen(12);
+  lora.setPreambleLen(60); //前导60
+  //lora.setPayloadLength(10);//数据长度10
+  //lora.setTxPower(15); //default 最大发送20db
   // mode LR_IMPLICIT_HEADER_MODE or LR_EXPLICIT_HEADER_MODE
-  lora.setHeaderMode(LR_EXPLICIT_HEADER_MODE);
+  lora.setHeaderMode(LR_EXPLICIT_HEADER_MODE);//不要header
 }
