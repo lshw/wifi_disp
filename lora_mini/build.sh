@@ -33,7 +33,7 @@ $arduino/arduino-builder -compile -logger=machine -hardware $arduino/hardware -h
 -prefs=runtime.tools.avrdude-6.3.0-arduino12.path=$arduinoset/packages/arduino/tools/avrdude/6.3.0-arduino12 \
 -prefs=runtime.tools.arduinoOTA.path=$arduinoset/packages/arduino/tools/arduinoOTA/1.2.0 \
 -prefs=runtime.tools.arduinoOTA-1.2.0.path=$arduinoset/packages/arduino/tools/arduinoOTA/1.2.0 \
--verbose lora_mini.ino |tee /tmp/build/info.log
+-verbose lora_mini.ino |tee -a /tmp/build/info.log
 
 if [ $? == 0 ] ; then
  chown -R liushiwei /tmp/build /tmp/cache

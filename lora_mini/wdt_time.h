@@ -1,11 +1,10 @@
 #ifndef WDT_TIME_H
 #define WDT_TIME_H 1
-#include "cpu_clock.h"
+//#include "cpu_clock.h"
 //reboot
 #define REBOOT_   asm volatile ("  rjmp 0")
-#define _8Mhz 0
 void power_down_8s() { //进入powerdown模式，8秒钟唤醒一次
-  clock_prescale_set(_8Mhz); //powerdown时，时钟停止，所以可以最高速。加快操作
+  //  clock_prescale_set(_8Mhz); //powerdown时，时钟停止，所以可以最高速。加快操作
   power_adc_disable();
   // power_spi_disable();
   power_twi_disable();
@@ -21,10 +20,10 @@ void power_down_8s() { //进入powerdown模式，8秒钟唤醒一次
 uint8_t half_sec = 0, sec = 0, minute = 0, hour = 0, day = 0, min_dog = 0;
 //8秒中断程序
 ISR(WDT_vect) {
-  half_sec++;
-  if (half_sec < 4) return;
+  //  half_sec++;
+  //  if (half_sec < 4) return;
   // sec+=8;
-  half_sec = 0;
+  //half_sec = 0;
   sec++;
   if (sec < 60) return;
   sec -= 60;

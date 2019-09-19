@@ -1,16 +1,26 @@
 #include "global.h"
 void setup() {
   set_gpio();
-  setup_watchdog(WDTO_250MS); //睡8秒，醒一次
+  Serial.begin(9600);
+  /*
+    uint8_t osc;
+    osc=OSCCAL;
+    for( int8_t i=-20;i<20;i++) {
+    OSCCAL=osc+i;
+    delay(10);
+    Serial.print(F("offset="));
+    Serial.println(i);
+    }
+    OSCCAL=osc-5;
+  */
+  setup_watchdog(WDTO_1S); //睡8秒，醒一次
   lora_init();
 }
 void loop() {
   char ch[10];
   lora_send_loop();
   sprintf(ch, "%02d %02d:%02d:%02d\r\n", day, hour, minute, sec);
-  Serial.begin(9600);
   Serial.print(ch);
-  Serial.end();
   power_down_8s();
   //delay(100);
 }
