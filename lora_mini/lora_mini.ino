@@ -2,7 +2,7 @@
 void setup() {
   set_gpio();
   setup_watchdog(WDTO_250MS); //睡8秒，醒一次
-lora_init();
+  lora_init();
 }
 void loop() {
   char ch[10];
@@ -12,5 +12,5 @@ void loop() {
   Serial.print(ch);
   Serial.end();
   power_down_8s();
-//delay(100);
+  //delay(100);
 }

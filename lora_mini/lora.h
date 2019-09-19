@@ -13,11 +13,11 @@ uint16_t lora_count = 0;
 
 void lora_send_loop() {
   lora_count++;
-  sprintf(buf, "S%04d", lora_count%10000);
+  sprintf(buf, "S%04d", lora_count % 10000);
   //  disp(disp_buf);
   lora.sendPackage((uint8_t *)buf, 5); // sending data
   lora.idle();    // turn to standby mode
-//  lora.sleep();
+  //  lora.sleep();
 }
 uint8_t lora_rxtx = 0; //1:rx 2:tx
 void lora_receive_loop() {
@@ -35,17 +35,17 @@ void lora_receive_loop() {
     lora.rxInit();
 
     Serial.print("with RSSI ");
-   uint8_t rssi=137-lora.readRSSI(1); //-dBm
+    uint8_t rssi = 137 - lora.readRSSI(1); //-dBm
     Serial.println(rssi);
   }
 }
 bool lora_state = false;
 void lora_init() {
-//  if (lora_state && digitalRead(LORA_VCC) == LOW) return;
-//  digitalWrite(LORA_VCC, LOW);
-//  delay(1);
-  lora_state = lora.init(10,9);
-lora.sleep();
+  //  if (lora_state && digitalRead(LORA_VCC) == LOW) return;
+  //  digitalWrite(LORA_VCC, LOW);
+  //  delay(1);
+  lora_state = lora.init(10, 9);
+  lora.sleep();
   lora.setFrequency(434500000); //434.5Mhz
   lora.setRFpara(LR_BW_250k, LR_CODINGRATE_2, 12, LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC
   // preamble length is 6~65535
