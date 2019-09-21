@@ -16,8 +16,8 @@
 void set_gpio() {
   out_low(0); //RX
   out_low(1); //TX
-  input_up(2); //DIO0
-  input_up(3); //DIO1
+  pinMode(2,INPUT); //DIO0
+  pinMode(3,INPUT); //DIO1
   out_low(4); //ds_vcc
   out_low(5); //ds1820
   out_low(6);
@@ -28,11 +28,20 @@ void set_gpio() {
   //out_low(11); //MOSI
   input_up(12); //MISO
   out_low(13); //SCK
-  input_up(A0); //DIO2
+  pinMode(A0,INPUT); //DIO2
   pinMode(A1, INPUT); //POWER ADC
-  input_up(A2); //POWER ADC EN
+  pinMode(A2, INPUT); //POWER ADC EN
   out_low(A3);
   out_low(A4);
   out_low(A5);
+}
+float bat(){
+pinMode(A2,OUTPUT);
+digitalWrite(A2,LOW);
+uint16_t volatile val;
+val=analogRead(A1);
+val=analogRead(A1);
+pinMode(A2,INPUT);
+return (float) 3.3*(val/1023.0)*2;
 }
 #endif

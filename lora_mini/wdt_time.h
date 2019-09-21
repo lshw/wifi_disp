@@ -3,18 +3,13 @@
 //#include "cpu_clock.h"
 //reboot
 #define REBOOT_   asm volatile ("  rjmp 0")
-void power_down_8s() { //进入powerdown模式，8秒钟唤醒一次
-  //  clock_prescale_set(_8Mhz); //powerdown时，时钟停止，所以可以最高速。加快操作
-  power_adc_disable();
-  // power_spi_disable();
-  power_twi_disable();
-  power_timer1_disable();
-  power_timer2_disable();
-  // lora_off();
+void power_down() { //进入powerdown模式，wdt定时唤醒
+  power_spi_disable();
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   sleep_enable();
-  sleep_cpu();  //enter sleep mode
+  sleep_cpu();//进入掉电模式,时钟关闭,等待wdt唤醒唤醒,或者lora发送结束中断唤醒
   sleep_disable();
+  power_spi_enable();//
 }
 
 uint8_t half_sec = 0, sec = 0, minute = 0, hour = 0, day = 0, min_dog = 0;

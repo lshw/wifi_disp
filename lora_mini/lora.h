@@ -22,12 +22,12 @@ void lora_send_loop() {
   sprintf(buf, "S%04d", lora_count % 10000);
   //disp(disp_buf);
   lora.sendPackage((uint8_t *)buf, 5); // sending data
-  //lora.idle();    // turn to standby mode
   attachInterrupt(0, lora_tx_int, HIGH);
-  power_down_8s();
+  wdt_reset(); //让wdt中断，1秒后发生，防止wdt中断，干扰lora发送完成中断
+  power_down();//cpu掉电模式， 等待发送完成
   detachInterrupt(0);
   lora.clearIRQFlags();
-  lora.sleep();
+  lora.sleep();//发送完成，lora休眠
 }
 uint8_t lora_rxtx = 0; //1:rx 2:tx
 void lora_receive_loop() {
