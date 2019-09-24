@@ -11,3 +11,5 @@
 *.log
 *.hex
 *.bin
+
+build

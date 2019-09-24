@@ -1,0 +1,7 @@
+{
+    "board": "arduino:avr:mini",
+    "sketch": "lora_mini/lora_mini.ino",
+    "programmer": "AVR ISP",
+    "configuration": "cpu=atmega168",
+    "output": "./build"
+}
