@@ -17,14 +17,14 @@ uint8_t half_sec = 0, sec = 0, minute = 0, hour = 0, day = 0, min_dog = 0;
 ISR(WDT_vect) {
   //  half_sec++;
   //  if (half_sec < 4) return;
-  // sec+=8;
+  sec += 8;
   //half_sec = 0;
-  sec++;
+  //sec++;
   if (sec < 60) return;
   sec -= 60;
   minute++;
   min_dog++;
-  if (min_dog > 10) REBOOT_;
+  if (min_dog > 60) REBOOT_;
   if (minute < 60) return;
   minute -= 60;
   hour++;

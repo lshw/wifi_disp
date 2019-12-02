@@ -7,23 +7,38 @@
 #define RESET_PIN  9
 #define LORA_VCC 8
 LoRa lora;
+extern float temp, bat_v;
+extern byte dsn[8];
 uint8_t len;
 char buf[256];
 uint16_t lora_count = 0;
+uint32_t ms;
 void lora_tx_int() {
+  //digitalWrite(13,LOW);
+//  Serial.begin(9600);
+//  Serial.println(millis() - ms);
+//  Serial.flush();
   min_dog = 0;//清看门狗
 }
 void lora_send_loop() {
   lora_count++;
+  String str;
   pinMode(DIO0, INPUT);
   digitalWrite(DIO0, LOW);
   lora.enterTxMode();
   lora.setTxInterrupt();	// enable RxDoneIrq
-  sprintf(buf, "S%04d", lora_count % 10000);
+  sprintf(buf, "S%04d,%02x%02x%02x%02x%02x%02x%02x%02x,", lora_count % 10000, dsn[0], dsn[1], dsn[2], dsn[3], dsn[4], dsn[5], dsn[6], dsn[7], temp, (int)(bat_v * 1000));
+  str = String(temp);
+  strcat(buf, String(temp).c_str());
+  strcat(buf, ",");
+  strcat(buf, String(bat_v).c_str());
+  Serial.println(buf);
   //disp(disp_buf);
-  lora.sendPackage((uint8_t *)buf, 5); // sending data
+  //digitalWrite(13,HIGH);
+  lora.sendPackage((uint8_t *)buf, strlen(buf)); // sending data
   attachInterrupt(0, lora_tx_int, HIGH);
   wdt_reset(); //让wdt中断，1秒后发生，防止wdt中断，干扰lora发送完成中断
+  ms = millis();
   power_down();//cpu掉电模式， 等待发送完成
   detachInterrupt(0);
   lora.clearIRQFlags();

@@ -8,6 +8,7 @@
 #include "global.h"
 //Pinger pinger;
 extern char ram_buf[10];
+extern uint8_t rxBuf[256];
 extern bool power_in;
 bool http_update();
 void poweroff(uint32_t);
@@ -20,7 +21,9 @@ HTTPClient http;
 String ssid, passwd, bssidstr;
 uint32_t channel = 0;
 IPAddress local_ip, gateway, netmask, dns1, dns2;
+void send_web() {
 
+}
 void save_wifi() {
   File fp;
   if (ssid == WiFi.SSID()
