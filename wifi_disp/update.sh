@@ -1,5 +1,5 @@
 #!/bin/bash
-arduino=/opt/arduino-1.8.5
+arduino=/opt/arduino-1.8.9
 if [ "a$1" != "a" ] ; then
 $arduino/hardware/esp8266com/esp8266/tools/espota.py -i $1 -f lib/wifi_disp.bin 
 else

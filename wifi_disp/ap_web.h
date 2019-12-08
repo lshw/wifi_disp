@@ -206,7 +206,7 @@ void ap_loop() {
       poweroff(3600);
     }
     if (power_in == 1) {
-      if (ds_pin == 12) digitalWrite(13, HIGH);
+      if (ds_pin != 0) digitalWrite(13, HIGH);
       else {
         Serial.flush();
         Serial.end();

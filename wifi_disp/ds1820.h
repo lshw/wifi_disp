@@ -22,22 +22,30 @@ bool ds_init() {
     ds_pin = fp_gets(fp).toInt();
   }
   temp[0] = -999.0;
-  pinMode(14, OUTPUT);
-  digitalWrite(14, LOW);
-  delay(50);
-  digitalWrite(14, HIGH);
-  delay(50);
+  if (ds_pin != 0) {
+    pinMode(14, OUTPUT);
+    digitalWrite(14, LOW);
+    delay(50);
+    digitalWrite(14, HIGH);
+    delay(50);
+  }
   memset(dsn, 0, sizeof(dsn));
   oneWire.begin(ds_pin);
   if (oneWire.search(dsn[0])) {
+    i = 0;
+    Serial.print("DS18B20[" + String(i) + "]=");
+    sprintf(key, "%02x%02x%02x%02x%02x%02x%02x%02x", dsn[i][0], dsn[i][1], dsn[i][2], dsn[i][3], dsn[i][4], dsn[i][5], dsn[i][6], dsn[i][7]);
+    Serial.println(key);
     i = 1;
   } else {
-    if (ds_pin == 12) ds_pin = 0;
+    if (ds_pin != 0) ds_pin = 0;
     else ds_pin = 12;
     save = true;
     oneWire.begin(ds_pin);
     i = 0;
   }
+  Serial.print("ds_pin=");
+  Serial.println(ds_pin);
   for (; i < 32; i++) {
     if (!oneWire.search(dsn[i]))
       break;
@@ -56,8 +64,8 @@ bool ds_init() {
   oneWire.write(0x44, 1);
   temp_start = millis();
   if (dsn[1][0] != 0) { //有多个探头时，外接探头是信号线供电， 测温期间，要对12进行上拉。
-    pinMode(12, OUTPUT);
-    digitalWrite(12, HIGH);
+    pinMode(ds_pin, OUTPUT);
+    digitalWrite(ds_pin, HIGH);
   }
   if (save) {
     fp = SPIFFS.open("/ds_pin.txt", "w");
@@ -119,20 +127,20 @@ bool get_temp() {
       Serial.println("温度" + String(n) + "=" + String(temp[n]));
   }
   if (ret == true) {
-    digitalWrite(12, LOW);
-    digitalWrite(14, LOW);
+    digitalWrite(ds_pin, LOW);
+    if (ds_pin != 0)
+      digitalWrite(14, LOW);
   } else {
     oneWire.reset();
     oneWire.skip(); //广播
     oneWire.write(0x44, 1);//再读一次
     temp_start = millis();
     if (dsn[1][0] != 0) { //有多个探头时，外接探头是信号线供电， 测温期间，要对12进行上拉。
-      pinMode(12, OUTPUT);
-      digitalWrite(12, HIGH);
+      pinMode(ds_pin, OUTPUT);
+      digitalWrite(ds_pin, HIGH);
     }
   }
   return ret;
 }
 
 #endif //__DS1820_H__
-

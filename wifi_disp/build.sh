@@ -15,11 +15,11 @@ chmod 777 /tmp/build /tmp/cache
 chown liushiwei /tmp/build /tmp/cache
 rm -f /tmp/build/info.log
 touch /tmp/build/info.log
-$arduino/arduino-builder -dump-prefs -logger=machine -hardware $arduino/hardware -hardware $arduinoset/packages -tools $arduino/tools-builder -tools $arduino/hardware/tools/avr -tools $arduinoset/packages -built-in-libraries $arduino/libraries -libraries $sketchbook/libraries \
+$arduino/arduino-builder -dump-prefs -logger=machine -hardware $arduino/hardware -tools $arduino/tools-builder -tools $arduino/hardware/tools/avr -built-in-libraries $arduino/libraries -libraries $sketchbook/libraries \
 -fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,xtal=80,vt=flash,exception=disabled,eesz=4M3M,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200 \
 -ide-version=10809 -build-path /tmp/build -warnings=none -build-cache /tmp/cache -prefs=build.warn_data_percentage=75 -verbose ./wifi_disp/wifi_disp.ino
 
-$arduino/arduino-builder -compile -logger=machine -hardware $arduino/hardware -hardware $arduinoset/packages -tools $arduino/tools-builder -tools $arduino/hardware/tools/avr -tools $arduinoset/packages -built-in-libraries $arduino/libraries -libraries $sketchbook/libraries \
+$arduino/arduino-builder -compile -logger=machine -hardware $arduino/hardware -tools $arduino/tools-builder -tools $arduino/hardware/tools/avr -built-in-libraries $arduino/libraries -libraries $sketchbook/libraries \
 -fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,xtal=80,vt=flash,exception=disabled,eesz=4M3M,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200 \
 -ide-version=10809 -build-path /tmp/build -warnings=none -build-cache /tmp/cache -prefs=build.warn_data_percentage=75 -verbose ./wifi_disp/wifi_disp.ino \
 |tee -a  /tmp/build/info.log

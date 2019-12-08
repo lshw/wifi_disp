@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.36"
+#define VER "1.37"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -52,38 +52,21 @@ void setup()
   Serial.flush();
   proc = ram_buf[0];
   switch (proc) {
-    case LORA_RECEIVE_MODE:
-      wdt_disable();
-      ram_buf[0] = 0;
-      disp("L-" VER);
-      Serial.println("lora  接收模式");
-      send_ram();
-      lora_init();
-      wifi_station_disconnect();
-      wifi_set_opmode(NULL_MODE);
-      delay(1000);
-      return;
-      break;
-    case LORA_SEND_MODE:
-      wdt_disable();
-      ram_buf[0] = LORA_RECEIVE_MODE;
-      disp("S-" VER);
-      send_ram();
-      lora_init();
-      wifi_station_disconnect();
-      wifi_set_opmode(NULL_MODE);
-      delay(1000);
-      return;
-      break;
     case OFF_MODE: //OFF
       wdt_disable();
-      ram_buf[0] = LORA_SEND_MODE;
+
+      if (ds_pin == 0)
+        ram_buf[0] = LORA_SEND_MODE;
+      else
+        ram_buf[0] = 0;
       disp(" OFF ");
       delay(5000);
       disp("     ");
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
-      lora_init();
-      lora.sleep();
+      if (ds_pin == 0) {
+        lora_init();
+        lora.sleep();
+      }
       poweroff(0);
       return;
       break;
@@ -100,12 +83,42 @@ void setup()
       AP();
       return;
       break;
+    case LORA_RECEIVE_MODE:
+      if (ds_pin == 0) {
+        wdt_disable();
+        ram_buf[0] = 0;
+        disp("L-" VER);
+        Serial.println("lora  接收模式");
+        send_ram();
+        lora_init();
+        wifi_station_disconnect();
+        wifi_set_opmode(NULL_MODE);
+        delay(1000);
+        return;
+        break;
+      }
+    case LORA_SEND_MODE:
+      if (ds_pin == 0) {
+        wdt_disable();
+        ram_buf[0] = LORA_RECEIVE_MODE;
+        disp("S-" VER);
+        send_ram();
+        lora_init();
+        wifi_station_disconnect();
+        wifi_set_opmode(NULL_MODE);
+        delay(1000);
+        return;
+        break;
+      }
+
     default:
       ram_buf[0] = AP_MODE;
       sprintf(disp_buf, " %3.2f ", v);
       disp(disp_buf);
-      lora_init();
-      lora.sleep();
+      if (ds_pin == 0) {
+        lora_init();
+        lora.sleep();
+      }
       break;
   }
   send_ram();
@@ -188,9 +201,9 @@ void setup()
 bool power_off = false;
 void poweroff(uint32_t sec) {
   get_batt();
-  if (ds_pin == 12) Serial.println("V1.0");
+  if (ds_pin == 0) Serial.println("V2.0");
   else
-    Serial.println("V2.0");
+    Serial.println("V1.0");
   if (power_in) Serial.println("有外接电源");
   else Serial.println("无外接电源");
   Serial.flush();
@@ -214,7 +227,7 @@ void poweroff(uint32_t sec) {
     Serial.println("充电中");
     Serial.flush();
     wdt_disable();
-    if (ds_pin == 12) digitalWrite(13, LOW);
+    if (ds_pin != 0) digitalWrite(13, LOW);
     else {
       Serial.end();
       pinMode(1, OUTPUT);
@@ -226,7 +239,7 @@ void poweroff(uint32_t sec) {
     }
   }
   wifi_set_sleep_type(LIGHT_SLEEP_T);
-  if (ds_pin != 12) {
+  if (ds_pin == 0) {
     Serial.begin(115200);
     Serial.println();
   }
@@ -243,7 +256,7 @@ void poweroff(uint32_t sec) {
     Serial.println("bye!");
   }
   Serial.flush();
-  if (ds_pin == 12) digitalWrite(13, HIGH); //v1.0硬件
+  if (ds_pin != 0) digitalWrite(13, HIGH); //v1.0硬件
   else {
     Serial.println("关闭充电");
     Serial.end();
@@ -259,7 +272,7 @@ void poweroff(uint32_t sec) {
 }
 float get_batt() {
   float v0;
-  if (ds_pin == 12) { //v1.0硬件
+  if (ds_pin != 0) { //v1.0硬件
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH); //不充电
   } else { //v2.0硬件
@@ -271,7 +284,7 @@ float get_batt() {
   delay(1);
   get_batt0();
   v0 = v;
-  if (ds_pin == 12) //v1.0硬件
+  if (ds_pin != 0) //v1.0硬件
     digitalWrite(13, LOW); //充电
   else //v2.0硬件
     digitalWrite(1, HIGH); //充电
@@ -279,7 +292,7 @@ float get_batt() {
   get_batt0();
   if (v > v0) { //有外接电源
     v0 = v;
-    if (ds_pin == 12)
+    if (ds_pin != 0)
       digitalWrite(13, HIGH); //不充电
     else
       digitalWrite(1, LOW); //不充电
@@ -287,7 +300,7 @@ float get_batt() {
     get_batt0();
     if (v0 > v) {
       v0 = v;
-      if (ds_pin == 12)
+      if (ds_pin != 0)
         digitalWrite(13, LOW); //充电
       else
         digitalWrite(1, HIGH); //充电
@@ -295,7 +308,7 @@ float get_batt() {
       get_batt0();
       if (v > v0) {
         v0 = v;
-        if (ds_pin == 12)
+        if (ds_pin != 0)
           digitalWrite(13, HIGH); //不充电
         else
           digitalWrite(1, LOW); //不充电
@@ -311,7 +324,7 @@ float get_batt() {
     } else power_in = false;
   } else power_in = false;
 
-  if (ds_pin == 12)
+  if (ds_pin != 0)
     digitalWrite(13, HIGH); //不充电
   else
     digitalWrite(1, LOW); //不充电
@@ -323,7 +336,7 @@ float get_batt() {
       send_ram();
     }
   }
-  if (ds_pin != 12) {
+  if (ds_pin == 0) {
     Serial.begin(115200);
   }
   return v;
@@ -339,7 +352,7 @@ float get_batt0() {//锂电池电压
         + analogRead(A0)
         + analogRead(A0);
 
-  if (ds_pin == 12) //V1.0硬件分压电阻 499k 97.6k
+  if (ds_pin != 0) //V1.0硬件分压电阻 499k 97.6k
     v = (float) dat / 8 * (499 + 97.6) / 97.6 / 1023 ;
   //else    //V2.0硬件 分压电阻 470k/100k
   v = (float) dat / 8 * (470.0 + 100.0) / 100.0 / 1023 ;
