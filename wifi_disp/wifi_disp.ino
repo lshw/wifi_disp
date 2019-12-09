@@ -49,6 +49,13 @@ void setup()
   if (power_in) {
     Serial.println("外接电源");
   }
+  if(v<3.40) {
+    disp(" OFF1");
+    ram_buf[7] |= 1; //充电
+    ram_buf[0] = 0;
+    poweroff(3600);
+    return;
+  }
   Serial.flush();
   proc = ram_buf[0];
   switch (proc) {
