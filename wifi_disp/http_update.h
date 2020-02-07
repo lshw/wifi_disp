@@ -18,6 +18,7 @@ bool http_update()
   String update_url = "http://www.anheng.com.cn/wifi_disp.bin"; // get_url((ram_buf[7] >> 1) & 1) + "?p=update&sn=" + String(hostname) + "&ver=" VER;
   USE_SERIAL.print("下载firmware from ");
   USE_SERIAL.println(update_url);
+  http.setTimeout(40000);
 
   t_httpUpdate_return  ret = ESPhttpUpdate.update(update_url);
 
