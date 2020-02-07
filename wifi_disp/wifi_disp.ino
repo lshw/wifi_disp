@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.37"
+#define VER "1.38"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -229,9 +229,11 @@ void poweroff(uint32_t sec) {
       Serial.print(sec / 60);
       Serial.print("分钟");
     }
-    Serial.print(sec % 60);
-    Serial.println("秒");
-    Serial.println("充电中");
+    if((sec % 60) != 0){
+      Serial.print(sec % 60);
+      Serial.print("秒");
+    }
+    Serial.println("\r\n充电中");
     Serial.flush();
     wdt_disable();
     if (ds_pin != 0) digitalWrite(13, LOW);
@@ -258,9 +260,11 @@ void poweroff(uint32_t sec) {
       Serial.print(sec / 60);
       Serial.print("分钟");
     }
-    Serial.print(sec % 60);
-    Serial.println("秒");
-    Serial.println("bye!");
+  if((sec % 60) != 0) {
+      Serial.print(sec % 60);
+      Serial.print("秒");
+    }
+    Serial.println("\r\nbye!");
   }
   uint64_t sec0 = sec * 1000000;
   Serial.flush();
