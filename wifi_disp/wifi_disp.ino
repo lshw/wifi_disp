@@ -262,10 +262,12 @@ void poweroff(uint32_t sec) {
     Serial.println("秒");
     Serial.println("bye!");
   }
+  uint64_t sec0 = sec * 1000000;
   Serial.flush();
   if (ds_pin != 0) digitalWrite(13, HIGH); //v1.0硬件
   else {
     Serial.println("关闭充电");
+    Serial.flush();
     Serial.end();
     pinMode(1, OUTPUT);
     digitalWrite(1, LOW);
@@ -273,8 +275,8 @@ void poweroff(uint32_t sec) {
   wdt_disable();
   system_deep_sleep_set_option(4);
   digitalWrite(LED_BUILTIN, LOW);
-  if (sec == 0) ht16c21_cmd(0x84, 0x2); //lcd off
-  ESP.deepSleep((uint64_t) 1000000 * sec, WAKE_RF_DEFAULT);
+  if (sec == 0) ht16c21_cmd(0x84, 0x2); //lcd off 
+  ESP.deepSleep(sec0, WAKE_RF_DEFAULT);
   power_off = true;
 }
 float get_batt() {
