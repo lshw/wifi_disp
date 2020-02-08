@@ -126,8 +126,6 @@ void disp(char *str) {
   //if (dot & 0x10)
   //  ram_buf[5] |= 1; //x2
   //0,3,4,7,8 未用
-  if (power_in)
-    ram_buf[5] |= 1; //x2
   send_ram();
 }
 void set_ram_check() {
@@ -161,6 +159,14 @@ bool load_ram() {
 }
 void send_ram() {
   uint8_t i;
+  if (power_in) //外接电源，点亮左上角的三角形
+    ram_buf[9] |= 0x10;
+  else
+    ram_buf[9] &= ~0x10;
+  if (ram_buf[7] & 1) //需要充电， 点亮左下角的三角形
+    ram_buf[5] |= 1; //x2
+  else
+    ram_buf[5] &= ~1; //x2
   set_ram_check();
   Wire.beginTransmission(HT1621); // transmit to device #8
   Wire.write(byte(0x80));        // sends five bytes

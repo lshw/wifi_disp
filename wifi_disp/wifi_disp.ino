@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.40"
+#define VER "1.41"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -49,7 +49,7 @@ void setup()
   if (power_in) {
     Serial.println("外接电源");
   }
-  if(v<3.40) {
+  if (v < 3.40) {
     disp(" OFF1"); //电压过低
     ram_buf[7] |= 1; //充电
     ram_buf[0] = 0;
@@ -218,15 +218,15 @@ void poweroff(uint32_t sec) {
       send_ram();
     }
   }
+  wifi_set_sleep_type(LIGHT_SLEEP_T);
   if (power_in && (ram_buf[7] & 1)) { //如果外面接了电， 就进入LIGHT_SLEEP模式 电流0.8ma， 保持充电
     sec = sec / 2;
-    wifi_set_sleep_type(MODEM_SLEEP_T);
     Serial.print("休眠");
     if (sec > 60) {
       Serial.print(sec / 60);
       Serial.print("分钟");
     }
-    if((sec % 60) != 0){
+    if ((sec % 60) != 0) {
       Serial.print(sec % 60);
       Serial.print("秒");
     }
@@ -239,12 +239,25 @@ void poweroff(uint32_t sec) {
       pinMode(1, OUTPUT);
       digitalWrite(1, HIGH);
     }
-    for (uint32_t i = 0; i < sec / 2; i++) {
+    uint8_t no_power_in = 0;
+    for (uint32_t i = 0; i < sec; i++) {
       system_soft_wdt_feed ();
-      delay(2000); //空闲时进入LIGHT_SLEEP_T模式
+      delay(1000); //空闲时进入LIGHT_SLEEP_T模式
+      power_in = i % 2;
+      send_ram();
+      get_batt();
+      if (!power_in) {
+        no_power_in++;
+      } else {
+        if (no_power_in > 0) no_power_in--;
+      }
+      if (no_power_in > 5) {
+        sec = sec + sec - i; //连续6次测试电源断开
+        send_ram();
+        break;
+      }
     }
   }
-  wifi_set_sleep_type(LIGHT_SLEEP_T);
   if (ds_pin == 0) {
     Serial.begin(115200);
     Serial.println();
@@ -257,7 +270,7 @@ void poweroff(uint32_t sec) {
       Serial.print(sec / 60);
       Serial.print("分钟");
     }
-  if((sec % 60) != 0) {
+    if ((sec % 60) != 0) {
       Serial.print(sec % 60);
       Serial.print("秒");
     }
@@ -276,7 +289,7 @@ void poweroff(uint32_t sec) {
   wdt_disable();
   system_deep_sleep_set_option(4);
   digitalWrite(LED_BUILTIN, LOW);
-  if (sec == 0) ht16c21_cmd(0x84, 0x2); //lcd off 
+  if (sec == 0) ht16c21_cmd(0x84, 0x2); //lcd off
   ESP.deepSleep(sec0, WAKE_RF_DEFAULT);
   power_off = true;
 }
