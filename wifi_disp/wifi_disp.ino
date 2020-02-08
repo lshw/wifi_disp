@@ -72,6 +72,7 @@ void setup()
         lora_init();
         lora.sleep();
       }
+      ram_buf[0] = 0; //自行关闭的话，下一次开机进程序0
       poweroff(0);
       return;
       break;
