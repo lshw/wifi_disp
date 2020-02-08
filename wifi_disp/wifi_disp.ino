@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.41"
+#define VER "1.42"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -49,7 +49,7 @@ void setup()
   if (power_in) {
     Serial.println("外接电源");
   }
-  if (v < 3.40) {
+  if (v < 3.40 && !power_in) {
     disp(" OFF1"); //电压过低
     ram_buf[7] |= 1; //充电
     ram_buf[0] = 0;
@@ -68,7 +68,7 @@ void setup()
       disp("-" VER "-");
       delay(2000);
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
-      if (ds_pin == 0) {
+      if (ds_pin == 0) { //v2.0
         lora_init();
         lora.sleep();
       }
@@ -233,12 +233,6 @@ void poweroff(uint32_t sec) {
     Serial.println("\r\n充电中");
     Serial.flush();
     wdt_disable();
-    if (ds_pin != 0) digitalWrite(13, LOW);
-    else {
-      Serial.end();
-      pinMode(1, OUTPUT);
-      digitalWrite(1, HIGH);
-    }
     uint8_t no_power_in = 0;
     for (uint32_t i = 0; i < sec; i++) {
       system_soft_wdt_feed ();
@@ -246,6 +240,14 @@ void poweroff(uint32_t sec) {
       power_in = i % 2;
       send_ram();
       get_batt();
+    if (ds_pin != 0) {
+      pinMode(13,OUTPUT); //v1.0充电控制
+      digitalWrite(13, LOW); //1.0硬件
+    } else {
+      Serial.end();
+      pinMode(1, OUTPUT);
+      digitalWrite(1, HIGH); //2.0硬件
+    }
       if (!power_in) {
         no_power_in++;
       } else {
@@ -278,8 +280,10 @@ void poweroff(uint32_t sec) {
   }
   uint64_t sec0 = sec * 1000000;
   Serial.flush();
-  if (ds_pin != 0) digitalWrite(13, HIGH); //v1.0硬件
-  else {
+  if (ds_pin != 0) {
+    pinMode(13,OUTPUT);
+    digitalWrite(13, HIGH); //v1.0硬件
+  } else {
     Serial.println("关闭充电");
     Serial.flush();
     Serial.end();
