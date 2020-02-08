@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.39"
+#define VER "1.40"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -50,7 +50,7 @@ void setup()
     Serial.println("外接电源");
   }
   if(v<3.40) {
-    disp(" OFF1");
+    disp(" OFF1"); //电压过低
     ram_buf[7] |= 1; //充电
     ram_buf[0] = 0;
     poweroff(3600);
@@ -62,13 +62,11 @@ void setup()
     case OFF_MODE: //OFF
       wdt_disable();
 
-      if (ds_pin == 0)
-        ram_buf[0] = LORA_SEND_MODE;
-      else
-        ram_buf[0] = 0;
+      ram_buf[0] = LORA_SEND_MODE;
       disp(" OFF ");
-      delay(5000);
-      disp("     ");
+      delay(2000);
+      disp("-" VER "-");
+      delay(2000);
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
       if (ds_pin == 0) {
         lora_init();
@@ -117,7 +115,6 @@ void setup()
         return;
         break;
       }
-
     default:
       ram_buf[0] = AP_MODE;
       sprintf(disp_buf, " %3.2f ", v);
