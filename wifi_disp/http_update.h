@@ -21,6 +21,7 @@ bool http_update()
   http.setTimeout(40000);
 
   t_httpUpdate_return  ret = ESPhttpUpdate.update(update_url);
+  update_url = "";
 
   switch (ret) {
     case HTTP_UPDATE_FAILED:

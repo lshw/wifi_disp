@@ -7,7 +7,6 @@ uint8_t len;
 uint8_t rxBuf[256];
 uint32_t send_delay = 0;
 uint16_t lora_count = 0;
-
 void lora_send_loop() {
   if (millis() - send_delay < 200) return;
   send_delay = millis();
@@ -36,10 +35,10 @@ void lora_receive_loop() {
     Serial.println("dBm");
   }
 }
-bool lora_state = false;
-void lora_init() {
-  if (lora_state) return;
-  lora_state = lora.init(2, 1);
+bool lora_init() {
+  if (version != 255) return true;
+  lora.init(2, 1);
+  if (version == 255) return false;
   lora.idle();    // turn to standby mode
   lora.setFrequency(434500000); //434Mhz
   lora.setRFpara(LR_BW_250k, LR_CODINGRATE_2, 12, LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC
@@ -49,4 +48,5 @@ void lora_init() {
   //lora.setTxPower(15); //default 最大发送20db
   // mode LR_IMPLICIT_HEADER_MODE or LR_EXPLICIT_HEADER_MODE
   lora.setHeaderMode(LR_EXPLICIT_HEADER_MODE);//不要header
+  return true;
 }

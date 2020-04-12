@@ -39,6 +39,7 @@ void ota_setup() {
     send_ram();
     // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
     Serial.println("Start updating " + type);
+    type = "";
   });
   ArduinoOTA.onEnd([]() {
     ht16c21_cmd(0x88, 1); //闪烁

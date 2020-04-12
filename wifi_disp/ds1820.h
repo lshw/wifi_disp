@@ -1,7 +1,6 @@
 #ifndef __DS1820_H__
 #define __DS1820_H__
 #include <OneWire.h>
-#include "global.h"
 OneWire  oneWire(12);
 
 byte dsn[32][8]; //ds1820 sn
@@ -20,6 +19,7 @@ bool ds_init() {
   } else {
     fp = SPIFFS.open("/ds_pin.txt", "r");
     ds_pin = fp_gets(fp).toInt();
+    fp.close();
   }
   temp[0] = -999.0;
   if (ds_pin != 0) {
@@ -57,6 +57,7 @@ bool ds_init() {
   if (dsn[0][0] == 0) {
     Serial.println("没找到ds1820.");
     Serial.println();
+    SPIFFS.end();
     return false;
   }
   oneWire.reset();
@@ -72,6 +73,7 @@ bool ds_init() {
     fp.println(ds_pin);
     fp.close();
   }
+  SPIFFS.end();
   return true;
 }
 

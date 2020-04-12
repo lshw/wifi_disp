@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.42"
+#define VER "1.43"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -58,6 +58,7 @@ void setup()
   }
   Serial.flush();
   proc = ram_buf[0];
+  if (millis() > 10000) proc=0; //程序升级后第一次启动
   switch (proc) {
     case OFF_MODE: //OFF
       wdt_disable();
@@ -69,8 +70,9 @@ void setup()
       delay(2000);
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
       if (ds_pin == 0) { //v2.0
-        lora_init();
-        lora.sleep();
+        if (lora_init())
+          lora.sleep();
+        Serial.begin(115200);
       }
       ram_buf[0] = 0; //自行关闭的话，下一次开机进程序0
       poweroff(0);
@@ -81,48 +83,64 @@ void setup()
       ram_buf[7] |= 1; //充电
       ram_buf[0] = OFF_MODE;//ota以后，
       disp(" OTA ");
+      if (ds_pin == 0) { //v2.0
+        if (lora_init())
+          lora.sleep();
+        Serial.begin(115200);
+      }
       break;
     case AP_MODE:
       ram_buf[7] |= 1; //充电
       ram_buf[0] = OTA_MODE; //ota
       send_ram();
+      if (ds_pin == 0) { //v2.0
+        if (lora_init())
+          lora.sleep();
+        Serial.begin(115200);
+      }
       AP();
       return;
       break;
     case LORA_RECEIVE_MODE:
       if (ds_pin == 0) {
-        wdt_disable();
-        ram_buf[0] = 0;
-        disp("L-" VER);
         Serial.println("lora  接收模式");
-        send_ram();
-        lora_init();
-        wifi_station_disconnect();
-        wifi_set_opmode(NULL_MODE);
-        delay(1000);
-        return;
-        break;
+        wdt_disable();
+        if (lora_init()) {
+          ram_buf[0] = 0;
+          disp("L-" VER);
+          send_ram();
+          wifi_station_disconnect();
+          wifi_set_opmode(NULL_MODE);
+          delay(1000);
+          return;
+          break;
+        }
       }
     case LORA_SEND_MODE:
       if (ds_pin == 0) {
+        Serial.println("lora  发送模式");
         wdt_disable();
-        ram_buf[0] = LORA_RECEIVE_MODE;
-        disp("S-" VER);
-        send_ram();
-        lora_init();
-        wifi_station_disconnect();
-        wifi_set_opmode(NULL_MODE);
-        delay(1000);
-        return;
-        break;
+        if (lora_init()) {
+          ram_buf[0] = LORA_RECEIVE_MODE;
+          disp("S-" VER);
+          send_ram();
+          wifi_station_disconnect();
+          wifi_set_opmode(NULL_MODE);
+          delay(1000);
+          return;
+          break;
+        }
       }
     default:
       ram_buf[0] = AP_MODE;
       sprintf(disp_buf, " %3.2f ", v);
       disp(disp_buf);
       if (ds_pin == 0) {
-        lora_init();
-        lora.sleep();
+        if (lora_init())
+          lora.sleep();
+        Serial.begin(115200);
+        Serial.print(F("lora version="));
+        Serial.println(version);
       }
       break;
   }
@@ -166,9 +184,8 @@ void setup()
     ESP.restart();
     return;
   }
-
   uint16_t httpCode = http_get((ram_buf[7] >> 1) & 1); //先试试上次成功的url
-  if (httpCode < 200  || httpCode >= 300) {
+  if (httpCode < 200  || httpCode >= 400) {
     httpCode = http_get((~ram_buf[7] >> 1) & 1); //再试试另一个的url
   }
   if (httpCode < 200 || httpCode >= 400) {
@@ -184,6 +201,7 @@ void setup()
       poweroff(3);
       return;
     }
+    SPIFFS.begin();
     Serial.print("不能链接到web\r\n60分钟后再试试\r\n本次上电时长");
     ram_buf[0] = 0;
     send_ram();
@@ -241,14 +259,14 @@ void poweroff(uint32_t sec) {
       power_in = i % 2;
       send_ram();
       get_batt();
-    if (ds_pin != 0) {
-      pinMode(13,OUTPUT); //v1.0充电控制
-      digitalWrite(13, LOW); //1.0硬件
-    } else {
-      Serial.end();
-      pinMode(1, OUTPUT);
-      digitalWrite(1, HIGH); //2.0硬件
-    }
+      if (ds_pin != 0) {
+        pinMode(13, OUTPUT); //v1.0充电控制
+        digitalWrite(13, LOW); //1.0硬件
+      } else {
+        Serial.end();
+        pinMode(1, OUTPUT);
+        digitalWrite(1, HIGH); //2.0硬件
+      }
       if (!power_in) {
         no_power_in++;
       } else {
@@ -282,7 +300,7 @@ void poweroff(uint32_t sec) {
   uint64_t sec0 = sec * 1000000;
   Serial.flush();
   if (ds_pin != 0) {
-    pinMode(13,OUTPUT);
+    pinMode(13, OUTPUT);
     digitalWrite(13, HIGH); //v1.0硬件
   } else {
     Serial.println("关闭充电");
@@ -392,12 +410,13 @@ void loop()
   if (power_off) return;
   switch (proc) {
     case LORA_RECEIVE_MODE:
-      lora_init();
-      lora_receive_loop();
+      if (lora_init())
+        lora_receive_loop();
+      else delay(400);
       break;
     case LORA_SEND_MODE:
-      lora_init();
-      lora_send_loop();
+      if (lora_init())
+        lora_send_loop();
       delay(400);
       break;
     case OTA_MODE:

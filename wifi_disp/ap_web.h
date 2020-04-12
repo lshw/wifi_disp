@@ -58,6 +58,7 @@ void handleNotFound() {
       fp.close();
       server.send ( 200, "text/plain", message );
       server.client().stop();
+      message = "";
       return;
     }
   }
@@ -66,12 +67,12 @@ void handleNotFound() {
   message += server.uri();
   server.send ( 404, "text/plain", message );
   server.client().stop();
+  message = "";
 }
 void httpsave() {
   File fp;
   String url;
   SPIFFS.begin();
-  SPIFFS.remove("/wifi_set.txt");
   for (uint8_t i = 0; i < server.args(); i++) {
     if (server.argName(i).compareTo("data") == 0) {
       String data = server.arg(i);
@@ -122,6 +123,7 @@ void httpsave() {
       }
     }
   }
+  url = "";
   server.send(200, "text/plain", "OK!");
   ram_buf[0] = 0;
   send_ram();
@@ -133,6 +135,7 @@ void httpsave() {
   Serial.println("ms");
   Serial.println("reboot");
   Serial.flush();
+  SPIFFS.end();
   poweroff(2);
 }
 void AP() {
