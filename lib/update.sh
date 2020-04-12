@@ -2,7 +2,7 @@
 #update.sh 192.168.1.2
 arduino=/opt/arduino-1.8.9
 if [ "a$1" != "a" ] ; then
-lib/espota.py -f lib/wifi_disp.bin -i $1
+lib/espota.py -p 8266 -f lib/wifi_disp.bin -i $1
 else
 killall minicom 2>/dev/null
 sleep 3

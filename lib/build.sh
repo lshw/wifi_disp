@@ -7,7 +7,7 @@ date=`git log --date=short -1 |grep ^Date: |awk '{print $2}' |tr -d '-'`
 ver=$date-${a:0:7}
 echo $ver
 export COMMIT=$ver
-arduino=/opt/arduino-1.8.9
+arduino=/opt/arduino-1.8.12
 arduinoset=~/.arduino15
 sketchbook=~/sketchbook
 mkdir -p /tmp/build /tmp/cache
@@ -15,14 +15,42 @@ chmod 777 /tmp/build /tmp/cache
 chown liushiwei /tmp/build /tmp/cache
 rm -f /tmp/build/info.log
 touch /tmp/build/info.log
-$arduino/arduino-builder -dump-prefs -logger=machine -hardware $arduino/hardware -tools $arduino/tools-builder -tools $arduino/hardware/tools/avr -built-in-libraries $arduino/libraries -libraries $sketchbook/libraries \
+$arduino/arduino-builder -dump-prefs -logger=machine \
+-hardware $arduino/hardware \
+-hardware $arduinoset/packages \
+-tools $arduino/tools-builder \
+-tools $arduino/hardware/tools/avr \
+-tools $arduinoset/packages \
+-built-in-libraries $arduino/libraries \
+-libraries $sketchbook/libraries \
 -fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,xtal=80,vt=flash,exception=disabled,eesz=4M3M,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200 \
--ide-version=10809 -build-path /tmp/build -warnings=none -build-cache /tmp/cache -prefs=build.warn_data_percentage=75 -verbose ./wifi_disp/wifi_disp.ino
+-ide-version=10812 \
+-build-path /tmp/build \
+-warnings=none \
+-build-cache /tmp/cache \
+-prefs=build.warn_data_percentage=75 \
+-verbose \
+./wifi_disp/wifi_disp.ino
 
-$arduino/arduino-builder -compile -logger=machine -hardware $arduino/hardware -tools $arduino/tools-builder -tools $arduino/hardware/tools/avr -built-in-libraries $arduino/libraries -libraries $sketchbook/libraries \
+$arduino/arduino-builder \
+-compile \
+-logger=machine \
+-hardware $arduino/hardware \
+-hardware $arduinoset/packages \
+-tools $arduino/tools-builder \
+-tools $arduino/hardware/tools/avr \
+-tools $arduinoset/packages \
+-built-in-libraries $arduino/libraries \
+-libraries $sketchbook/libraries \
 -fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,xtal=80,vt=flash,exception=disabled,eesz=4M3M,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200 \
--ide-version=10809 -build-path /tmp/build -warnings=none -build-cache /tmp/cache -prefs=build.warn_data_percentage=75 -verbose ./wifi_disp/wifi_disp.ino \
-|tee -a  /tmp/build/info.log
+-ide-version=10812 \
+-build-path /tmp/build \
+-warnings=none \
+-build-cache /tmp/cache \
+-prefs=build.warn_data_percentage=75 \
+-verbose \
+./wifi_disp/wifi_disp.ino \
+|tee -a /tmp/build/info.log
 
 if [ $? == 0 ] ; then
  chown -R liushiwei /tmp/build /tmp/cache
@@ -33,7 +61,7 @@ if [ $? == 0 ] ; then
 
  cp -a /tmp/build/wifi_disp.ino.bin lib/wifi_disp.bin
  if [ "a%1" != "a"  ] ;then
-  $arduino/hardware/esp8266com/esp8266/tools/espota.py -i $1 -f lib/wifi_disp.bin
+  $arduino/hardware/esp8266com/esp8266/tools/espota.py -p 8266 -i $1 -f lib/wifi_disp.bin
  else
   $arduino/hardware/esp8266com/esp8266/tools/esptool/esptool -vv -cd nodemcu -cb 115200 -cp /dev/ttyUSB0 -ca 0x00000 -cf lib/wifi_disp.bin
  fi
