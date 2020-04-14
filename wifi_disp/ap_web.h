@@ -180,6 +180,7 @@ uint32_t ms0;
 void ap_loop() {
   dnsServer.processNextRequest();
   http_loop();
+  ArduinoOTA.handle();
   if (ms0 < millis()) {
     get_batt();
     system_soft_wdt_feed ();
