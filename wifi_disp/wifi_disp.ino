@@ -54,6 +54,7 @@ void setup()
     disp(" OFF1"); //电压过低
     ram_buf[7] |= 1; //充电
     ram_buf[0] = 0;
+    send_ram();
     poweroff(3600);
     return;
   }
@@ -98,7 +99,6 @@ void setup()
         if (lora_init()) {
           ram_buf[0] = 0;
           disp("L-" VER);
-          send_ram();
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
           delay(1000);

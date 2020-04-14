@@ -9,7 +9,10 @@ extern void disp(char *);
 extern void http_listen();
 extern void http_loop();
 extern float get_batt();
+extern uint32_t ap_on_time;
+extern bool power_in;
 extern char ram_buf[10];
+extern void poweroff(uint32_t sec);
 void send_ram();
 void ota_setup() {
 
@@ -88,7 +91,20 @@ void zmd() {
 }
 uint16_t sec0, sec1;
 void ota_loop() {
-  if (ip_buf[0] == 0)
+  if(millis()>10000) {
+    if(ram_buf[0]!=0) {
+      ram_buf[0] = 0;
+      send_ram();
+    }
+    if ( millis() > ap_on_time) {
+      if(power_in && millis() < 1800000 ) ap_on_time=millis()+200000; //有外接电源的情况下，最长半小时
+      else {
+	poweroff(2);
+	return;
+      }
+    }
+   }
+    if (ip_buf[0] == 0)
   {
     snprintf(ip_buf, sizeof(ip_buf), "OTA %s     ", WiFi.localIP().toString().c_str());
     ip_len = strlen(ip_buf);

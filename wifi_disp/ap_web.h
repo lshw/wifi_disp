@@ -143,8 +143,6 @@ void httpsave() {
 void AP() {
   // Go into software AP mode.
   struct softap_config cfgESP;
-  ram_buf[0] = OTA_MODE; //ota
-  send_ram();
 
   Serial.println("AP模式启动.\r\nssid:disp\r\npasswd:none");
   WiFi.mode(WIFI_AP_STA);
@@ -261,16 +259,19 @@ void ap_loop() {
     disp(disp_buf);
 
     if ( millis() > ap_on_time) {
-      Serial.print("batt:");
-      Serial.print(v);
-      Serial.print("V,millis()=");
-      Serial.println(millis());
-      Serial.println("power down");
-      ram_buf[0] = 0;
-      disp("00000");
-      ht16c21_cmd(0x84, 0);
-      server.close();
-      poweroff(3600);
+      if(power_in && millis() < 1800000 ) ap_on_time=millis()+200000; //有外接电源的情况下，最长半小时
+      else {
+	Serial.print("batt:");
+	Serial.print(v);
+	Serial.print("V,millis()=");
+	Serial.println(millis());
+	Serial.println("power down");
+	ram_buf[0] = 0;
+	disp("00000");
+	ht16c21_cmd(0x84, 0);
+	server.close();
+	poweroff(3600);
+      }
     }
     if (power_in == 1) {
       if (ds_pin != 0) digitalWrite(13, HIGH);
