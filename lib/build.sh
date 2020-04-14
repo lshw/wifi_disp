@@ -1,5 +1,8 @@
 #!/bin/bash
 cd `dirname $0`
+if ! [ -x ./uncrc32 ] ; then
+gcc -o uncrc32 uncrc32.c
+fi
 cd ..
 branch=`git branch |grep "^\*" |awk '{print $2}'`
 a=`git rev-parse --short HEAD`
@@ -60,6 +63,7 @@ if [ $? == 0 ] ; then
  grep "Sketch uses" /tmp/build/info.log |awk -F[ '{printf $2}'|tr -d ']'|awk -F' ' '{print "ROM：使用"$1"字节,"$3"%"}'
 
  cp -a /tmp/build/wifi_disp.ino.bin lib/wifi_disp.bin
+ lib/uncrc32 lib/wifi_disp.bin 0
  if [ "a%1" != "a"  ] ;then
   $arduino/hardware/esp8266com/esp8266/tools/espota.py -p 8266 -i $1 -f lib/wifi_disp.bin
  else
