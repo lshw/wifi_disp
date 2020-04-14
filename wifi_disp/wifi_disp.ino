@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.43"
+#define VER "1.45"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
