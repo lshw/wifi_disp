@@ -65,11 +65,7 @@ void ota_setup() {
     }
   });
   ArduinoOTA.begin();
-  snprintf(ip_buf, sizeof(ip_buf), "OTA %s     ", WiFi.localIP().toString().c_str());
-  ip_len = strlen(ip_buf);
-  ip_offset = 0;
   Serial.println("Ready");
-  Serial.println(ip_len);
 }
 void zmd() {
   uint8_t i, i0, i1;
@@ -92,6 +88,12 @@ void zmd() {
 }
 uint16_t sec0, sec1;
 void ota_loop() {
+  if (ip_buf[0] == 0)
+  {
+    snprintf(ip_buf, sizeof(ip_buf), "OTA %s     ", WiFi.localIP().toString().c_str());
+    ip_len = strlen(ip_buf);
+    ip_offset = 0;
+  }
   if (millis() < 600000) {
     sec0 = millis() / 1000;
     if (sec0 != sec1) {

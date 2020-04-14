@@ -27,14 +27,14 @@ bool wifi_connect() {
   File fp;
   uint32_t i;
   char buf[3];
-  //  WiFi.mode(WIFI_STA);
+  WiFi.mode(WIFI_AP_STA);
   char ch;
   boolean is_ssid = true;
   if (SPIFFS.begin()) {
     fp = SPIFFS.open("/ssid.txt", "r");
     if (!fp) {
       AP();
-      proc = AP_MODE;
+      proc = OTA_MODE;
       SPIFFS.end();
       return true;
     }
@@ -81,6 +81,7 @@ bool wifi_connect() {
   }
   Serial.println("正在连接wifi.");
   // ... Give ESP 10 seconds to connect to station.
+  if (proc == OTA_MODE) return true;
   unsigned long startTime = millis();
   i = 0;
   while (WiFiMulti.run() != WL_CONNECTED && millis() - startTime < 40000)

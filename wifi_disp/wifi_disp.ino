@@ -7,6 +7,7 @@ extern "C" {
 #include "default.h"
 bool temp_ok = false; //测温ok
 bool lcd_flash = false;
+extern char ip_buf[30];
 uint32_t temp_start;
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 char disp_buf[22];
@@ -15,11 +16,10 @@ String hostname = HOSTNAME;
 float v;
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
 //0,1-正常 2-AP 3-OTA  4-http update
-#define AP_MODE 2
-#define OTA_MODE 3
-#define OFF_MODE 4
-#define LORA_RECEIVE_MODE 5
-#define LORA_SEND_MODE 6
+#define OTA_MODE 2
+#define OFF_MODE 3
+#define LORA_RECEIVE_MODE 4
+#define LORA_SEND_MODE 5
 
 #include "fs.h"
 #include "ota.h"
@@ -33,6 +33,7 @@ bool power_in = false;
 void setup()
 {
   uint8_t i;
+  ip_buf[0] = 0;
   Serial.begin(115200);
   Serial.println("\x0c\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b");
   Serial.println("Software Ver=" VER "\r\nBuildtime=" __DATE__ " " __TIME__);
@@ -88,18 +89,7 @@ void setup()
           lora.sleep();
         Serial.begin(115200);
       }
-      break;
-    case AP_MODE:
-      ram_buf[7] |= 1; //充电
-      ram_buf[0] = OTA_MODE; //ota
-      send_ram();
-      if (ds_pin == 0) { //v2.0
-        if (lora_init())
-          lora.sleep();
-        Serial.begin(115200);
-      }
       AP();
-      return;
       break;
     case LORA_RECEIVE_MODE:
       if (ds_pin == 0) {
@@ -132,7 +122,7 @@ void setup()
         }
       }
     default:
-      ram_buf[0] = AP_MODE;
+      ram_buf[0] = OTA_MODE;
       sprintf(disp_buf, " %3.2f ", v);
       disp(disp_buf);
       if (ds_pin == 0) {
@@ -169,7 +159,6 @@ void setup()
     temp_ok = get_temp();
   }
   ht16c21_cmd(0x88, 0); //停止闪烁
-  if (proc == AP_MODE) return;
   if (proc == OTA_MODE) {
     ota_setup();
     return;
@@ -420,10 +409,10 @@ void loop()
       delay(400);
       break;
     case OTA_MODE:
-      ota_loop();
-      break;
-    case AP_MODE:
-      ap_loop();
+      if (WiFiMulti.run() == WL_CONNECTED)
+        ota_loop();
+      else
+        ap_loop();
       break;
   }
 }

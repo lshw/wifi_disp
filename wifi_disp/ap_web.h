@@ -143,12 +143,11 @@ void httpsave() {
 void AP() {
   // Go into software AP mode.
   struct softap_config cfgESP;
-  disp("  AP ");
   ram_buf[0] = OTA_MODE; //ota
   send_ram();
 
   Serial.println("AP模式启动.\r\nssid:disp\r\npasswd:none");
-  WiFi.mode(WIFI_AP);
+  WiFi.mode(WIFI_AP_STA);
 
   while (!wifi_softap_get_config(&cfgESP)) {
     system_soft_wdt_feed();
