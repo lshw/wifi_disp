@@ -2,6 +2,7 @@
 #define __AP_WEB_H__
 #include <ESP8266WebServer.h>
 #include <DNSServer.h>
+//#include <ESP8266mDNS.h>
 extern void disp(char *);
 extern char ram_buf[10];
 extern String hostname;
@@ -37,6 +38,7 @@ void handleRoot() {
               "<input type=submit name=submit value=save>"
               "</form>"
               "<hr>"
+              "<form method='POST' action='/update' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
               "</body>"
               "</html>");
   server.client().stop();
@@ -160,18 +162,81 @@ void AP() {
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(53, "*", WiFi.softAPIP());
   Serial.println("泛域名dns服务器启动");
+  MDNS.begin(hostname);
+  MDNS.addService("http", "tcp", 80);
   wifi_set_sleep_type(LIGHT_SLEEP_T);
   http_listen();
 }
 void http_listen() {
 
+  server.begin();
+
   server.on("/", handleRoot);
   server.on("/save.php", httpsave); //保存设置
   server.on("/generate_204", http204);//安卓上网检测
 
+  server.on("/update", HTTP_POST, []() {
+    ram_buf[0] = 0;
+    send_ram();
+    server.sendHeader("Connection", "close");
+    if (Update.hasError()) {
+      Serial.println("上传失败");
+      server.send(200, "text/html", "<html>"
+                  "<head>"
+                  "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
+                  "</head>"
+                  "<body>"
+                  "升级失败 <a href=/>返回</a>"
+                  "</body>"
+                  "</html>"
+                 );
+    } else {
+      server.send(200, "text/html", "<html>"
+                  "<head>"
+                  "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
+                  "</head>"
+                  "<body>"
+                  "<script>setTimeout(function(){ alert('升级成功!'); }, 15000); </script>"
+                  "</body>"
+                  "</html>"
+                 );
+      Serial.println("上传成功");
+      Serial.flush();
+      ht16c21_cmd(0x88, 1); //闪烁
+      delay(5);
+      ESP.restart();
+    }
+  }, []() {
+    HTTPUpload& upload = server.upload();
+    if (upload.status == UPLOAD_FILE_START) {
+      Serial.setDebugOutput(true);
+      WiFiUDP::stopAll();
+      Serial.printf("Update: %s\r\n", upload.filename.c_str());
+      uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+      if (!Update.begin(maxSketchSpace)) { //start with max available size
+        Update.printError(Serial);
+      }
+    } else if (upload.status == UPLOAD_FILE_WRITE) {
+      sprintf(disp_buf, "%d", upload.totalSize / 1000);
+      disp(disp_buf);
+      Serial.println("size:" + String(upload.totalSize));
+      if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+        Update.printError(Serial);
+      }
+    } else if (upload.status == UPLOAD_FILE_END) {
+      if (Update.end(true)) { //true to set the size to the current progress
+        Serial.printf("Update Success: %u\r\nRebooting...\r\n", upload.totalSize);
+      } else {
+        Update.printError(Serial);
+      }
+      Serial.setDebugOutput(false);
+    }
+    yield();
+  });
   server.onNotFound(handleNotFound);
   server.begin();
-  Serial.println("HTTP服务器启动");
+
+  Serial.printf("HTTP服务器启动! 用浏览器打开 http://%s.local\n", hostname.c_str());
 }
 void http_loop() {
   server.handleClient();

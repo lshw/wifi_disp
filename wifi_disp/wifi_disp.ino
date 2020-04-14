@@ -58,7 +58,7 @@ void setup()
   }
   Serial.flush();
   proc = ram_buf[0];
-  if (millis() > 10000) proc=0; //程序升级后第一次启动
+  if (millis() > 10000) proc = 0; //程序升级后第一次启动
   switch (proc) {
     case OFF_MODE: //OFF
       wdt_disable();
