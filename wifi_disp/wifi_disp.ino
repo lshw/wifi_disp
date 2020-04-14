@@ -70,6 +70,8 @@ void setup()
       delay(2000);
       disp("-" VER "-");
       delay(2000);
+      ram_buf[0] = 0;
+      send_ram();
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
       if (ds_pin == 0) { //v2.0
         if (lora_init())
@@ -166,7 +168,6 @@ void setup()
   if (proc == OFF_MODE) {
     if (http_update() == true) {
       ram_buf[0] = 0;
-      send_ram();
       disp("HUP O");
       delay(2000);
     }
