@@ -8,7 +8,6 @@ extern uint8_t rxBuf[256];
 extern bool power_in;
 bool http_update();
 void poweroff(uint32_t);
-void AP();
 void send_ram();
 void set_ram_check();
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
@@ -31,13 +30,12 @@ bool wifi_connect() {
   char ch;
   boolean is_ssid = true;
   if (SPIFFS.begin()) {
-    fp = SPIFFS.open("/ssid.txt", "r");
-    if (!fp) {
-      AP();
-      proc = OTA_MODE;
-      SPIFFS.end();
-      return true;
+    if (SPIFFS.exists("/ssid.txt")) {
+      fp = SPIFFS.open("/ssid.txt", "w");
+      fp.println("test:cfido.com");
+      fp.close();
     }
+    fp = SPIFFS.open("/ssid.txt", "r");
     Serial.print("载入wifi设置文件:/ssid.txt ");
     ssid = "";
     passwd = "";

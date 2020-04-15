@@ -29,7 +29,6 @@ void ota_setup() {
   // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
   // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
 
-  http_listen();
 
   ArduinoOTA.onStart([]() {
     String type;
@@ -91,20 +90,20 @@ void zmd() {
 }
 uint16_t sec0, sec1;
 void ota_loop() {
-  if(millis()>10000) {
-    if(ram_buf[0]!=0) {
+  if (millis() > 10000) {
+    if (ram_buf[0] != 0) {
       ram_buf[0] = 0;
       send_ram();
     }
     if ( millis() > ap_on_time) {
-      if(power_in && millis() < 1800000 ) ap_on_time=millis()+200000; //有外接电源的情况下，最长半小时
+      if (power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
       else {
-	poweroff(2);
-	return;
+        poweroff(2);
+        return;
       }
     }
-   }
-    if (ip_buf[0] == 0)
+  }
+  if (ip_buf[0] == 0)
   {
     snprintf(ip_buf, sizeof(ip_buf), "OTA %s     ", WiFi.localIP().toString().c_str());
     ip_len = strlen(ip_buf);

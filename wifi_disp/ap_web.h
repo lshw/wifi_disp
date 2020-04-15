@@ -233,7 +233,7 @@ void http_listen() {
   server.onNotFound(handleNotFound);
   server.begin();
 
-  Serial.printf("HTTP服务器启动! 用浏览器打开 http://%s.local\n", hostname.c_str());
+  Serial.printf("HTTP服务器启动! 用浏览器打开 http://%s.local\r\n", hostname.c_str());
 }
 void http_loop() {
   server.handleClient();
@@ -259,18 +259,18 @@ void ap_loop() {
     disp(disp_buf);
 
     if ( millis() > ap_on_time) {
-      if(power_in && millis() < 1800000 ) ap_on_time=millis()+200000; //有外接电源的情况下，最长半小时
+      if (power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
       else {
-	Serial.print("batt:");
-	Serial.print(v);
-	Serial.print("V,millis()=");
-	Serial.println(millis());
-	Serial.println("power down");
-	ram_buf[0] = 0;
-	disp("00000");
-	ht16c21_cmd(0x84, 0);
-	server.close();
-	poweroff(3600);
+        Serial.print("batt:");
+        Serial.print(v);
+        Serial.print("V,millis()=");
+        Serial.println(millis());
+        Serial.println("power down");
+        ram_buf[0] = 0;
+        disp("00000");
+        ht16c21_cmd(0x84, 0);
+        server.close();
+        poweroff(3600);
       }
     }
     if (power_in == 1) {
