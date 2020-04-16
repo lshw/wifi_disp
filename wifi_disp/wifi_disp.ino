@@ -140,7 +140,7 @@ void setup()
   ht16c21_cmd(0x88, 1); //闪烁
 
   if (wifi_connect() == false) {
-    if (proc == OTA_MODE || proc == OFF_MODE) {
+    if (proc == OTA_MODE) {
       ram_buf[0] = 0;
       send_ram();
       ESP.restart();

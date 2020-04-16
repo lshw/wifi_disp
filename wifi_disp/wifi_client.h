@@ -88,7 +88,7 @@ bool wifi_connect() {
   if (proc == OTA_MODE) return true;
   unsigned long startTime = millis();
   i = 0;
-  while (WiFiMulti.run() != WL_CONNECTED && millis() - startTime < 40000)
+  while (WiFiMulti.run() != WL_CONNECTED && millis() - startTime < 20000)
   {
     Serial.write('.');
     //Serial.print(WiFi.status());
