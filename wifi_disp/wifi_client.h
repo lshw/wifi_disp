@@ -175,8 +175,6 @@ uint16_t http_get(uint8_t no) {
               && disp_buf[4] == 'T'
               && disp_buf[5] == 'E') {
           SPIFFS.begin();
-          SPIFFS.remove("/wifi_set.txt");
-          SPIFFS.begin();
           if (http_update() == false)
             http_update();
           poweroff(1800);

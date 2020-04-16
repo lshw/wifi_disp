@@ -38,7 +38,7 @@ void handleRoot() {
               "<input type=submit name=submit value=save>"
               "</form>"
               "<hr>"
-              "<form method='POST' action='/update' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
+              "<form method='POST' action='/update.php' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
               "</body>"
               "</html>");
   server.client().stop();
@@ -172,7 +172,7 @@ void http_listen() {
   server.on("/save.php", httpsave); //保存设置
   server.on("/generate_204", http204);//安卓上网检测
 
-  server.on("/update", HTTP_POST, []() {
+  server.on("/update.php", HTTP_POST, []() {
     ram_buf[0] = 0;
     send_ram();
     server.sendHeader("Connection", "close");

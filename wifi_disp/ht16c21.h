@@ -157,6 +157,7 @@ bool load_ram() {
   //0,3,4,7,8 校验
   return ram_check();
 }
+extern bool power_in;
 void send_ram() {
   uint8_t i;
   if (power_in) //外接电源，点亮左上角的三角形

@@ -2,6 +2,7 @@
 #define __OTA_H__
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
+#include <DNSServer.h>
 #include <ArduinoOTA.h>
 char ip_buf[30];
 uint8_t ip_offset, ip_len;
@@ -13,6 +14,7 @@ extern uint32_t ap_on_time;
 extern bool power_in;
 extern char ram_buf[10];
 extern void poweroff(uint32_t sec);
+extern DNSServer dnsServer;
 void send_ram();
 void ota_setup() {
 
@@ -118,6 +120,7 @@ void ota_loop() {
       disp(disp_buf);
       system_soft_wdt_feed ();
     }
+    dnsServer.processNextRequest();
     ArduinoOTA.handle();
     http_loop();
     wifi_set_sleep_type(LIGHT_SLEEP_T);
