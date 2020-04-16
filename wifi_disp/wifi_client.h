@@ -30,7 +30,7 @@ bool wifi_connect() {
   char ch;
   boolean is_ssid = true;
   if (SPIFFS.begin()) {
-    if (SPIFFS.exists("/ssid.txt")) {
+    if (!SPIFFS.exists("/ssid.txt")) {
       fp = SPIFFS.open("/ssid.txt", "w");
       fp.println("test:cfido.com");
       fp.close();
