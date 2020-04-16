@@ -145,7 +145,6 @@ void AP() {
   struct softap_config cfgESP;
 
   Serial.println("AP模式启动.\r\nssid:disp\r\npasswd:none");
-  WiFi.mode(WIFI_AP_STA);
 
   while (!wifi_softap_get_config(&cfgESP)) {
     system_soft_wdt_feed();

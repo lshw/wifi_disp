@@ -6,6 +6,7 @@
 extern char ram_buf[10];
 extern uint8_t rxBuf[256];
 extern bool power_in;
+void AP();
 bool http_update();
 void poweroff(uint32_t);
 void send_ram();
@@ -26,9 +27,14 @@ bool wifi_connect() {
   File fp;
   uint32_t i;
   char buf[3];
-  WiFi.mode(WIFI_AP_STA);
   char ch;
   boolean is_ssid = true;
+  if(proc==OTA_MODE) { //ota时要 ap 和 client
+    WiFi.mode(WIFI_AP_STA);
+    AP();
+  }else  { //测温时， 只用client
+    WiFi.mode(WIFI_STA);
+  }
   if (SPIFFS.begin()) {
     if (!SPIFFS.exists("/ssid.txt")) {
       fp = SPIFFS.open("/ssid.txt", "w");

@@ -92,7 +92,6 @@ void setup()
           lora.sleep();
         Serial.begin(115200);
       }
-      AP();
       break;
     case LORA_RECEIVE_MODE:
       if (ds_pin == 0) {
