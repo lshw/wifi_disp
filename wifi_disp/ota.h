@@ -69,6 +69,7 @@ void ota_setup() {
     }
   });
   ArduinoOTA.begin();
+  wifi_set_sleep_type(LIGHT_SLEEP_T);
   Serial.println("Ready");
 }
 void zmd() {
@@ -92,17 +93,13 @@ void zmd() {
 }
 uint16_t sec0, sec1;
 void ota_loop() {
-  if (millis() > 10000) {
-    if (ram_buf[0] != 0) {
-      ram_buf[0] = 0;
+  if ( millis() > ap_on_time) {
+    if (power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
+    else {
+      ram_buf[0] = OFF_MODE;
       send_ram();
-    }
-    if ( millis() > ap_on_time) {
-      if (power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
-      else {
-        poweroff(2);
-        return;
-      }
+      poweroff(2);
+      return;
     }
   }
   if (ip_buf[0] == 0)
@@ -117,13 +114,14 @@ void ota_loop() {
       get_batt();
       zmd(); //"OTA 192.168.12.126  " 走马灯填充disp_buf
       sec1 = sec0;
+      if(sec0>5)
+        ram_buf[0] = 0;
       disp(disp_buf);
       system_soft_wdt_feed ();
     }
     dnsServer.processNextRequest();
     ArduinoOTA.handle();
     http_loop();
-    wifi_set_sleep_type(LIGHT_SLEEP_T);
   } else {
     ht16c21_cmd(0x88, 0); //不闪烁
     ESP.restart();
