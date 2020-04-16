@@ -9,6 +9,7 @@ uint32_t send_delay = 0;
 uint16_t lora_count = 0;
 void lora_send_loop() {
   if (millis() - send_delay < 200) return;
+  system_soft_wdt_feed ();
   send_delay = millis();
   lora_count++;
   sprintf(disp_buf, "S%04d", lora_count % 10000);
@@ -33,6 +34,7 @@ void lora_receive_loop() {
     Serial.print("with RSSI ");
     Serial.print(rssi);
     Serial.println("dBm");
+    system_soft_wdt_feed ();
   }
 }
 bool lora_init() {

@@ -200,8 +200,11 @@ void setup()
 }
 void loop()
 {
-  system_soft_wdt_feed ();
-  if (power_off) return;
+  //system_soft_wdt_feed (); //各loop里要根据需要执行喂狗命令
+  if (power_off) {
+    system_soft_wdt_feed ();
+    return;
+  }
   switch (proc) {
     case LORA_RECEIVE_MODE:
       if (lora_init())
