@@ -12,6 +12,7 @@
 我现在用它给家里的室温和室外温度进行测试并记录，还用它作为美元汇率显示器。  
 这个项目也可以作为esp8266开发的一个入门例子。  
 源码在wifi_disp目录下。   
+编译好的bin在 https://www.anheng.com.cn/wifi_disp.bin  
 
 lib目录下的脚本，是linux下，不用arduino集成环境， 直接用命令行进行编译或者ota或者线刷的脚本
 
@@ -19,7 +20,7 @@ lora_mini是一个兼容arduino的uno，带lora功能的一个小板子，可以
 
  V2版硬件,增加lora模块，cfido2019同款, 可以作为lora开发板学习研究lora， 也可以作为lora网关， 让lora网络覆盖一个住宅小区。  目前稳定测试通讯距离可以1.3公里  
 
-这里是taobao链接， 提供全套散件，这个小小的套件， 可以体验学习如下诸多内容: 嵌入式开发，wifi开发, arduino,http开发，制作ap接入点，物联网应用，3D打印外壳，基于单片机dns泛域名解析， mdns发现，基于单片机的web服务器，好多内容， 适合于大中小学生玩耍。 
+这里是taobao链接， 提供全套散件，这个小小的套件， 可以体验学习如下诸多内容: 嵌入式开发，wifi开发, arduino,http开发，制作ap接入点，物联网应用，3D打印外壳，基于单片机dns泛域名解析， mdns发现，基于单片机的web服务器，好多内容， 适合于大中小学生玩耍,随便从以上各点取一个方向，做毕业设计是很好的。 
 
 相关的项目链接:  
 微信小程序[惠多气象]:https://github.com/scfido/weather_thermometer  
