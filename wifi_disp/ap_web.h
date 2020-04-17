@@ -2,7 +2,6 @@
 #define __AP_WEB_H__
 #include <ESP8266WebServer.h>
 #include <DNSServer.h>
-//#include <ESP8266mDNS.h>
 extern void disp(char *);
 extern char ram_buf[10];
 extern String hostname;
@@ -158,8 +157,6 @@ void AP() {
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(53, "*", WiFi.softAPIP());
   Serial.println("泛域名dns服务器启动");
-  MDNS.begin(hostname);
-  MDNS.addService("http", "tcp", 80);
   wifi_set_sleep_type(LIGHT_SLEEP_T);
   http_listen();
 }

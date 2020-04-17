@@ -1,6 +1,5 @@
 #ifndef __OTA_H__
 #define __OTA_H__
-#include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <DNSServer.h>
 #include <ArduinoOTA.h>
@@ -17,21 +16,6 @@ extern void poweroff(uint32_t sec);
 extern DNSServer dnsServer;
 void send_ram();
 void ota_setup() {
-
-  // Port defaults to 8266
-  // ArduinoOTA.setPort(8266);
-
-  // Hostname defaults to esp8266-[ChipID]
-  // ArduinoOTA.setHostname("myesp8266");
-
-  // No authentication by default
-  // ArduinoOTA.setPassword("admin");
-
-  // Password can be set with it's md5 value as well
-  // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
-  // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
-
-
   ArduinoOTA.onStart([]() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {

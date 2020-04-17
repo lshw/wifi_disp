@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.49"
+#define VER "1.50"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -27,7 +27,6 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 #include "wifi_client.h"
 #include "ap_web.h"
 #include "ht16c21.h"
-#include "http_update.h"
 #include "lora.h"
 bool power_in = false;
 void setup()
