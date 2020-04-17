@@ -130,7 +130,7 @@ void setup()
         if (lora_init())
           lora.sleep();
         Serial.begin(115200);
-        Serial.print(F("lora version="));
+        Serial.print("lora version=");
         Serial.println(version);
       }
       break;

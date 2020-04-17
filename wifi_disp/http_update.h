@@ -3,7 +3,6 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266httpUpdate.h>
 
-#define USE_SERIAL Serial
 
 bool http_update()
 {
@@ -16,26 +15,24 @@ bool http_update()
   send_ram();
   disp(" H UP");
   String update_url = "http://www.anheng.com.cn/wifi_disp.bin"; // get_url((ram_buf[7] >> 1) & 1) + "?p=update&sn=" + String(hostname) + "&ver=" VER;
-  USE_SERIAL.print("下载firmware from ");
-  USE_SERIAL.println(update_url);
-  http.setTimeout(40000);
-
+  Serial.print("下载firmware from ");
+  Serial.println(update_url);
   t_httpUpdate_return  ret = ESPhttpUpdate.update(update_url);
   update_url = "";
 
   switch (ret) {
     case HTTP_UPDATE_FAILED:
-      USE_SERIAL.printf("HTTP_UPDATE_FAILD Error (%d): %s\r\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+      Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\r\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
       ram_buf[0] = 0;
       ESP.restart();
       break;
 
     case HTTP_UPDATE_NO_UPDATES:
-      USE_SERIAL.println("HTTP_UPDATE_NO_UPDATES");
+      Serial.println("HTTP_UPDATE_NO_UPDATES");
       break;
 
     case HTTP_UPDATE_OK:
-      USE_SERIAL.println("HTTP_UPDATE_OK");
+      Serial.println("HTTP_UPDATE_OK");
       return true;
       break;
   }

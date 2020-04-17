@@ -26,7 +26,7 @@ $arduino/arduino-builder -dump-prefs -logger=machine \
 -tools $arduinoset/packages \
 -built-in-libraries $arduino/libraries \
 -libraries $sketchbook/libraries \
--fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,xtal=80,vt=flash,exception=disabled,eesz=4M3M,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200 \
+-fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,xtal=80,vt=flash,exception=legacy,eesz=4M3M,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200 \
 -ide-version=10812 \
 -build-path /tmp/build \
 -warnings=none \
@@ -45,7 +45,7 @@ $arduino/arduino-builder \
 -tools $arduinoset/packages \
 -built-in-libraries $arduino/libraries \
 -libraries $sketchbook/libraries \
--fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,xtal=80,vt=flash,exception=disabled,eesz=4M3M,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200 \
+-fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,xtal=80,vt=flash,exception=legacy,eesz=4M3M,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200 \
 -ide-version=10812 \
 -build-path /tmp/build \
 -warnings=none \
