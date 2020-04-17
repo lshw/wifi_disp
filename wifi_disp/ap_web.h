@@ -213,7 +213,7 @@ void http_listen() {
         Update.printError(Serial);
       }
     } else if (upload.status == UPLOAD_FILE_WRITE) {
-      sprintf(disp_buf, "%d", upload.totalSize / 1000);
+      sprintf(disp_buf, "UP.%d", upload.totalSize / 1000);
       disp(disp_buf);
       Serial.println("size:" + String(upload.totalSize));
       if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {

@@ -2,7 +2,15 @@
 #define __HTTP_UPDATE_H__
 #include <ESP8266HTTPClient.h>
 #include <ESP8266httpUpdate.h>
+void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 
+void update_progress(int cur, int total) {
+  char disp_buf[6];
+  Serial.printf("HTTP update process at %d of %d bytes...\r\n", cur, total);
+  sprintf(disp_buf,"HUP.%02d",cur*99/total);
+  disp(disp_buf);
+  ht16c21_cmd(0x88, 1); //闪烁
+}
 
 bool http_update()
 {
@@ -13,10 +21,11 @@ bool http_update()
   }
   ram_buf[7] |= 1; //开充电模式
   send_ram();
-  disp(" H UP");
+  disp("H UP. ");
   String update_url = "http://www.anheng.com.cn/wifi_disp.bin"; // get_url((ram_buf[7] >> 1) & 1) + "?p=update&sn=" + String(hostname) + "&ver=" VER;
   Serial.print("下载firmware from ");
   Serial.println(update_url);
+  ESPhttpUpdate.onProgress(update_progress);
   t_httpUpdate_return  ret = ESPhttpUpdate.update(update_url);
   update_url = "";
 
