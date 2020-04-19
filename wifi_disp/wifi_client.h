@@ -8,6 +8,11 @@
 extern char ram_buf[10];
 extern uint8_t rxBuf[256];
 extern bool power_in;
+#if DHT_HAVE
+extern float shidu, wendu;
+bool dht_loop(); //不阻塞
+void dht_load(); //阻塞等转换完成
+#endif
 void AP();
 bool http_update();
 void poweroff(uint32_t);
@@ -96,6 +101,9 @@ bool wifi_connect() {
     //Serial.print(WiFi.status());
     delay(1000);
     system_soft_wdt_feed ();
+#if DHT_HAVE
+    dht_loop();
+#endif
     if (i % 2 == 0) {
       if (temp_ok == false) temp_ok = get_temp();
     } else
@@ -138,6 +146,11 @@ uint16_t http_get(uint8_t no) {
           + "&power=" + String(power_in)
           + "&charge=" + String(ram_buf[7] & 1)
           + "&temp=" + String(temp[0]);
+#if DHT_HAVE
+  dht_load();
+  if (wendu < -300)
+    url0 += "&shidu=" + String((int8_t)shidu) + "%," + String(wendu);
+#endif
   if (dsn[1][0] != 0) {
     url0 += "&temps=";
     for (uint8_t i = 0; i < 32; i++) {
