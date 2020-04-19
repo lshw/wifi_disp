@@ -98,7 +98,7 @@ void ota_loop() {
       get_batt();
       zmd(); //"OTA 192.168.12.126  " 走马灯填充disp_buf
       sec1 = sec0;
-      if(sec0>5)
+      if (sec0 > 5)
         ram_buf[0] = 0;
       disp(disp_buf);
       system_soft_wdt_feed ();

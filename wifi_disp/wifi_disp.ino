@@ -4,7 +4,7 @@
 extern "C" {
 #include "user_interface.h"
 }
-#include "default.h"
+#include "config.h"
 #include "global.h"
 bool temp_ok = false; //测温ok
 bool lcd_flash = false;
@@ -137,7 +137,6 @@ void setup()
   send_ram();
   //更新时闪烁
   ht16c21_cmd(0x88, 1); //闪烁
-
   if (wifi_connect() == false) {
     if (proc == OTA_MODE) {
       ram_buf[0] = 0;
@@ -161,15 +160,6 @@ void setup()
   ht16c21_cmd(0x88, 0); //停止闪烁
   if (proc == OTA_MODE) {
     ota_setup();
-    return;
-  }
-  if (proc == OFF_MODE) {
-    if (http_update() == true) {
-      ram_buf[0] = 0;
-      disp("HUP O");
-      delay(2000);
-    }
-    ESP.restart();
     return;
   }
   uint16_t httpCode = http_get((ram_buf[7] >> 1) & 1); //先试试上次成功的url

@@ -15,14 +15,14 @@ String get_url(uint8_t no) {
       ret = fp.readStringUntil('\n');
       ret.trim();
       fp.close();
-      if(ret.startsWith("http:/www.cfido.com/")){
-	SPIFFS.remove("/url.txt");
-	SPIFFS.remove("/url1.txt");
-	ret.replace("www.cfido.com/", "temp.cfido.com:808/");
-      }else if(ret.startsWith("http:/www.wf163.com/")){
-	SPIFFS.remove("/url.txt");
-	SPIFFS.remove("/url1.txt");
-	ret.replace("www.wf163.com/", "temp2.wf163.com:808/");
+      if (ret.startsWith("http:/www.cfido.com/")) {
+        SPIFFS.remove("/url.txt");
+        SPIFFS.remove("/url1.txt");
+        ret.replace("www.cfido.com/", "temp.cfido.com:808/");
+      } else if (ret.startsWith("http:/www.wf163.com/")) {
+        SPIFFS.remove("/url.txt");
+        SPIFFS.remove("/url1.txt");
+        ret.replace("www.wf163.com/", "temp2.wf163.com:808/");
       }
     }
   }

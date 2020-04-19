@@ -1,5 +1,6 @@
 #ifndef __WIFI_CLIENT_H__
 #define __WIFI_CLIENT_H__
+#include "config.h"
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFiMulti.h>
@@ -30,10 +31,10 @@ bool wifi_connect() {
   char buf[3];
   char ch;
   boolean is_ssid = true;
-  if(proc==OTA_MODE) { //ota时要 ap 和 client
+  if (proc == OTA_MODE) { //ota时要 ap 和 client
     WiFi.mode(WIFI_AP_STA);
     AP();
-  }else  { //测温时， 只用client
+  } else  { //测温时， 只用client
     WiFi.mode(WIFI_STA);
   }
   if (SPIFFS.begin()) {
@@ -221,7 +222,7 @@ uint16_t http_get(uint8_t no) {
 void update_progress(int cur, int total) {
   char disp_buf[6];
   Serial.printf("HTTP update process at %d of %d bytes...\r\n", cur, total);
-  sprintf(disp_buf,"HUP.%02d",cur*99/total);
+  sprintf(disp_buf, "HUP.%02d", cur * 99 / total);
   disp(disp_buf);
   ht16c21_cmd(0x88, 1); //闪烁
 }

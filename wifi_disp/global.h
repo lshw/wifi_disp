@@ -1,11 +1,12 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
+#include "config.h"
 #include "ht16c21.h"
 extern uint8_t ds_pin ;
 extern bool power_in ;
 extern char ram_buf[10];
-extern void send_ram();
-extern float get_batt();
+void send_ram();
+float get_batt();
 float v;
 bool power_off = false;
 void poweroff(uint32_t sec) {
