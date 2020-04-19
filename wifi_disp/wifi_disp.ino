@@ -49,12 +49,17 @@ void setup()
   if (power_in) {
     Serial.println("外接电源");
   }
-  if (v < 3.40 && !power_in) {
-    disp(" OFF1"); //电压过低
+  if (v < 3.50 && !power_in) {
+    sprintf(disp_buf,"OFF%f",v);
+    disp(disp_buf); //电压过低
     ram_buf[7] |= 1; //充电
     ram_buf[0] = 0;
     send_ram();
-    poweroff(3600);
+    ht16c21_cmd(0x88, 0); //闪烁
+    if(v > 3.45)
+      poweroff(7200);//3.45V-3.5V 2小时
+    else
+      poweroff(3600*24);//一天
     return;
   }
   Serial.flush();
