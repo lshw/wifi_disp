@@ -10,7 +10,7 @@ DHTNEW mySensor(DHTPIN);
 uint32_t next_load;
 extern uint8_t ds_pin;
 float shidu = -999.0;
-float wendu;
+float wendu = -900.0;
 bool test();
 void system_soft_wdt_feed ();
 void dht_load() { //阻塞测试
