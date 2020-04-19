@@ -9,13 +9,16 @@
 DHTNEW mySensor(DHTPIN);
 uint32_t next_load;
 extern uint8_t ds_pin;
+extern uint8_t lora_version;
 float shidu = -999.0;
 float wendu = -900.0;
 bool test();
 void system_soft_wdt_feed ();
 void dht_load() { //阻塞测试
-  if (ds_pin != 0) return; //v1硬件不带湿度
+  if(lora_version != 255) return; //存在lora模块
+  if(ds_pin != 0) return; //v1硬件不带湿度
   while (mySensor.read() != DHTLIB_OK) {
+    if(millis()>2100) return;
     system_soft_wdt_feed();
     if (test()) break;
   }
@@ -25,6 +28,7 @@ void dht_load() { //阻塞测试
 }
 bool dht_loop()
 { //不阻塞测试
+  if(lora_version != 255) return false; //存在lora模块
   if (ds_pin != 0) return false; //v1硬件不带湿度
   if (wendu < -300.0) {
     if (mySensor.read() == DHTLIB_OK) {
@@ -38,14 +42,13 @@ bool dht_loop()
 }
 void dht_setup()
 {
+  if(lora_version != 255) return; //存在lora模块
   if (ds_pin != 0) return ; //v1硬件不带湿度
   pinMode(DHT_VCC, OUTPUT); //gpio13 电源
   digitalWrite(DHT_VCC, HIGH);
   next_load = millis() + 2000;
   Serial.println("STAT\tHUMI\tTEMP\tTIME\tTYPE");
-  test();
-  test();
-  test();
+  if(!test() && !test() && !test() && !test())
   test();
   /*
     Serial.println("\n4. LastRead test");
@@ -66,6 +69,7 @@ void dht_setup()
 }
 void dht_end()
 {
+  if(lora_version != 255) return; //存在lora模块
   if (ds_pin != 0) return ; //v1硬件不带湿度
   digitalWrite(DHT_VCC, LOW);
   pinMode(DHTPIN, OUTPUT);
@@ -75,6 +79,8 @@ void dht_end()
 
 bool test()
 {
+  if(lora_version != 255) return true; //存在lora模块
+  if(ds_pin != 0) return true; //v1硬件不带湿度
   // READ DATA
   uint32_t start = micros();
   int chk = mySensor.read();

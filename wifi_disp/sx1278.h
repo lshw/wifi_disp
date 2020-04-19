@@ -5,7 +5,7 @@
 */
 
 #include "sx1278_reg.h"
-uint8_t version = 255;
+uint8_t lora_version = 255;
 LoRa::LoRa()
 {
 }
@@ -37,8 +37,8 @@ bool LoRa::init(uint8_t _NSSPin, uint8_t _NRESETPin)
   spiInit();
 
   // check version
-  version = readRegister(LR_RegVERSION);
-  //if (version != 0x12) {
+  lora_version = readRegister(LR_RegVERSION);
+  //if (lora_version != 0x12) {
   //return 0;
   //}
 

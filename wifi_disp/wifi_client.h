@@ -148,7 +148,7 @@ uint16_t http_get(uint8_t no) {
           + "&temp=" + String(temp[0]);
 #if DHT_HAVE
   dht_load();
-  if (wendu < -300)
+  if (wendu > -300.0 && shidu >=0.0 && shidu <=100.0)
     url0 += "&shidu=" + String((int8_t)shidu) + "%," + String(wendu);
 #endif
   if (dsn[1][0] != 0) {

@@ -38,9 +38,9 @@ void lora_receive_loop() {
   }
 }
 bool lora_init() {
-  if (version != 255) return true;
+  if (lora_version != 255) return true;
   lora.init(2, 1);
-  if (version == 255) return false;
+  if (lora_version == 255) return false;
   lora.idle();    // turn to standby mode
   lora.setFrequency(434500000); //434Mhz
   lora.setRFpara(LR_BW_250k, LR_CODINGRATE_2, 12, LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC

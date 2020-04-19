@@ -138,7 +138,7 @@ void setup()
           lora.sleep();
         Serial.begin(115200);
         Serial.print("lora version=");
-        Serial.println(version);
+        Serial.println(lora_version);
 #if DHT_HAVE
         dht_setup();
 #endif
