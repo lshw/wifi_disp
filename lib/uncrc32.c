@@ -12,7 +12,6 @@ uint32_t crc32c ( uint8_t *message, uint32_t bytes)
   uint32_t index;
   int8_t shift;
   uint32_t crc=0xffffffff;
-  printf("crc32c(memage,%ld)\r\n",bytes);
   for ( index = 0 ; index < bytes ; index++ )
   {
     // Get Next Byte
@@ -88,9 +87,6 @@ void main(int argc,char * argv[])
   printf("size=%d\r\n",size);
   char *buf;
   buf=malloc(size+4);
-  if(buf) {
-    printf("ok\r\n");
-  }
   fp=fopen(argv[1],"a+");
   if(!fp) {
     printf("fopen error\r\n");
@@ -98,19 +94,16 @@ void main(int argc,char * argv[])
     return;
   }
   uint32_t size0;
-  printf("read size=%ld,size0=%ld ok\r\n",size,size0);
   size0=fread(buf,1,size,fp);
-  printf("read size=%ld,size0=%ld ok\r\n",size,size0);
 
   if(crc32c(buf,size)!=crc32)
   {
-    printf("crc32!=%d\r\n",crc32);
     crc32_gen_array (crc32, size, buf, size+4);
     for (uint32_t i = size; i < size+4; i++)
     {
-      printf ("%02X ", buf[i]);
+      printf ("%02X", (uint8_t)buf[i]);
     }
-    printf ("%08X \n", crc32c (buf,size+4));
+    printf(" crc ok\r\n");
   }
   fseek(fp,0,SEEK_END);
   fwrite(&buf[size],1,4,fp);
