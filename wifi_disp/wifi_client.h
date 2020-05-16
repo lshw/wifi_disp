@@ -8,6 +8,7 @@
 extern char ram_buf[10];
 extern uint8_t rxBuf[256];
 extern bool power_in;
+bool wifi_connected = false;
 #if DHT_HAVE
 extern float shidu, wendu;
 bool dht_loop(); //不阻塞
@@ -36,6 +37,7 @@ bool wifi_connect() {
   char buf[3];
   char ch;
   boolean is_ssid = true;
+  if (wifi_connected) return true;
   if (proc == OTA_MODE) { //ota时要 ap 和 client
     WiFi.mode(WIFI_AP_STA);
     AP();
@@ -76,9 +78,9 @@ bool wifi_connect() {
             break;
           default:
             if (is_ssid)
-              ssid = ssid + String(ch);
+              ssid += ch;
             else
-              passwd = passwd + String(ch);
+              passwd += ch;
         }
       }
       if (ssid != "" && passwd != "") {
@@ -117,6 +119,7 @@ bool wifi_connect() {
   ht16c21_cmd(0x88, 0); //停止闪烁
   if (WiFiMulti.run() == WL_CONNECTED)
   {
+    wifi_connected = true;
     Serial.println("wifi已链接");
     Serial.print("SSID: ");
     Serial.println(WiFi.SSID());
@@ -148,7 +151,7 @@ uint16_t http_get(uint8_t no) {
           + "&temp=" + String(temp[0]);
 #if DHT_HAVE
   dht_load();
-  if (wendu > -300.0 && shidu >=0.0 && shidu <=100.0)
+  if (wendu > -300.0 && shidu >= 0.0 && shidu <= 100.0)
     url0 += "&shidu=" + String((int8_t)shidu) + "%," + String(wendu);
 #endif
   if (dsn[1][0] != 0) {

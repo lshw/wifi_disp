@@ -120,7 +120,7 @@ float get_batt0() {//锂电池电压
   if (ds_pin != 0) //V1.0硬件分压电阻 499k 97.6k
     v = (float) dat / 8 * (499 + 97.6) / 97.6 / 1023 ;
   else    //V2.0硬件 分压电阻 470k/100k
-  v = (float) dat / 8 * (470.0 + 100.0) / 100.0 / 1023 ;
+    v = (float) dat / 8 * (470.0 + 100.0) / 100.0 / 1023 ;
   return v;
 }
 float get_batt() {
