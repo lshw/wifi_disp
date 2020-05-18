@@ -16,8 +16,6 @@ sketchbook=~/sketchbook
 mkdir -p /tmp/build /tmp/cache
 chmod 777 /tmp/build /tmp/cache
 chown liushiwei /tmp/build /tmp/cache
-rm -f /tmp/info_wifi.log
-touch /tmp/info_wifi.log
 $arduino/arduino-builder -dump-prefs -logger=machine \
 -hardware $arduino/hardware \
 -hardware $arduinoset/packages \
@@ -53,7 +51,7 @@ $arduino/arduino-builder \
 -prefs=build.warn_data_percentage=75 \
 -verbose \
 ./wifi_disp/wifi_disp.ino \
-|tee -a /tmp/info_wifi.log
+|tee /tmp/info_wifi.log
 
 if [ $? == 0 ] ; then
  grep "Global vari" /tmp/info_wifi.log |awk -F[ '{printf $2}'|tr -d ']'|awk -F' ' '{print "内存：使用"$1"字节,"$3"%,剩余:"$4"字节"}'
