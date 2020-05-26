@@ -5,6 +5,7 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266httpUpdate.h>
+#include "ds1820.h"
 extern char ram_buf[10];
 extern uint8_t rxBuf[256];
 extern bool power_in;

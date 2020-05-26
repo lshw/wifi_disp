@@ -3,11 +3,10 @@
 #include <WiFiUdp.h>
 #include <DNSServer.h>
 #include <ArduinoOTA.h>
+#include "ap_web.h"
 char ip_buf[30];
 uint8_t ip_offset, ip_len;
 extern void disp(char *);
-extern void http_listen();
-extern void http_loop();
 extern float get_batt();
 extern uint32_t ap_on_time;
 extern bool power_in;
@@ -105,7 +104,7 @@ void ota_loop() {
     }
     dnsServer.processNextRequest();
     ArduinoOTA.handle();
-    http_loop();
+    httpd_loop();
   } else {
     ht16c21_cmd(0x88, 0); //不闪烁
     ESP.restart();

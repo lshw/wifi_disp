@@ -1,7 +1,9 @@
 #ifndef __AP_WEB_H__
 #define __AP_WEB_H__
 #include <ESP8266WebServer.h>
+#include <ArduinoOTA.h>
 #include <DNSServer.h>
+#include "wifi_client.h"
 extern void disp(char *);
 extern char ram_buf[10];
 extern String hostname;
@@ -236,9 +238,9 @@ void AP() {
   dnsServer.start(53, "*", WiFi.softAPIP());
   Serial.println("泛域名dns服务器启动");
   wifi_set_sleep_type(LIGHT_SLEEP_T);
-  http_listen();
+  void httpd_listen();
 }
-void http_listen() {
+void httpd_listen() {
 
   server.begin();
 
@@ -310,13 +312,12 @@ void http_listen() {
 
   Serial.printf("HTTP服务器启动! 用浏览器打开 http://%s.local\r\n", hostname.c_str());
 }
-void http_loop() {
-  server.handleClient();
-}
+#define httpd_loop() server.handleClient()
+
 uint32_t ms0;
 void ap_loop() {
   dnsServer.processNextRequest();
-  http_loop();
+  httpd_loop();
   ArduinoOTA.handle();
   if (ms0 < millis()) {
     get_batt();

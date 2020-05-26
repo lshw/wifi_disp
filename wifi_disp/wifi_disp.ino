@@ -15,7 +15,8 @@ char disp_buf[22];
 uint32_t next_disp = 1800; //下次开机
 String hostname = HOSTNAME;
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
-//0,1-正常 2-AP 3-OTA  4-http update
+//0,1-正常 2-OTA 3-off 4-lora接收 5-lora发射
+
 #define OTA_MODE 2
 #define OFF_MODE 3
 #define LORA_RECEIVE_MODE 4
@@ -177,7 +178,6 @@ void setup()
     httpCode = http_get((~ram_buf[7] >> 1) & 1); //再试试另一个的url
   }
   if (httpCode < 200 || httpCode >= 400) {
-    SPIFFS.begin();
     Serial.print("不能链接到web\r\n60分钟后再试试\r\n本次上电时长");
     ram_buf[0] = 0;
     send_ram();
