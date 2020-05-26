@@ -21,7 +21,6 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 #define LORA_RECEIVE_MODE 4
 #define LORA_SEND_MODE 5
 
-#include "fs.h"
 #include "ota.h"
 #include "ds1820.h"
 #include "wifi_client.h"
