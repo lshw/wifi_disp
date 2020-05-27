@@ -25,7 +25,7 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 #include "ota.h"
 #include "ds1820.h"
 #include "wifi_client.h"
-#include "ap_web.h"
+#include "httpd.h"
 #include "ht16c21.h"
 #include "lora.h"
 #if DHT_HAVE
