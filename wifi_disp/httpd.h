@@ -38,7 +38,7 @@ void handleRoot() {
     }
     wifi_scan += "<br>";
   }
-
+  yield();
   if (WiFiMulti.run() == WL_CONNECTED) {
     wifi_stat = "wifi已连接 ssid:<mark>" + String(WiFi.SSID()) + "</mark> &nbsp; "
                 + "ap:<mark>" + WiFi.BSSIDstr() + "</mark> &nbsp; "
@@ -47,6 +47,7 @@ void handleRoot() {
                 + "电池电压:<mark>" + String(v) + "</mark>V &nbsp; ";
 #if DHT_HAVE
     dht_load();
+    yield();
     if (wendu > -300.0 && shidu >= 0.0 && shidu <= 100.0)
       wifi_stat += "湿度:<mark>" + String((int8_t)shidu) + "%</mark> &nbsp; " + "温度:<mark>" + String(wendu) + "</mark>&#8451<br>";
     else
@@ -56,40 +57,40 @@ void handleRoot() {
 #endif
   }
   httpd.send(200, "text/html", "<html>"
-              "<head>"
-              "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
-              "<script>"
-              "function get_passwd(ssid) {"
-              "var passwd=prompt('输入 '+ssid+' 的密码:');"
-              "if(passwd==null) return false;"
-              "if(passwd) location.replace('add_ssid.php?data='+ssid+':'+passwd);"
-              "else return false;"
-              "return true;"
-              "}"
-              "function select_ssid(ssid){"
-              "if(confirm('连接到['+ssid+']?')) location.replace('add_ssid.php?data='+ssid);"
-              "}"
-              "</script>"
-              "</head>"
-              "<body>"
-              "SN:<mark>" + hostname + "</mark> &nbsp; "
-              "版本:<mark>" VER "</mark>"
-              "<hr>"
-              + wifi_stat + "<hr>" + wifi_scan +
-              "<hr><form action=/save.php method=post>"
-              "输入ssid:passwd(可以多行多个)"
-              "<input type=submit value=save><br>"
-              "<textarea  style='width:500px;height:80px;' name=data>" + get_ssid() + "</textarea><br>"
-              "可以设置自己的服务器地址(清空恢复)<br>"
-              "url0:<input maxlength=100  size=30 type=text value='" + get_url(0) + "' name=url><br>"
-              "url1:<input maxlength=100  size=30 type=text value='" + get_url(1) + "' name=url1><br>"
-              "<input type=submit name=submit value=save>"
-              "</form>"
-              "<hr>"
-              "<form method='POST' action='/update.php' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
-              "<hr><table width=100%><tr><td align=left width=50%>程序源码:<a href=https://github.com/lshw/wifi_disp target=_blank>https://github.com/lshw/wifi_disp</a><td><td align=right width=50%>程序编译时间: <mark>" __DATE__ " " __TIME__ "</mark></td></tr></table>"
-              "<hr></body>"
-              "</html>");
+             "<head>"
+             "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
+             "<script>"
+             "function get_passwd(ssid) {"
+             "var passwd=prompt('输入 '+ssid+' 的密码:');"
+             "if(passwd==null) return false;"
+             "if(passwd) location.replace('add_ssid.php?data='+ssid+':'+passwd);"
+             "else return false;"
+             "return true;"
+             "}"
+             "function select_ssid(ssid){"
+             "if(confirm('连接到['+ssid+']?')) location.replace('add_ssid.php?data='+ssid);"
+             "}"
+             "</script>"
+             "</head>"
+             "<body>"
+             "SN:<mark>" + hostname + "</mark> &nbsp; "
+             "版本:<mark>" VER "</mark>"
+             "<hr>"
+             + wifi_stat + "<hr>" + wifi_scan +
+             "<hr><form action=/save.php method=post>"
+             "输入ssid:passwd(可以多行多个)"
+             "<input type=submit value=save><br>"
+             "<textarea  style='width:500px;height:80px;' name=data>" + get_ssid() + "</textarea><br>"
+             "可以设置自己的服务器地址(清空恢复)<br>"
+             "url0:<input maxlength=100  size=30 type=text value='" + get_url(0) + "' name=url><br>"
+             "url1:<input maxlength=100  size=30 type=text value='" + get_url(1) + "' name=url1><br>"
+             "<input type=submit name=submit value=save>"
+             "</form>"
+             "<hr>"
+             "<form method='POST' action='/update.php' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
+             "<hr><table width=100%><tr><td align=left width=50%>程序源码:<a href=https://github.com/lshw/wifi_disp target=_blank>https://github.com/lshw/wifi_disp</a><td><td align=right width=50%>程序编译时间: <mark>" __DATE__ " " __TIME__ "</mark></td></tr></table>"
+             "<hr></body>"
+             "</html>");
   httpd.client().stop();
   ap_on_time = millis() + 200000;
 }
@@ -113,6 +114,7 @@ void handleNotFound() {
       return;
     }
   }
+  yield();
   message = "File Not Found\n\n";
   message += "URI: ";
   message += httpd.uri();
@@ -158,7 +160,7 @@ void http_add_ssid() {
   SPIFFS.end();
   wifi_connect();
   httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/');</script></body></html>");
-
+  yield();
 }
 void httpsave() {
   File fp;
@@ -218,6 +220,7 @@ void httpsave() {
   SPIFFS.end();
   wifi_connect();
   httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/');</script></body></html>");
+  yield();
 }
 void AP() {
   // Go into software AP mode.
@@ -239,6 +242,7 @@ void AP() {
   Serial.println("泛域名dns服务器启动");
   wifi_set_sleep_type(LIGHT_SLEEP_T);
   void httpd_listen();
+  yield();
 }
 void httpd_listen() {
 
@@ -256,30 +260,31 @@ void httpd_listen() {
     if (Update.hasError()) {
       Serial.println("上传失败");
       httpd.send(200, "text/html", "<html>"
-                  "<head>"
-                  "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
-                  "</head>"
-                  "<body>"
-                  "升级失败 <a href=/>返回</a>"
-                  "</body>"
-                  "</html>"
-                 );
+                 "<head>"
+                 "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
+                 "</head>"
+                 "<body>"
+                 "升级失败 <a href=/>返回</a>"
+                 "</body>"
+                 "</html>"
+                );
     } else {
       httpd.send(200, "text/html", "<html>"
-                  "<head>"
-                  "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
-                  "</head>"
-                  "<body>"
-                  "<script>setTimeout(function(){ alert('升级成功!'); }, 15000); </script>"
-                  "</body>"
-                  "</html>"
-                 );
+                 "<head>"
+                 "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
+                 "</head>"
+                 "<body>"
+                 "<script>setTimeout(function(){ alert('升级成功!'); }, 15000); </script>"
+                 "</body>"
+                 "</html>"
+                );
       Serial.println("上传成功");
       Serial.flush();
       ht16c21_cmd(0x88, 1); //闪烁
       delay(5);
       ESP.restart();
     }
+    yield();
   }, []() {
     HTTPUpload& upload = httpd.upload();
     if (upload.status == UPLOAD_FILE_START) {
@@ -319,6 +324,7 @@ void ap_loop() {
   dnsServer.processNextRequest();
   httpd_loop();
   ArduinoOTA.handle();
+  yield();
   if (ms0 < millis()) {
     get_batt();
     system_soft_wdt_feed ();
@@ -349,6 +355,7 @@ void ap_loop() {
         poweroff(3600);
       }
     }
+    yield();
     if (power_in == 1) {
       if (ds_pin != 0) digitalWrite(13, HIGH);
       else {

@@ -1,5 +1,5 @@
 #include <FS.h>
-#define VER "1.53"
+#define VER "1.54"
 #define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
@@ -199,7 +199,6 @@ void setup()
 }
 void loop()
 {
-  //system_soft_wdt_feed (); //各loop里要根据需要执行喂狗命令
   if (power_off) {
     system_soft_wdt_feed ();
     return;
@@ -222,4 +221,6 @@ void loop()
         ap_loop();
       break;
   }
+  yield();
+  system_soft_wdt_feed (); //各loop里要根据需要执行喂狗命令
 }

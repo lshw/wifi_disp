@@ -16,6 +16,7 @@ void lora_send_loop() {
   disp(disp_buf);
   lora.sendPackage((uint8_t *)disp_buf, 5); // sending data
   lora.idle();    // turn to standby mode
+  yield();
 }
 uint8_t lora_rxtx = 0; //1:rx 2:tx
 void lora_receive_loop() {
@@ -36,6 +37,7 @@ void lora_receive_loop() {
     Serial.println("dBm");
     system_soft_wdt_feed ();
   }
+  yield();
 }
 bool lora_init() {
   if (lora_version != 255) return true;
