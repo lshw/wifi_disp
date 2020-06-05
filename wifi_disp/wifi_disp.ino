@@ -5,7 +5,6 @@ extern "C" {
 #include "config.h"
 #include "global.h"
 bool temp_ok = false; //测温ok
-bool lcd_flash = false;
 extern char ip_buf[30];
 uint32_t temp_start;
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);

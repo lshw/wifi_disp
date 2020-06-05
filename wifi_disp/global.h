@@ -5,7 +5,6 @@
 #include "ht16c21.h"
 extern uint8_t ds_pin ;
 extern bool power_in ;
-void send_ram();
 float get_batt();
 float v;
 bool power_off = false;
@@ -47,7 +46,6 @@ void poweroff(uint32_t sec) {
       system_soft_wdt_feed ();
       delay(1000); //空闲时进入LIGHT_SLEEP_T模式
       power_in = i % 2;
-      send_ram();
       get_batt();
       if (ds_pin != 0) {
         pinMode(13, OUTPUT); //v1.0充电控制
@@ -64,7 +62,6 @@ void poweroff(uint32_t sec) {
       }
       if (no_power_in > 5) {
         sec = sec + sec - i; //连续6次测试电源断开
-        send_ram();
         break;
       }
     }

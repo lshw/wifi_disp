@@ -6,7 +6,6 @@
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266httpUpdate.h>
 #include "ds1820.h"
-extern uint8_t rxBuf[256];
 extern bool power_in;
 bool wifi_connected = false;
 #if DHT_HAVE
@@ -20,10 +19,7 @@ void poweroff(uint32_t);
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 ESP8266WiFiMulti WiFiMulti;
 HTTPClient http;
-String ssid, passwd, bssidstr;
-uint8_t bssid[7];
-uint32_t channel = 0;
-IPAddress local_ip, gateway, netmask, dns1, dns2;
+String ssid, passwd;
 uint8_t hex2ch(char dat) {
   dat |= 0x20; //41->61 A->a
   if (dat >= 'a') return dat - 'a' + 10;
@@ -32,7 +28,6 @@ uint8_t hex2ch(char dat) {
 bool wifi_connect() {
   File fp;
   uint32_t i;
-  char buf[3];
   char ch;
   boolean is_ssid = true;
   if (wifi_connected) return true;

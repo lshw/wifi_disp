@@ -4,7 +4,7 @@
 #define HT1621 0x38
 char ram_buf[10];
 void send_ram();
-bool load_ram();
+void load_ram();
 void ht16c21_cmd(uint8_t cmd, uint8_t dat) {
   Wire.beginTransmission(HT1621);
   Wire.write(byte(cmd));
@@ -20,11 +20,7 @@ void ht16c21_setup() {
   }
   Wire.begin(4, 5);
   Wire.begin(4, 5);
-  if (!load_ram() && !load_ram() && !load_ram()) {
-    ram_buf[0] = 0xff; //读取错误
-    ram_buf[7] = 0; // 1 充电， 0 不充电
-    send_ram();
-  }
+  load_ram();
   ht16c21_cmd(0x84, 3); //1621文档20页 系统模式命令 开关ht1621时钟/显示  0-关闭  3-开启
   ht16c21_cmd(0x8A, B00110001); //LCD电压 后4位，16种电压 0000-关闭
   ht16c21_cmd(0x82, 0); //LCD电压 后4位，16种电压 0000-关闭
@@ -135,17 +131,7 @@ void disp(char *str) {
   //0,3,4,7,8 未用
   send_ram();
 }
-void set_ram_check() {
-  ram_buf[3] = 'L';
-  ram_buf[4] = 'S';
-  ram_buf[8] = 0x55 ^ ram_buf[0] ^ ram_buf[1] ^ ram_buf[2] ^ ram_buf[5] ^ ram_buf[6] ^ ram_buf[7] ^ ram_buf[9];
-}
-bool ram_check() {
-  return  ram_buf[3] == 'L'
-          && ram_buf[4] == 'S'
-          && ram_buf[8] == (0x55 ^ ram_buf[0] ^ ram_buf[1] ^ ram_buf[2] ^ ram_buf[5] ^ ram_buf[6] ^ ram_buf[7] ^ ram_buf[9]);
-}
-bool load_ram() {
+void load_ram() {
   Wire.beginTransmission(HT1621);//读
   Wire.write(byte(0x80));//
   Wire.write(byte(0)); //read ram
@@ -160,9 +146,6 @@ bool load_ram() {
   }
   Wire.endTransmission();
   Serial.println();
-
-  //0,3,4,7,8 校验
-  return ram_check();
 }
 extern bool power_in;
 void send_ram() {
@@ -175,7 +158,6 @@ void send_ram() {
     ram_buf[5] |= 1; //x2
   else
     ram_buf[5] &= ~1; //x2
-  set_ram_check();
   Wire.beginTransmission(HT1621); // transmit to device #8
   Wire.write(byte(0x80));        // sends five bytes
   Wire.write(byte(0));              // sends one byte
