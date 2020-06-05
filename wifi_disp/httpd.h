@@ -5,10 +5,7 @@
 #include <DNSServer.h>
 #include "wifi_client.h"
 extern void disp(char *);
-extern char ram_buf[10];
 extern String hostname;
-void set_ram_check();
-void send_ram();
 void poweroff(uint32_t);
 float get_batt();
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
@@ -254,8 +251,11 @@ void httpd_listen() {
   httpd.on("/generate_204", http204);//安卓上网检测
 
   httpd.on("/update.php", HTTP_POST, []() {
-    ram_buf[0] = 0;
-    send_ram();
+    if (nvram.proc != 0) {
+      nvram.proc = 0;
+      nvram.change = 1;
+      save_nvram();
+    }
     httpd.sendHeader("Connection", "close");
     if (Update.hasError()) {
       Serial.println("上传失败");
@@ -348,7 +348,11 @@ void ap_loop() {
         Serial.print("V,millis()=");
         Serial.println(millis());
         Serial.println("power down");
-        ram_buf[0] = 0;
+        if (nvram.proc != 0) {
+          nvram.proc = 0;
+          nvram.change = 1;
+          save_nvram();
+        }
         disp("00000");
         ht16c21_cmd(0x84, 0);
         httpd.close();

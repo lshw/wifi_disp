@@ -10,10 +10,8 @@ extern void disp(char *);
 extern float get_batt();
 extern uint32_t ap_on_time;
 extern bool power_in;
-extern char ram_buf[10];
 extern void poweroff(uint32_t sec);
 extern DNSServer dnsServer;
-void send_ram();
 void ota_setup() {
   ArduinoOTA.onStart([]() {
     String type;
@@ -22,8 +20,10 @@ void ota_setup() {
     } else { // U_SPIFFS
       type = "filesystem";
     }
-    ram_buf[0] = 0;
-    send_ram();
+    if (nvram.proc != 0) {
+      nvram.proc = 0;
+      nvram.change = 1;
+    }
     // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
     Serial.println("Start updating " + type);
     type = "";
@@ -79,8 +79,11 @@ void ota_loop() {
   if ( millis() > ap_on_time) {
     if (power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
     else {
-      ram_buf[0] = OFF_MODE;
-      send_ram();
+      if (nvram.proc != OFF_MODE) {
+        nvram.proc = OFF_MODE;
+        nvram.change = 1;
+        save_nvram();
+      }
       poweroff(2);
       return;
     }
@@ -97,8 +100,10 @@ void ota_loop() {
       get_batt();
       zmd(); //"OTA 192.168.12.126  " 走马灯填充disp_buf
       sec1 = sec0;
-      if (sec0 > 5)
-        ram_buf[0] = 0;
+      if (sec0 > 5 && nvram.proc != 0) {
+        nvram.proc = 0;
+        nvram.change = 1;
+      }
       disp(disp_buf);
       system_soft_wdt_feed ();
     }

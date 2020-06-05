@@ -1,10 +1,10 @@
 #ifndef __GLOBAL_H__
 #define __GLOBAL_H__
 #include "config.h"
+#include "nvram.h"
 #include "ht16c21.h"
 extern uint8_t ds_pin ;
 extern bool power_in ;
-extern char ram_buf[10];
 void send_ram();
 float get_batt();
 float v;
@@ -20,15 +20,15 @@ void poweroff(uint32_t sec) {
   if (power_in) Serial.println("有外接电源");
   else Serial.println("无外接电源");
   Serial.flush();
-  if (ram_buf[7] & 1) {
+  if (nvram.nvram7 & NVRAM7_CHARGE) {
     if (v > 4.20) {
       Serial.println("v=" + String(v) + ",停止充电");
-      ram_buf[7] &= ~1;
-      send_ram();
+      nvram.nvram7 &= ~NVRAM7_CHARGE;
+      nvram.change = 1;
     }
   }
   wifi_set_sleep_type(LIGHT_SLEEP_T);
-  if (power_in && (ram_buf[7] & 1)) { //如果外面接了电， 就进入LIGHT_SLEEP模式 电流0.8ma， 保持充电
+  if (power_in && (nvram.nvram7 & NVRAM7_CHARGE)) { //如果外面接了电， 就进入LIGHT_SLEEP模式 电流0.8ma， 保持充电
     sec = sec / 2;
     Serial.print("休眠");
     if (sec > 60) {
@@ -73,7 +73,7 @@ void poweroff(uint32_t sec) {
     Serial.begin(115200);
     Serial.println();
   }
-  if ((ram_buf[7] & 1) && power_in)
+  if ((nvram.nvram7 & NVRAM7_CHARGE) && power_in)
     Serial.println("充电结束");
   Serial.print("关机");
   if (sec > 0) {
@@ -183,10 +183,10 @@ float get_batt() {
     digitalWrite(1, LOW); //不充电
   delay(1);
   get_batt0();
-  if ((ram_buf[7] & 1) == 0) {
+  if ((nvram.nvram7 & NVRAM7_CHARGE) == 0) {
     if (v < 3.8) {
-      ram_buf[7] |= 1;
-      send_ram();
+      nvram.nvram7 |= NVRAM7_CHARGE;
+      nvram.change = 1;
     }
   }
   if (ds_pin == 0) {

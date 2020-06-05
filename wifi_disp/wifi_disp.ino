@@ -1,6 +1,4 @@
 #include <FS.h>
-#define VER "1.54"
-#define HOSTNAME "disp_"
 extern "C" {
 #include "user_interface.h"
 }
@@ -55,44 +53,54 @@ void setup()
   if (v < 3.50 && !power_in) {
     sprintf(disp_buf, "OFF%f", v);
     disp(disp_buf); //电压过低
-    ram_buf[7] |= 1; //充电
-    ram_buf[0] = 0;
-    send_ram();
+    if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != 0) {
+      nvram.nvram7 |= NVRAM7_CHARGE; //充电
+      nvram.proc = 0;
+      nvram.change = 1;
+    }
     ht16c21_cmd(0x88, 0); //闪烁
     if (v > 3.45)
       poweroff(7200);//3.45V-3.5V 2小时
     else
       poweroff(3600 * 24); //一天
+    save_nvram();
     return;
   }
   Serial.flush();
-  proc = ram_buf[0];
+  proc = nvram.proc;
   if (millis() > 10000) proc = 0; //程序升级后第一次启动
   switch (proc) {
     case OFF_MODE: //OFF
       wdt_disable();
-
-      ram_buf[0] = LORA_SEND_MODE;
+      if (nvram.proc != LORA_SEND_MODE) {
+        nvram.proc = LORA_SEND_MODE;
+        nvram.change = 1;
+      }
       disp(" OFF ");
       delay(2000);
       disp("-" VER "-");
       delay(2000);
-      ram_buf[0] = 0;
-      send_ram();
+      if (nvram.proc != 0) {
+        nvram.proc = 0;
+        nvram.change = 1;
+      }
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
       if (ds_pin == 0) { //v2.0
         if (lora_init())
           lora.sleep();
         Serial.begin(115200);
       }
-      ram_buf[0] = 0; //自行关闭的话，下一次开机进程序0
+      save_nvram();
       poweroff(0);
       return;
       break;
     case OTA_MODE:
       wdt_disable();
-      ram_buf[7] |= 1; //充电
-      ram_buf[0] = OFF_MODE;//ota以后，
+      if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != OFF_MODE) {
+        nvram.nvram7 |= NVRAM7_CHARGE; //充电
+        nvram.proc = OFF_MODE;//ota以后，
+        nvram.change = 1;
+      }
       disp(" OTA ");
       if (ds_pin == 0) { //v2.0
         if (lora_init())
@@ -105,10 +113,14 @@ void setup()
         Serial.println("lora  接收模式");
         wdt_disable();
         if (lora_init()) {
-          ram_buf[0] = 0;
+          if (nvram.proc != 0) {
+            nvram.proc = 0;
+            nvram.change = 1;
+          }
           disp("L-" VER);
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
+          save_nvram();
           delay(1000);
           return;
           break;
@@ -119,18 +131,24 @@ void setup()
         Serial.println("lora  发送模式");
         wdt_disable();
         if (lora_init()) {
-          ram_buf[0] = LORA_RECEIVE_MODE;
+          if (nvram.proc != LORA_RECEIVE_MODE) {
+            nvram.proc = LORA_RECEIVE_MODE;
+            nvram.change = 1;
+          }
           disp("S-" VER);
-          send_ram();
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
+          save_nvram();
           delay(1000);
           return;
           break;
         }
       }
     default:
-      ram_buf[0] = OTA_MODE;
+      if (nvram.proc != OTA_MODE) {
+        nvram.proc = OTA_MODE;
+        nvram.change = 1;
+      }
       sprintf(disp_buf, " %3.2f ", v);
       disp(disp_buf);
       if (ds_pin == 0) {
@@ -145,21 +163,25 @@ void setup()
       }
       break;
   }
-  send_ram();
   //更新时闪烁
   ht16c21_cmd(0x88, 1); //闪烁
   if (wifi_connect() == false) {
     if (proc == OTA_MODE) {
-      ram_buf[0] = 0;
-      send_ram();
+      if (nvram.proc != 0) {
+        nvram.proc = 0;
+        nvram.change = 1;
+        save_nvram();
+      }
       ESP.restart();
     }
-    ram_buf[9] |= 0x10; //x1
-    ram_buf[0] = 0;
-    send_ram();
+    if (nvram.proc != 0) {
+      nvram.proc = 0;
+      nvram.change = 1;
+    }
     Serial.print("不能链接到AP\r\n30分钟后再试试\r\n本次上电时长");
     Serial.print(millis());
     Serial.println("ms");
+    save_nvram();
     poweroff(1800);
     return;
   }
@@ -171,18 +193,24 @@ void setup()
   ht16c21_cmd(0x88, 0); //停止闪烁
   if (proc == OTA_MODE) {
     ota_setup();
+    save_nvram();
     return;
   }
-  uint16_t httpCode = http_get((ram_buf[7] >> 1) & 1); //先试试上次成功的url
+  uint16_t httpCode = http_get( nvram.nvram7 & NVRAM7_URL); //先试试上次成功的url
   if (httpCode < 200  || httpCode >= 400) {
-    httpCode = http_get((~ram_buf[7] >> 1) & 1); //再试试另一个的url
+    nvram.nvram7 = (nvram.nvram7 & ~ NVRAM7_URL) | (~ nvram.nvram7 & NVRAM7_URL);
+    nvram.change = 1;
+    httpCode = http_get(nvram.nvram7 & NVRAM7_URL); //再试试另一个的url
   }
   if (httpCode < 200 || httpCode >= 400) {
     Serial.print("不能链接到web\r\n60分钟后再试试\r\n本次上电时长");
-    ram_buf[0] = 0;
-    send_ram();
+    if (nvram.proc != 0) {
+      nvram.proc = 0;
+      nvram.change = 1;
+    }
     Serial.print(millis());
     Serial.println("ms");
+    save_nvram();
     poweroff(3600);
     return;
   }
@@ -195,6 +223,7 @@ void setup()
   if (next_disp < 60) next_disp = 1800;
   Serial.print("ms,sleep=");
   Serial.println(next_disp);
+  save_nvram();
   poweroff(next_disp);
 }
 void loop()
@@ -222,5 +251,6 @@ void loop()
       break;
   }
   yield();
+  if (nvram.change) save_nvram();
   system_soft_wdt_feed (); //各loop里要根据需要执行喂狗命令
 }

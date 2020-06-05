@@ -6,7 +6,6 @@
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266httpUpdate.h>
 #include "ds1820.h"
-extern char ram_buf[10];
 extern uint8_t rxBuf[256];
 extern bool power_in;
 bool wifi_connected = false;
@@ -18,8 +17,6 @@ void dht_load(); //阻塞等转换完成
 void AP();
 bool http_update();
 void poweroff(uint32_t);
-void send_ram();
-void set_ram_check();
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 ESP8266WiFiMulti WiFiMulti;
 HTTPClient http;
@@ -148,7 +145,7 @@ uint16_t http_get(uint8_t no) {
           + "&batt=" + String(v)
           + "&rssi=" + String(WiFi.RSSI())
           + "&power=" + String(power_in)
-          + "&charge=" + String(ram_buf[7] & 1)
+          + "&change=" + String(nvram.nvram7 & NVRAM7_CHARGE)
           + "&temp=" + String(temp[0]);
 #if DHT_HAVE
   dht_load();
@@ -180,10 +177,10 @@ uint16_t http_get(uint8_t no) {
     // httpCode will be negative on error
     if (httpCode >= 200 && httpCode <= 299) {
       // HTTP header has been send and Server response header has been handled
-      ram_buf[0] = 0;
-      if (no == 0) ram_buf[7] &= ~2;
-      else ram_buf[7] |= 2; //bit2表示上次完成通讯用的是哪个url 0:url0 2:url1
-      send_ram();
+      if (nvram.proc != 0) {
+        nvram.proc = 0;
+        nvram.change = 1;
+      }
       Serial.print("[HTTP] GET... code:");
       Serial.println(httpCode);
       // file found at server
@@ -221,8 +218,6 @@ uint16_t http_get(uint8_t no) {
       }
     } else {
 
-      ram_buf[9] |= 0x10; //x1
-      send_ram();
       if (httpCode > 0)
         sprintf(disp_buf, ".E %03d", httpCode);
       disp(disp_buf);
@@ -251,10 +246,13 @@ bool http_update()
     ESP.restart();
     return false;
   }
-  ram_buf[7] |= 1; //开充电模式
-  send_ram();
+  if (nvram.nvram7 & NVRAM7_CHARGE == 0) {
+    nvram.nvram7 |= NVRAM7_CHARGE; //开充电模式
+    nvram.change = 1;
+    save_nvram();
+  }
   disp("H UP. ");
-  String update_url = "http://www.anheng.com.cn/wifi_disp.bin"; // get_url((ram_buf[7] >> 1) & 1) + "?p=update&sn=" + String(hostname) + "&ver=" VER;
+  String update_url = "http://www.anheng.com.cn/wifi_disp.bin";
   Serial.print("下载firmware from ");
   Serial.println(update_url);
   ESPhttpUpdate.onProgress(update_progress);
@@ -264,7 +262,11 @@ bool http_update()
   switch (ret) {
     case HTTP_UPDATE_FAILED:
       Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\r\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-      ram_buf[0] = 0;
+      if (nvram.proc != 0) {
+        nvram.proc = 0;
+        nvram.change = 1;
+        save_nvram();
+      }
       ESP.restart();
       break;
 
