@@ -12,12 +12,16 @@ void ht16c21_cmd(uint8_t cmd, uint8_t dat) {
   Wire.endTransmission();
 }
 void ht16c21_setup() {
+  pinMode(5,OUTPUT);
+  digitalWrite(5, LOW);
+  delay(50);
   for (uint8_t i = 0; i < 10; i++) {
     digitalWrite(5, HIGH);
     delay(1);
     digitalWrite(5, LOW);
     delay(1);
   }
+  delay(50);
   Wire.begin(4, 5);
   Wire.begin(4, 5);
   load_ram();

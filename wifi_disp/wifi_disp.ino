@@ -39,7 +39,6 @@ void setup()
   hostname += String(ESP.getChipId(), HEX);
   WiFi.hostname(hostname);
   Serial.println("Hostname: " + hostname);
-  delay(100);
   Serial.flush();
   if (!ds_init() && !ds_init()) ds_init();
   ht16c21_setup();
