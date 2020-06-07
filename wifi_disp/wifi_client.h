@@ -127,6 +127,16 @@ bool wifi_connect() {
     return false;
 }
 
+bool wifi_connected_is_ok() {
+  if (WiFiMulti.run() == WL_CONNECTED)
+  {
+    ht16c21_cmd(0x88, 0); //停止闪烁
+    return true;
+  }
+  ht16c21_cmd(0x88, 0); //开始闪烁
+  return false;
+}
+
 uint16_t http_get(uint8_t no) {
   char key[17];
   String url0 = get_url(no);

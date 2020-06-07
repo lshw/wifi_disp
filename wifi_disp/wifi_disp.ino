@@ -8,16 +8,9 @@ bool temp_ok = false; //测温ok
 extern char ip_buf[30];
 uint32_t temp_start;
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
-char disp_buf[22];
 uint32_t next_disp = 1800; //下次开机
 String hostname = HOSTNAME;
-uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
 //0,1-正常 2-OTA 3-off 4-lora接收 5-lora发射
-
-#define OTA_MODE 2
-#define OFF_MODE 3
-#define LORA_RECEIVE_MODE 4
-#define LORA_SEND_MODE 5
 
 #include "ota.h"
 #include "ds1820.h"
@@ -166,11 +159,6 @@ void setup()
   ht16c21_cmd(0x88, 1); //闪烁
   if (wifi_connect() == false) {
     if (proc == OTA_MODE) {
-      if (nvram.proc != 0) {
-        nvram.proc = 0;
-        nvram.change = 1;
-        save_nvram();
-      }
       ESP.restart();
     }
     if (nvram.proc != 0) {
@@ -195,12 +183,7 @@ void setup()
     save_nvram();
     return;
   }
-  uint16_t httpCode = http_get( nvram.nvram7 & NVRAM7_URL); //先试试上次成功的url
-  if (httpCode < 200  || httpCode >= 400) {
-    nvram.nvram7 = (nvram.nvram7 & ~ NVRAM7_URL) | (~ nvram.nvram7 & NVRAM7_URL);
-    nvram.change = 1;
-    httpCode = http_get(nvram.nvram7 & NVRAM7_URL); //再试试另一个的url
-  }
+  uint16_t httpCode = wget();
   if (httpCode < 200 || httpCode >= 400) {
     Serial.print("不能链接到web\r\n60分钟后再试试\r\n本次上电时长");
     if (nvram.proc != 0) {
@@ -225,6 +208,7 @@ void setup()
   save_nvram();
   poweroff(next_disp);
 }
+
 void loop()
 {
   if (power_off) {
@@ -250,6 +234,10 @@ void loop()
       break;
   }
   yield();
+  if (run_zmd) {
+    run_zmd = false;
+    zmd();
+  }
   if (nvram.change) save_nvram();
   system_soft_wdt_feed (); //各loop里要根据需要执行喂狗命令
 }
