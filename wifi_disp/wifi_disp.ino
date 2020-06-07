@@ -31,7 +31,7 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 bool power_in = false;
 void setup()
 {
-  uint8_t i;
+  load_nvram();
   ip_buf[0] = 0;
   Serial.begin(115200);
   Serial.println("\r\n\r\n\r\n\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b");
@@ -43,6 +43,7 @@ void setup()
   if (!ds_init() && !ds_init()) ds_init();
   ht16c21_setup();
   get_batt();
+  _myTicker.attach(1,timer1s);
   Serial.print("电池电压");
   Serial.println(v);
   if (power_in) {

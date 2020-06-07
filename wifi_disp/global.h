@@ -3,6 +3,8 @@
 #include "config.h"
 #include "nvram.h"
 #include "ht16c21.h"
+#include "Ticker.h"
+Ticker _myTicker;
 extern uint8_t ds_pin ;
 extern bool power_in ;
 float get_batt();
@@ -96,6 +98,7 @@ void poweroff(uint32_t sec) {
     pinMode(1, OUTPUT);
     digitalWrite(1, LOW);
   }
+  _myTicker.detach();
   wdt_disable();
   system_deep_sleep_set_option(4);
   digitalWrite(LED_BUILTIN, LOW);
@@ -103,6 +106,9 @@ void poweroff(uint32_t sec) {
   ESP.deepSleep(sec0, WAKE_RF_DEFAULT);
   power_off = true;
 }
+void timer1s(){
+}
+
 float get_batt0() {//锂电池电压
   uint32_t dat = analogRead(A0);
   dat = analogRead(A0)
