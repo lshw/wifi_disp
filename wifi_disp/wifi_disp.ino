@@ -35,7 +35,7 @@ void setup()
   if (!ds_init() && !ds_init()) ds_init();
   ht16c21_setup();
   get_batt();
-  _myTicker.attach(1,timer1s);
+  _myTicker.attach(1, timer1s);
   Serial.print("电池电压");
   Serial.println(v);
   if (power_in) {
@@ -153,33 +153,40 @@ void setup()
         dht_setup();
 #endif
       }
+      timer1 = 20;
+      while (!wifi_connected_is_ok());
+      if (timer1 > 0) {
+        uint16_t httpCode = wget();
+        if (httpCode >= 200 || httpCode < 400) {
+          if (v < 3.6)
+            ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
+          else
+            ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
+          Serial.print("uptime=");
+          Serial.print(millis());
+          if (next_disp < 60) next_disp = 1800;
+          Serial.print("ms,sleep=");
+          Serial.println(next_disp);
+          save_nvram();
+          poweroff(next_disp);
+          return;
+        } else {
+          Serial.print(millis());
+          Serial.println("ms,web error,reboot 3600s");
+        }
+      } else {
+        Serial.print(millis());
+        Serial.println("ms,not link to ap,reboot 3600s");
+      }
+      if (nvram.proc != 0) {
+        nvram.proc = 0;
+        nvram.change = 1;
+      }
+      save_nvram();
+      poweroff(3600);
+      return;
       break;
   }
-
-  uint16_t httpCode = wget();
-  if (httpCode < 200 || httpCode >= 400) {
-    Serial.print("不能链接到web\r\n60分钟后再试试\r\n本次上电时长");
-    if (nvram.proc != 0) {
-      nvram.proc = 0;
-      nvram.change = 1;
-    }
-    Serial.print(millis());
-    Serial.println("ms");
-    save_nvram();
-    poweroff(3600);
-    return;
-  }
-  if (v < 3.6)
-    ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
-  else
-    ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
-  Serial.print("uptime=");
-  Serial.print(millis());
-  if (next_disp < 60) next_disp = 1800;
-  Serial.print("ms,sleep=");
-  Serial.println(next_disp);
-  save_nvram();
-  poweroff(next_disp);
 }
 
 void loop()
