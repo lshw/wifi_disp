@@ -119,6 +119,7 @@ void poweroff(uint32_t sec) {
     digitalWrite(1, LOW);
   }
   _myTicker.detach();
+  for(;sec>0;sec--)timer1s();
   wdt_disable();
   system_deep_sleep_set_option(4);
   digitalWrite(LED_BUILTIN, LOW);
