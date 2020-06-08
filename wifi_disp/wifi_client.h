@@ -94,7 +94,7 @@ bool wifi_connected_is_ok() {
     ht16c21_cmd(0x88, 0); //停止闪烁
     return true;
   }
-  ht16c21_cmd(0x88, 0); //开始闪烁
+  ht16c21_cmd(0x88, 1); //开始闪烁
   return false;
 }
 

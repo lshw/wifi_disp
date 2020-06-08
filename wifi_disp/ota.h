@@ -56,7 +56,6 @@ void ota_setup() {
   wifi_set_sleep_type(LIGHT_SLEEP_T);
   Serial.println("Ready");
 }
-uint16_t sec0, sec1;
 void ota_loop() {
   if ( millis() > ap_on_time) {
     if (power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
@@ -70,25 +69,7 @@ void ota_loop() {
       return;
     }
   }
-  if (ip_buf[0] == 0)
-  {
-    snprintf(ip_buf, sizeof(ip_buf), "OTA %s     ", WiFi.localIP().toString().c_str());
-    ip_len = strlen(ip_buf);
-    ip_offset = 0;
-  }
   if (millis() < 600000) {
-    sec0 = millis() / 1000;
-    if (sec0 != sec1) {
-      get_batt();
-      zmd(); //"OTA 192.168.12.126  " 走马灯填充disp_buf
-      sec1 = sec0;
-      if (sec0 > 5 && nvram.proc != 0) {
-        nvram.proc = 0;
-        nvram.change = 1;
-      }
-      disp(disp_buf);
-      system_soft_wdt_feed ();
-    }
     dnsServer.processNextRequest();
     ArduinoOTA.handle();
     httpd_loop();

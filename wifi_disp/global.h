@@ -5,6 +5,7 @@
 #include "ht16c21.h"
 #include "Ticker.h"
 #include <ESP8266WiFiMulti.h>
+bool get_temp();
 Ticker _myTicker;
 uint8_t year, month = 1, day = 1, hour = 0, minute = 0, sec = 0;
 int16_t update_timeok = 0; //0-马上wget ，-1 关闭，>0  xx分钟后wget
@@ -120,11 +121,11 @@ void poweroff(uint32_t sec) {
     digitalWrite(1, LOW);
   }
   _myTicker.detach();
-  for (; sec > 0; sec--)timer1s();
+  //for (; sec > 0; sec--)timer1s();
   wdt_disable();
   system_deep_sleep_set_option(4);
   digitalWrite(LED_BUILTIN, LOW);
-  if (sec == 0) ht16c21_cmd(0x84, 0x2); //lcd off
+  if (sec0 == 0) ht16c21_cmd(0x84, 0x2); //lcd off
   ESP.deepSleep(sec0, WAKE_RF_DEFAULT);
   power_off = true;
 }
@@ -201,10 +202,11 @@ void timer1s() {
     get_batt();
     update_disp();
   }
-  run_zmd = true;
+if(proc == OTA_MODE)  run_zmd = true;
 }
 
 uint16_t wget() {
+  get_temp();
   uint16_t httpCode = http_get( nvram.nvram7 & NVRAM7_URL); //先试试上次成功的url
   if (httpCode < 200  || httpCode >= 400) {
     nvram.nvram7 = (nvram.nvram7 & ~ NVRAM7_URL) | (~ nvram.nvram7 & NVRAM7_URL);

@@ -89,7 +89,6 @@ void handleRoot() {
              "<hr></body>"
              "</html>");
   httpd.client().stop();
-  ap_on_time = millis() + 200000;
 }
 void handleNotFound() {
   File fp;

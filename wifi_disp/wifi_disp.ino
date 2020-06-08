@@ -28,6 +28,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("\r\n\r\n\r\n\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b");
   Serial.println("Software Ver=" VER "\r\nBuildtime=" __DATE__ " " __TIME__);
+  Serial.print("proc=");Serial.println(nvram.proc);
   hostname += String(ESP.getChipId(), HEX);
   WiFi.hostname(hostname);
   Serial.println("Hostname: " + hostname);
@@ -93,6 +94,7 @@ void setup()
         nvram.nvram7 |= NVRAM7_CHARGE; //充电
         nvram.proc = OFF_MODE;//ota以后，
         nvram.change = 1;
+        save_nvram();
       }
       disp(" OTA ");
       if (ds_pin == 0) { //v2.0
@@ -100,6 +102,7 @@ void setup()
           lora.sleep();
         Serial.begin(115200);
       }
+      ap_on_time = millis() + 200000;
       break;
     case LORA_RECEIVE_MODE:
       if (ds_pin == 0) {
@@ -138,9 +141,10 @@ void setup()
         }
       }
     default:
-      wifi_setup();
       nvram.proc = OTA_MODE;
       nvram.change = 1;
+      save_nvram();
+      wifi_setup();
       sprintf(disp_buf, " %3.2f ", v);
       disp(disp_buf);
       if (ds_pin == 0) {
@@ -154,7 +158,11 @@ void setup()
 #endif
       }
       timer1 = 20;
-      while (!wifi_connected_is_ok());
+      ht16c21_cmd(0x88, 1); //开始闪烁
+      while (!wifi_connected_is_ok()){
+	yield();
+	system_soft_wdt_feed ();
+      }
       if (timer1 > 0) {
         uint16_t httpCode = wget();
         if (httpCode >= 200 || httpCode < 400) {
