@@ -25,18 +25,19 @@ uint8_t hex2ch(char dat) {
   if (dat >= 'a') return dat - 'a' + 10;
   return dat - '0';
 }
-bool wifi_connect() {
+void wifi_setup() {
   File fp;
   uint32_t i;
+  char buf[3];
   char ch;
   boolean is_ssid = true;
-  if (wifi_connected) return true;
   if (proc == OTA_MODE) { //ota时要 ap 和 client
     WiFi.mode(WIFI_AP_STA);
     AP();
   } else  { //测温时， 只用client
     WiFi.mode(WIFI_STA);
   }
+  wifi_set_sleep_type(LIGHT_SLEEP_T);
   if (SPIFFS.begin()) {
     if (!SPIFFS.exists("/ssid.txt")) {
       fp = SPIFFS.open("/ssid.txt", "w");
@@ -85,46 +86,6 @@ bool wifi_connect() {
     fp.close();
     SPIFFS.end();
   }
-  Serial.println("正在连接wifi.");
-  // ... Give ESP 10 seconds to connect to station.
-  if (proc == OTA_MODE) return true;
-  unsigned long startTime = millis();
-  i = 0;
-  while (WiFiMulti.run() != WL_CONNECTED && millis() - startTime < 20000)
-  {
-    Serial.write('.');
-    //Serial.print(WiFi.status());
-    delay(1000);
-    system_soft_wdt_feed ();
-#if DHT_HAVE
-    dht_loop();
-#endif
-    if (i % 2 == 0) {
-      if (temp_ok == false) temp_ok = get_temp();
-    } else
-      i++;
-  }
-  Serial.println();
-  if (temp_ok == false) {
-    if (millis() < (temp_start + 2000)) delay(temp_start + 2000 - millis());
-    temp_ok = get_temp();
-  }
-  ht16c21_cmd(0x88, 0); //停止闪烁
-  if (WiFiMulti.run() == WL_CONNECTED)
-  {
-    wifi_connected = true;
-    Serial.println("wifi已链接");
-    Serial.print("SSID: ");
-    Serial.println(WiFi.SSID());
-    Serial.println("BSSID: " + WiFi.BSSIDstr());
-    Serial.print("PSK: ");
-    Serial.println(WiFi.psk());
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-    return true;
-  }
-  else
-    return false;
 }
 
 bool wifi_connected_is_ok() {

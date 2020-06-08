@@ -10,7 +10,6 @@ uint32_t temp_start;
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 uint32_t next_disp = 1800; //下次开机
 String hostname = HOSTNAME;
-//0,1-正常 2-OTA 3-off 4-lora接收 5-lora发射
 
 #include "ota.h"
 #include "ds1820.h"
@@ -87,6 +86,8 @@ void setup()
       return;
       break;
     case OTA_MODE:
+      wifi_setup();
+      ota_setup();
       wdt_disable();
       if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != OFF_MODE) {
         nvram.nvram7 |= NVRAM7_CHARGE; //充电
@@ -137,10 +138,9 @@ void setup()
         }
       }
     default:
-      if (nvram.proc != OTA_MODE) {
-        nvram.proc = OTA_MODE;
-        nvram.change = 1;
-      }
+      wifi_setup();
+      nvram.proc = OTA_MODE;
+      nvram.change = 1;
       sprintf(disp_buf, " %3.2f ", v);
       disp(disp_buf);
       if (ds_pin == 0) {
@@ -155,34 +155,7 @@ void setup()
       }
       break;
   }
-  //更新时闪烁
-  ht16c21_cmd(0x88, 1); //闪烁
-  if (wifi_connect() == false) {
-    if (proc == OTA_MODE) {
-      ESP.restart();
-    }
-    if (nvram.proc != 0) {
-      nvram.proc = 0;
-      nvram.change = 1;
-    }
-    Serial.print("不能链接到AP\r\n30分钟后再试试\r\n本次上电时长");
-    Serial.print(millis());
-    Serial.println("ms");
-    save_nvram();
-    poweroff(1800);
-    return;
-  }
 
-  if (temp_ok == false) {
-    delay(temp_start + 2000 - millis());
-    temp_ok = get_temp();
-  }
-  ht16c21_cmd(0x88, 0); //停止闪烁
-  if (proc == OTA_MODE) {
-    ota_setup();
-    save_nvram();
-    return;
-  }
   uint16_t httpCode = wget();
   if (httpCode < 200 || httpCode >= 400) {
     Serial.print("不能链接到web\r\n60分钟后再试试\r\n本次上电时长");

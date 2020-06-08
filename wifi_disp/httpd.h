@@ -155,7 +155,6 @@ void http_add_ssid() {
   fp.println(data);
   fp.close();
   SPIFFS.end();
-  wifi_connect();
   httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/');</script></body></html>");
   yield();
 }
@@ -215,7 +214,6 @@ void httpsave() {
   }
   url = "";
   SPIFFS.end();
-  wifi_connect();
   httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/');</script></body></html>");
   yield();
 }

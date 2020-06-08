@@ -17,6 +17,7 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 #define OFF_MODE 3
 #define LORA_RECEIVE_MODE 4
 #define LORA_SEND_MODE 5
+//0,1-正常 2-OTA 3-off 4-lora接收 5-lora发射
 
 bool wifi_connected_is_ok();
 uint16_t http_get(uint8_t);
