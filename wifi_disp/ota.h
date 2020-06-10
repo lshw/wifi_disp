@@ -5,7 +5,6 @@
 #include <ArduinoOTA.h>
 #include "global.h"
 #include "httpd.h"
-char ip_buf[30];
 uint8_t ip_offset, ip_len;
 extern void disp(char *);
 extern float get_batt();

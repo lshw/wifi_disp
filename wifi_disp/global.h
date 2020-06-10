@@ -384,7 +384,7 @@ void zmd() {  //1s 一次Ticker
     zmd_offset = (zmd_offset + 1) % zmd_size;
   }
 
-  memset(disp_buf, ' ', sizeof(disp_buf));
+  memset(disp_buf, 0, sizeof(disp_buf));
   for (i = 0; i < sizeof(disp_buf); i++) {
     disp_buf[i] = zmd_disp[(zmd_offset + i) % zmd_size];
     if (disp_buf[i] != '.') i0++;

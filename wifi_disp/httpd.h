@@ -235,7 +235,6 @@ void AP() {
   dnsServer.start(53, "*", WiFi.softAPIP());
   Serial.println("泛域名dns服务器启动");
   wifi_set_sleep_type(LIGHT_SLEEP_T);
-  void httpd_listen();
   yield();
 }
 void httpd_listen() {

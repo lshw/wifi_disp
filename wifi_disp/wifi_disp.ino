@@ -5,7 +5,6 @@ extern "C" {
 #include "config.h"
 #include "global.h"
 bool temp_ok = false; //测温ok
-extern char ip_buf[30];
 uint32_t temp_start;
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 uint32_t next_disp = 1800; //下次开机
@@ -24,7 +23,6 @@ bool power_in = false;
 void setup()
 {
   load_nvram();
-  ip_buf[0] = 0;
   Serial.begin(115200);
   Serial.println("\r\n\r\n\r\n\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b");
   Serial.println("Software Ver=" VER "\r\nBuildtime=" __DATE__ " " __TIME__);
@@ -34,6 +32,7 @@ void setup()
   Serial.println("Hostname: " + hostname);
   Serial.flush();
   if (!ds_init() && !ds_init()) ds_init();
+  get_temp();
   ht16c21_setup();
   get_batt();
   _myTicker.attach(1, timer1s);
@@ -48,13 +47,13 @@ void setup()
     if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != 0) {
       nvram.nvram7 |= NVRAM7_CHARGE; //充电
       nvram.proc = 0;
-      nvram.change = 1;
+      nvram.change = 1; //电压过低
     }
     ht16c21_cmd(0x88, 0); //闪烁
     if (v > 3.45)
       poweroff(7200);//3.45V-3.5V 2小时
     else
-      poweroff(3600 * 24); //一天
+      poweroff(3600 * 48); // 低于3.45V 2天
     save_nvram();
     return;
   }
@@ -67,6 +66,7 @@ void setup()
       if (nvram.proc != LORA_SEND_MODE) {
         nvram.proc = LORA_SEND_MODE;
         nvram.change = 1;
+        save_nvram(); //4秒之内重启切换功能
       }
       disp(" OFF ");
       delay(2000);
@@ -74,7 +74,7 @@ void setup()
       delay(2000);
       if (nvram.proc != 0) {
         nvram.proc = 0;
-        nvram.change = 1;
+        nvram.change = 1; //4秒之后关机， 重启进proc0
       }
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
       if (ds_pin == 0) { //v2.0
@@ -88,12 +88,13 @@ void setup()
       break;
     case OTA_MODE:
       wifi_setup();
+      httpd_listen();
       ota_setup();
       wdt_disable();
       if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != OFF_MODE) {
-        nvram.nvram7 |= NVRAM7_CHARGE; //充电
+        nvram.nvram7 |= NVRAM7_CHARGE; //充电 
         nvram.proc = OFF_MODE;//ota以后，
-        nvram.change = 1;
+        nvram.change = 1; 
         save_nvram();
       }
       disp(" OTA ");
@@ -141,10 +142,10 @@ void setup()
         }
       }
     default:
+      wifi_setup();
       nvram.proc = OTA_MODE;
       nvram.change = 1;
       save_nvram();
-      wifi_setup();
       sprintf(disp_buf, " %3.2f ", v);
       disp(disp_buf);
       if (ds_pin == 0) {
@@ -164,7 +165,16 @@ void setup()
 	system_soft_wdt_feed ();
       }
       if (timer1 > 0) {
-        uint16_t httpCode = wget();
+	get_temp();
+	if(temp[0] > 84.00) {
+	  delay(200);
+	  get_temp();
+	  if(temp[0] > 84.00) {
+	    delay(200);
+	    get_temp();
+	  }
+	}
+	uint16_t httpCode = wget();
         if (httpCode >= 200 || httpCode < 400) {
           if (v < 3.6)
             ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
@@ -174,7 +184,12 @@ void setup()
           Serial.print(millis());
           if (next_disp < 60) next_disp = 1800;
           Serial.print("ms,sleep=");
-          Serial.println(next_disp);
+	  Serial.println(next_disp);
+          if(millis()<500) delay(500-millis());
+	  if(nvram.proc != 0) {
+	    nvram.proc = 0;
+	    nvram.change = 1;
+	  }
           save_nvram();
           poweroff(next_disp);
           return;
@@ -197,6 +212,7 @@ void setup()
   }
 }
 
+bool httpd_up = false;
 void loop()
 {
   if (power_off) {
@@ -215,11 +231,29 @@ void loop()
       delay(400);
       break;
     case OTA_MODE:
-      if (WiFiMulti.run() == WL_CONNECTED)
-        ota_loop();
-      else
+      httpd_loop();
+      ota_loop();
+      if (wifi_connected_is_ok()) {
+        if (!httpd_up) {
+          wget();
+          update_disp();
+          zmd();
+          httpd_up = true;
+          httpd_listen();
+        }
+      } else
         ap_loop();
       break;
+    default:
+      if (wifi_connected_is_ok()) {
+        if (!httpd_up) {
+          update_disp();
+          wget();
+          httpd_up = true;
+        }
+      }else if(timer3==0) {
+     //10秒超时1小时重试。
+}
   }
   yield();
   if (run_zmd) {

@@ -143,10 +143,6 @@ uint16_t http_get(uint8_t no) {
     // httpCode will be negative on error
     if (httpCode >= 200 && httpCode <= 299) {
       // HTTP header has been send and Server response header has been handled
-      if (nvram.proc != 0) {
-        nvram.proc = 0;
-        nvram.change = 1;
-      }
       Serial.print("[HTTP] GET... code:");
       Serial.println(httpCode);
       // file found at server
