@@ -67,6 +67,7 @@ void poweroff(uint32_t sec) {
     wdt_disable();
     uint8_t no_power_in = 0;
     for (uint32_t i = 0; i < sec; i++) {
+      yield();
       system_soft_wdt_feed ();
       delay(1000); //空闲时进入LIGHT_SLEEP_T模式
       power_in = i % 2;
@@ -123,10 +124,10 @@ void poweroff(uint32_t sec) {
   _myTicker.detach();
   //for (; sec > 0; sec--)timer1s();
   wdt_disable();
-  system_deep_sleep_set_option(4);
+  system_deep_sleep_set_option(2);
   digitalWrite(LED_BUILTIN, LOW);
   if (sec0 == 0) ht16c21_cmd(0x84, 0x2); //lcd off
-  ESP.deepSleep(sec0, WAKE_RF_DEFAULT);
+  ESP.deepSleepInstant(sec0, RF_NO_CAL);
   power_off = true;
 }
 void update_disp() {

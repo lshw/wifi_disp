@@ -1,7 +1,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#define VER "1.55"
+#define VER "1.56"
 #define HOSTNAME "disp_"
 
 

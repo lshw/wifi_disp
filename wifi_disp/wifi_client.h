@@ -18,6 +18,7 @@ bool http_update();
 void poweroff(uint32_t);
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 ESP8266WiFiMulti WiFiMulti;
+WiFiClient client;
 HTTPClient http;
 String ssid, passwd;
 uint8_t hex2ch(char dat) {
@@ -130,7 +131,7 @@ uint16_t http_get(uint8_t no) {
   }
 
   Serial.println( url0); //串口输出
-  http.begin( url0 ); //HTTP提交
+  http.begin(client, url0 ); //HTTP提交
   http.setTimeout(4000);
   int httpCode;
   for (uint8_t i = 0; i < 10; i++) {
@@ -218,7 +219,7 @@ bool http_update()
   Serial.print("下载firmware from ");
   Serial.println(update_url);
   ESPhttpUpdate.onProgress(update_progress);
-  t_httpUpdate_return  ret = ESPhttpUpdate.update(update_url);
+  t_httpUpdate_return  ret = ESPhttpUpdate.update(client,update_url);
   update_url = "";
 
   switch (ret) {
