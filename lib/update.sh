@@ -21,13 +21,6 @@ else
   port=/dev/ttyS0
  fi
 #先试试 esptool.py
- lib/esptool.py --chip esp8266 --port $port  --baud 460800 write_flash 0 lib/wifi_disp.bin
- if [ $? == 0 ] ; then
-  lib/esptool.py --chip esp8266 --port $port  --baud 115200 run
-  exit
- fi
-#esptool.py失败的话， 试试arduino带的 esptool
- esptool=`find /opt -type f -name esptool |head -n1 |tr -d "\r\n"`
- $esptool -vv -cd nodemcu -cb 115200 -cp $port -ca 0x00000 -cf lib/wifi_disp.bin
+ lib/esptool.py --chip esp8266 --port $port --after soft_reset --baud 460800 write_flash 0 lib/wifi_disp.bin
+lib/run.sh
 fi
-
