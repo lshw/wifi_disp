@@ -40,16 +40,17 @@ bool dht_loop()
   }
   return false;
 }
-void dht_setup()
+bool dht_setup()
 {
-  if (lora_version != 255) return; //存在lora模块
-  if (ds_pin != 0) return ; //v1硬件不带湿度
+  if (lora_version != 255) return false ; //存在lora模块
+  if (ds_pin != 0) return false; //v1硬件不带湿度
   pinMode(DHT_VCC, OUTPUT); //gpio13 电源
   digitalWrite(DHT_VCC, HIGH);
   next_load = millis() + 2000;
   Serial.println("STAT\tHUMI\tTEMP\tTIME\tTYPE");
   if (!test() && !test() && !test() && !test())
-    test();
+    return  test();
+  return true;
   /*
     Serial.println("\n4. LastRead test");
     mySensor.read();
