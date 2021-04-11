@@ -20,9 +20,11 @@ String hostname = HOSTNAME;
 #include "dht.h"
 #endif
 bool power_in = false;
+uint8_t devices = HAVE_DHT | HAVE_LORA;
 void setup()
 {
   load_nvram();
+  nvram.boot_count++;
   Serial.begin(115200);
   Serial.println("\r\n\r\n\r\n\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b");
   Serial.println("Software Ver=" VER "\r\nBuildtime=" __DATE__ " " __TIME__);
@@ -32,6 +34,12 @@ void setup()
   Serial.println("Hostname: " + hostname);
   Serial.flush();
   if (!ds_init() && !ds_init()) ds_init();
+  if (dht_setup()) {
+    devices |= HAVE_DHT;
+    devices &= ~HAVE_LORA;
+  } else {
+    devices &= ~HAVE_DHT;
+  }
   get_temp();
   ht16c21_setup();
   get_batt();
