@@ -203,7 +203,7 @@ void timer1s() {
     get_batt();
     update_disp();
   }
-if(proc == OTA_MODE)  run_zmd = true;
+  if (proc == OTA_MODE)  run_zmd = true;
 }
 
 uint16_t wget() {

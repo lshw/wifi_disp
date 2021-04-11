@@ -26,7 +26,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("\r\n\r\n\r\n\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b");
   Serial.println("Software Ver=" VER "\r\nBuildtime=" __DATE__ " " __TIME__);
-  Serial.print("proc=");Serial.println(nvram.proc);
+  Serial.print("proc="); Serial.println(nvram.proc);
   hostname += String(ESP.getChipId(), HEX);
   WiFi.hostname(hostname);
   Serial.println("Hostname: " + hostname);
@@ -92,9 +92,9 @@ void setup()
       ota_setup();
       wdt_disable();
       if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != OFF_MODE) {
-        nvram.nvram7 |= NVRAM7_CHARGE; //充电 
+        nvram.nvram7 |= NVRAM7_CHARGE; //充电
         nvram.proc = OFF_MODE;//ota以后，
-        nvram.change = 1; 
+        nvram.change = 1;
         save_nvram();
       }
       disp(" OTA ");
@@ -155,31 +155,31 @@ void setup()
         Serial.print("lora version=");
         Serial.println(lora_version);
 #if DHT_HAVE
-	dht_setup();
+        dht_setup();
 #endif
       }
-  timer1=10;
+      timer1 = 10;
   }
 }
 
-void wput(){
+void wput() {
   ht16c21_cmd(0x88, 1); //开始闪烁
   if (timer1 > 0) {
     uint16_t httpCode = wget();
     if (httpCode >= 200 || httpCode < 400) {
       if (v < 3.6)
-	ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
+        ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
       else
-	ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
+        ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
       Serial.print("uptime=");
       Serial.print(millis());
       if (next_disp < 60) next_disp = 1800;
       Serial.print("ms,sleep=");
       Serial.println(next_disp);
-      if(millis()<500) delay(500-millis());
-      if(nvram.proc != 0) {
-	nvram.proc = 0;
-	nvram.change = 1;
+      if (millis() < 500) delay(500 - millis());
+      if (nvram.proc != 0) {
+        nvram.proc = 0;
+        nvram.change = 1;
       }
       save_nvram();
       poweroff(next_disp);
@@ -187,9 +187,9 @@ void wput(){
     } else {
       Serial.print(millis());
       Serial.println("ms,web error,reboot 3600s");
-      if(nvram.proc != 0) {
-	nvram.proc = 0;
-	nvram.change = 1;
+      if (nvram.proc != 0) {
+        nvram.proc = 0;
+        nvram.change = 1;
       }
       poweroff(3600);
     }
@@ -230,23 +230,24 @@ void loop()
       break;
     default:
       if (wifi_connected_is_ok()) {
-	if (!httpd_up ) {
-	  update_disp();
-	  get_temp();
-	  if(temp[0] < 85.00) {
-	    wget();
-	    httpd_up = true;
-	  }
-	}
-      }else if(timer3==0) {
-	//10秒超时1小时重试。
+        if (!httpd_up ) {
+          update_disp();
+          get_temp();
+          if (temp[0] < 85.00) {
+            wget();
+            httpd_up = true;
+          }
+        }
+        return;
+      } else if (timer3 == 0) {
+        //10秒超时1小时重试。
         Serial.print(millis());
         Serial.println("ms,not link to ap,reboot 3600s");
-	if(nvram.proc != 0) {
-	  nvram.proc = 0;
-	  nvram.change = 1;
-	}
-	poweroff(3600);
+        if (nvram.proc != 0) {
+          nvram.proc = 0;
+          nvram.change = 1;
+        }
+        poweroff(3600);
         return;
       }
   }

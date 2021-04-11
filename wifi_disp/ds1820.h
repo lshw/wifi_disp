@@ -76,10 +76,10 @@ bool ds_init() {
   SPIFFS.end();
   return true;
 }
-uint32_t last_load_temp=0;
+uint32_t last_load_temp = 0;
 bool get_temp() {
   uint8_t i, n;
-  if(last_load_temp + 200 > millis()) return false;
+  if (last_load_temp + 200 > millis()) return false;
   last_load_temp = millis();
   bool ret = true;
   byte data[12];

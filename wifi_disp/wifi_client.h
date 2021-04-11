@@ -219,7 +219,7 @@ bool http_update()
   Serial.print("下载firmware from ");
   Serial.println(update_url);
   ESPhttpUpdate.onProgress(update_progress);
-  t_httpUpdate_return  ret = ESPhttpUpdate.update(client,update_url);
+  t_httpUpdate_return  ret = ESPhttpUpdate.update(client, update_url);
   update_url = "";
 
   switch (ret) {
