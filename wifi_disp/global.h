@@ -127,6 +127,9 @@ void poweroff(uint32_t sec) {
   system_deep_sleep_set_option(2);
   digitalWrite(LED_BUILTIN, LOW);
   if (sec0 == 0) ht16c21_cmd(0x84, 0x2); //lcd off
+  nvram.proc = 0;
+  nvram.change = 1;
+  save_nvram();
   ESP.deepSleepInstant(sec0, RF_NO_CAL);
   power_off = true;
 }
