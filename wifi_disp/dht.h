@@ -22,8 +22,8 @@ void dht_load() { //阻塞测试
     system_soft_wdt_feed();
     if (test()) break;
   }
-  shidu = mySensor.humidity;
-  wendu = mySensor.temperature;
+  shidu = mySensor.getHumidity();
+  wendu = mySensor.getTemperature();
   Serial.println("型号:" + String(mySensor.getType()) + " 湿度:" + String(shidu) + " 温度" + String(wendu));
 }
 bool dht_loop()
@@ -32,8 +32,8 @@ bool dht_loop()
   if (ds_pin != 0) return false; //v1硬件不带湿度
   if (wendu < -300.0) {
     if (mySensor.read() == DHTLIB_OK) {
-      shidu = mySensor.humidity;
-      wendu = mySensor.temperature;
+      shidu = mySensor.getHumidity();
+      wendu = mySensor.getTemperature();
       Serial.println("型号:" + String(mySensor.getType()) + "湿度:" + String(shidu) + " 温度" + String(wendu));
       return true;
     }
@@ -96,17 +96,26 @@ bool test()
     case DHTLIB_ERROR_CHECKSUM:
       Serial.print("Checksum error,\t");
       break;
-    case DHTLIB_ERROR_TIMEOUT:
-      Serial.print("Time out error,\t");
+    case DHTLIB_ERROR_TIMEOUT_A:
+      Serial.print("Time out A error,\t");
+      break;
+    case DHTLIB_ERROR_TIMEOUT_B:
+      Serial.print("Time out B error,\t");
+      break;
+    case DHTLIB_ERROR_TIMEOUT_C:
+      Serial.print("Time out C error,\t");
+      break;
+    case DHTLIB_ERROR_TIMEOUT_D:
+      Serial.print("Time out D error,\t");
       break;
     default:
       Serial.print("Unknown error,\t");
       break;
   }
   // DISPLAY DATA
-  Serial.print(mySensor.humidity, 1);
+  Serial.print(mySensor.getHumidity(), 1);
   Serial.print(",\t");
-  Serial.print(mySensor.temperature, 1);
+  Serial.print(mySensor.getTemperature(), 1);
   Serial.print(",\t");
   uint32_t duration = stop - start;
   Serial.print(duration);
@@ -114,8 +123,8 @@ bool test()
   Serial.println(mySensor.getType());
 
   if (chk == DHTLIB_OK) {
-    shidu = mySensor.humidity;
-    wendu = mySensor.temperature;
+    shidu = mySensor.getHumidity();
+    wendu = mySensor.getTemperature();
     Serial.println("型号:" + String(mySensor.getType()) + "湿度:" + String(shidu) + " 温度" + String(wendu));
     return true;
   }
