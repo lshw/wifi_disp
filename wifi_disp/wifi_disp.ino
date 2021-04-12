@@ -150,12 +150,18 @@ void setup()
         }
       }
     default:
-      wifi_setup();
       nvram.proc = OTA_MODE;
       nvram.change = 1;
       save_nvram();
       sprintf(disp_buf, " %3.2f ", v);
       disp(disp_buf);
+      wifi_setup();
+      if (dht_setup()) {
+        devices |= HAVE_DHT;
+        devices &= ~HAVE_LORA;
+      } else {
+        devices &= ~HAVE_DHT;
+      }
       if (ds_pin == 0) {
         if (lora_init())
           lora.sleep();

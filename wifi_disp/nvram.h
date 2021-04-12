@@ -4,6 +4,8 @@
 #define NVRAM7_CHARGE 0b1
 #define NVRAM7_URL    0b10
 #define NVRAM7_UPDATE 0b1000
+#define HAVE_DHT 0b1
+#define HAVE_LORA 0b10
 
 struct {
   uint8_t proc;
@@ -11,6 +13,7 @@ struct {
   uint32_t rate;
   uint8_t comset;
   uint8_t change;
+  uint32_t boot_count;
   uint32_t crc32;
 } nvram;
 
