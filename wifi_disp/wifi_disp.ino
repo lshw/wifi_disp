@@ -23,11 +23,23 @@ bool power_in = false;
 uint8_t devices = HAVE_DHT | HAVE_LORA;
 void setup()
 {
-  load_nvram();
+  load_nvram(); //从esp8266的nvram载入数据
   nvram.boot_count++;
+  save_nvram();
   Serial.begin(115200);
   Serial.println("\r\n\r\n\r\n\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b");
-  Serial.println("Software Ver=" VER "\r\nBuildtime=" __DATE__ " " __TIME__);
+#ifdef GIT_COMMIT_ID
+  Serial.println(F("Git Ver=" GIT_COMMIT_ID));
+#endif
+  Serial.print("Software Ver=" VER "\r\nBuildtime=");
+  Serial.print(__YEAR__);
+  Serial.write('-');
+  if(__MONTH__ < 10) Serial.write('0');
+  Serial.print(__MONTH__);
+  Serial.write('-');
+  if(__DAY__ < 10) Serial.write('0');
+  Serial.print(__DAY__);
+  Serial.println(F(" " __TIME__));
   Serial.print("proc="); Serial.println(nvram.proc);
   hostname += String(ESP.getChipId(), HEX);
   WiFi.hostname(hostname);
