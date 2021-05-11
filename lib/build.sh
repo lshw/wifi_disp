@@ -33,7 +33,7 @@ $arduino/arduino-builder \
 -build-path /tmp/build_wifi_disp \
 -warnings=none \
 -build-cache /tmp/cache_wifi_disp \
--prefs=build.warn_data_percentage=75 \
+-prefs build.extra_flags="-DGIT_COMMIT_ID=\"$ver\" -flto" \
 -verbose \
 ./wifi_disp/wifi_disp.ino
 
@@ -52,7 +52,7 @@ $arduino/arduino-builder \
 -build-path /tmp/build_wifi_disp \
 -warnings=none \
 -build-cache /tmp/cache_wifi_disp \
--prefs=build.warn_data_percentage=75 \
+-prefs build.extra_flags="-DGIT_COMMIT_ID=\"$ver\" -flto" \
 -verbose \
 ./wifi_disp/wifi_disp.ino
 

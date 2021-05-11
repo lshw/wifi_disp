@@ -40,6 +40,7 @@ void poweroff(uint32_t sec) {
   if (ds_pin == 0) Serial.println("V2.0");
   else
     Serial.println("V1.0");
+  Serial.println("开机时长:"+String(millis())+"ms");
   if (power_in) Serial.println("有外接电源");
   else Serial.println("无外接电源");
   Serial.flush();
