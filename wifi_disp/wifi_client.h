@@ -39,6 +39,7 @@ void wifi_setup() {
     WiFi.mode(WIFI_STA);
   }
   wifi_set_sleep_type(LIGHT_SLEEP_T);
+  WiFiMulti.run();
   if (SPIFFS.begin()) {
     if (!SPIFFS.exists("/ssid.txt")) {
       fp = SPIFFS.open("/ssid.txt", "w");
