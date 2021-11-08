@@ -23,10 +23,10 @@ bool power_in = false;
 uint8_t devices = HAVE_DHT | HAVE_LORA;
 void setup()
 {
+  Serial.begin(115200);
   load_nvram(); //从esp8266的nvram载入数据
   nvram.boot_count++;
   save_nvram();
-  Serial.begin(115200);
   Serial.println("\r\n\r\n\r\n\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b");
 #ifdef GIT_COMMIT_ID
   Serial.println(F("Git Ver=" GIT_COMMIT_ID));

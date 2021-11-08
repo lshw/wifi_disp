@@ -10,18 +10,21 @@
 struct {
   uint8_t proc;
   uint8_t nvram7;
-  uint32_t rate;
-  uint8_t comset;
   uint8_t change;
   uint32_t boot_count;
+  uint8_t ch;
   uint32_t crc32;
 } nvram;
 
 uint32_t calculateCRC32(const uint8_t *data, size_t length);
+
 void load_nvram() {
   ESP.rtcUserMemoryRead(0, (uint32_t*) &nvram, sizeof(nvram));
   if (nvram.crc32 != calculateCRC32((uint8_t*) &nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
     memset(&nvram, 0, sizeof(nvram));
+  }else {
+   Serial.println("channel=" +String(nvram.ch));
+   WRITE_PERI_REG(0x600011f4, 1 << 16 | nvram.ch);
   }
 }
 void save_nvram() {
