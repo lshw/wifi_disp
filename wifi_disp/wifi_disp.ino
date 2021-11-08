@@ -16,7 +16,7 @@ String hostname = HOSTNAME;
 #include "httpd.h"
 #include "ht16c21.h"
 #include "lora.h"
-#if DHT_HAVE
+#ifdef HAVE_DHT
 #include "dht.h"
 #endif
 bool power_in = false;
@@ -46,12 +46,14 @@ void setup()
   Serial.println("Hostname: " + hostname);
   Serial.flush();
   if (!ds_init() && !ds_init()) ds_init();
+#ifdef HAVE_DHT
   if (dht_setup()) {
     devices |= HAVE_DHT;
     devices &= ~HAVE_LORA;
   } else {
     devices &= ~HAVE_DHT;
   }
+#endif
   get_temp();
   ht16c21_setup();
   get_batt();
@@ -174,7 +176,7 @@ void setup()
         Serial.begin(115200);
         Serial.print("lora version=");
         Serial.println(lora_version);
-#if DHT_HAVE
+#ifdef HAVE_DHT
         dht_setup();
 #endif
       }

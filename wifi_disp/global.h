@@ -34,7 +34,7 @@ float v;
 bool power_off = false;
 void poweroff(uint32_t sec) {
   get_batt();
-#if DHT_HAVE
+#if HAVE_DHT
   void dht_end();
 #endif
   if (ds_pin == 0) Serial.println("V2.0");

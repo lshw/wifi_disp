@@ -42,7 +42,7 @@ void handleRoot() {
                 + "信号:<mark>" + String(WiFi.RSSI()) + "</mark>dbm &nbsp; "
                 + "ip:<mark>" + WiFi.localIP().toString() + "</mark> &nbsp; "
                 + "电池电压:<mark>" + String(v) + "</mark>V &nbsp; ";
-#if DHT_HAVE
+#if HAVE_DHT
     dht_load();
     yield();
     if (wendu > -300.0 && shidu >= 0.0 && shidu <= 100.0)
