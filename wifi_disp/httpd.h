@@ -42,16 +42,16 @@ void handleRoot() {
                 + "信号:<mark>" + String(WiFi.RSSI()) + "</mark>dbm &nbsp; "
                 + "ip:<mark>" + WiFi.localIP().toString() + "</mark> &nbsp; "
                 + "电池电压:<mark>" + String(v) + "</mark>V &nbsp; ";
-#if HAVE_DHT
-    dht_load();
-    yield();
-    if (wendu > -300.0 && shidu >= 0.0 && shidu <= 100.0)
-      wifi_stat += "湿度:<mark>" + String((int8_t)shidu) + "%</mark> &nbsp; " + "温度:<mark>" + String(wendu) + "</mark>&#8451<br>";
-    else
+    if(nvram.have_dht > 0) {
+      dht_load();
+      yield();
+      if (wendu > -300.0 && shidu >= 0.0 && shidu <= 100.0)
+        wifi_stat += "湿度:<mark>" + String((int8_t)shidu) + "%</mark> &nbsp; " + "温度:<mark>" + String(wendu) + "</mark>&#8451<br>";
+      else
+        wifi_stat += "温度:<mark>" + String(temp[0]) + "</mark>&#8451<br>";
+    }else{
       wifi_stat += "温度:<mark>" + String(temp[0]) + "</mark>&#8451<br>";
-#else
-    wifi_stat += "温度:<mark>" + String(temp[0]) + "</mark>&#8451<br>";
-#endif
+   }
   }
   httpd.send(200, "text/html", "<html>"
              "<head>"

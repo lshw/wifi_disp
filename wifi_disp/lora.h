@@ -42,7 +42,21 @@ void lora_receive_loop() {
 bool lora_init() {
   if (lora_version != 255) return true;
   lora.init(2, 1);
-  if (lora_version == 255) return false;
+  if (lora_version == 255) {
+    if(nvram.have_lora > -5) {
+      nvram.change = 1;
+      nvram.have_lora --;
+    }
+    return false;
+  }
+  if(nvram.have_dht > -5) {
+    nvram.have_dht = -5;
+    nvram.change = 1;
+  }
+  if(nvram.have_lora < 1) {
+    nvram.have_lora = 1;
+    nvram.change = 1;
+  }
   lora.idle();    // turn to standby mode
   lora.setFrequency(434500000); //434Mhz
   lora.setRFpara(LR_BW_250k, LR_CODINGRATE_2, 12, LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC

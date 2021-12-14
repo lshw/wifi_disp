@@ -4,14 +4,14 @@
 #define NVRAM7_CHARGE 0b1
 #define NVRAM7_URL    0b10
 #define NVRAM7_UPDATE 0b1000
-#define HAVE_DHT 0b1
-#define HAVE_LORA 0b10
 
 struct {
   uint8_t proc;
   uint8_t nvram7;
   uint8_t change;
   uint32_t boot_count;
+  int8_t  have_dht;  //失败一次就减1, 减到-5就不再测试dht，直接认为没有
+  int8_t  have_lora; //失败一次就减1，减到-5,  设置ota模式， 会清0， 上同
   uint8_t ch;
   uint32_t crc32;
 } nvram;
@@ -23,7 +23,7 @@ void load_nvram() {
   if (nvram.crc32 != calculateCRC32((uint8_t*) &nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
     memset(&nvram, 0, sizeof(nvram));
   }else {
-   Serial.println("channel=" +String(nvram.ch));
+   Serial.println("\r\nwifi channel=" +String(nvram.ch));
    WRITE_PERI_REG(0x600011f4, 1 << 16 | nvram.ch);
   }
 }

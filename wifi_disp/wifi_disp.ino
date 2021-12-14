@@ -16,11 +16,8 @@ String hostname = HOSTNAME;
 #include "httpd.h"
 #include "ht16c21.h"
 #include "lora.h"
-#ifdef HAVE_DHT
 #include "dht.h"
-#endif
 bool power_in = false;
-uint8_t devices = HAVE_DHT | HAVE_LORA;
 void setup()
 {
   Serial.begin(115200);
@@ -49,14 +46,22 @@ void setup()
   Serial.println("Hostname: " + hostname);
   Serial.flush();
   if (!ds_init() && !ds_init()) ds_init();
-#ifdef HAVE_DHT
-  if (dht_setup()) {
-    devices |= HAVE_DHT;
-    devices &= ~HAVE_LORA;
+  
+  if (nvram.have_dht > -5 && dht_setup()) {
+    if(nvram.have_dht < 1) {
+      nvram.have_dht = 1;
+      nvram.change = 1;
+    }
+    if(nvram.have_lora > -5) {
+      nvram.have_lora = -5;
+      nvram.change = 1;
+    }
   } else {
-    devices &= ~HAVE_DHT;
+    if(nvram.have_dht > -5) {
+      nvram.have_dht --;
+      nvram.change = 1;
+    }
   }
-#endif
   get_temp();
   ht16c21_setup();
   get_batt();
@@ -103,7 +108,7 @@ void setup()
       }
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
       if (ds_pin == 0) { //v2.0
-        if (lora_init())
+        if (nvram.have_lora > -5 & lora_init())
           lora.sleep();
         Serial.begin(115200);
       }
@@ -112,6 +117,11 @@ void setup()
       return;
       break;
     case OTA_MODE:
+      if(nvram.have_dht < 0 || nvram.have_lora < 0) {
+        nvram.have_dht = 0;  //清除无dht和lora 的标志， 重新诊断
+        nvram.have_lora = 0;
+        nvram.change = 1;
+      }
       httpd_listen();
       ota_setup();
       wdt_disable();
@@ -123,14 +133,14 @@ void setup()
       }
       disp(" OTA ");
       if (ds_pin == 0) { //v2.0
-        if (lora_init())
+        if (nvram.have_lora > -5 && lora_init())
           lora.sleep();
         Serial.begin(115200);
       }
       ap_on_time = millis() + 200000;
       break;
     case LORA_RECEIVE_MODE:
-      if (ds_pin == 0) {
+      if (ds_pin == 0 && nvram.have_lora > -5) {
         Serial.println("lora  接收模式");
         wdt_disable();
         if (lora_init()) {
@@ -148,7 +158,7 @@ void setup()
         }
       }
     case LORA_SEND_MODE:
-      if (ds_pin == 0) {
+      if (ds_pin == 0 && nvram.have_lora > -5) {
         Serial.println("lora  发送模式");
         wdt_disable();
         if (lora_init()) {
@@ -172,7 +182,7 @@ void setup()
       save_nvram();
       sprintf(disp_buf, " %3.2f ", v);
       disp(disp_buf);
-      if (ds_pin == 0) {
+      if (ds_pin == 0 && nvram.have_lora > -5) {
         if (lora_init())
           lora.sleep();
         Serial.begin(115200);
@@ -221,16 +231,6 @@ void loop()
     return;
   }
   switch (proc) {
-    case LORA_RECEIVE_MODE:
-      if (lora_init())
-        lora_receive_loop();
-      else delay(400);
-      break;
-    case LORA_SEND_MODE:
-      if (lora_init())
-        lora_send_loop();
-      delay(400);
-      break;
     case OTA_MODE:
       httpd_loop();
       ota_loop();
@@ -245,6 +245,20 @@ void loop()
       } else
         ap_loop();
       break;
+    case LORA_RECEIVE_MODE:
+      if (ds_pin == 0 && nvram.have_lora > -5) {
+        if(lora_init())
+          lora_receive_loop();
+        else delay(100);
+      break;
+      }
+    case LORA_SEND_MODE:
+      if (ds_pin == 0 && nvram.have_lora > -5) {
+        if (lora_init())
+          lora_send_loop();
+        delay(400);
+        break;
+      }
     default:
       if (wifi_connected_is_ok()) {
         if (!httpd_up ) {

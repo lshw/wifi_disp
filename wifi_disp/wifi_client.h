@@ -8,11 +8,9 @@
 #include "ds1820.h"
 extern bool power_in;
 bool wifi_connected = false;
-#ifdef HAVE_DHT
 extern float shidu, wendu;
 bool dht_loop(); //不阻塞
 void dht_load(); //阻塞等转换完成
-#endif
 void AP();
 bool http_update();
 void poweroff(uint32_t);
@@ -116,11 +114,11 @@ uint16_t http_get(uint8_t no) {
           + "&power=" + String(power_in)
           + "&change=" + String(nvram.nvram7 & NVRAM7_CHARGE)
           + "&temp=" + String(temp[0]);
-#ifdef HAVE_DHT
-  dht_load();
-  if (wendu > -300.0 && shidu >= 0.0 && shidu <= 100.0)
-    url0 += "&shidu=" + String((int8_t)shidu) + "%," + String(wendu);
-#endif
+  if(nvram.have_dht >= 0){
+    dht_load();
+    if (wendu > -300.0 && shidu >= 0.0 && shidu <= 100.0)
+      url0 += "&shidu=" + String((int8_t)shidu) + "%," + String(wendu);
+  }
   if (dsn[1][0] != 0) {
     url0 += "&temps=";
     for (uint8_t i = 0; i < 32; i++) {
