@@ -86,8 +86,8 @@ bool test()
   uint32_t start = micros();
   int chk = mySensor.read();
   uint32_t stop = micros();
-  Serial.print("vcc="); Serial.print(digitalRead(DHT_VCC));
-  Serial.print(",data="); Serial.println(digitalRead(DHTPIN));
+//  Serial.print("vcc="); Serial.print(digitalRead(DHT_VCC));
+//  Serial.print(",data="); Serial.println(digitalRead(DHTPIN));
 
   switch (chk)
   {
