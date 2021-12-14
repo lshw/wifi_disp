@@ -48,7 +48,7 @@ bool dht_setup()
   digitalWrite(DHT_VCC, HIGH);
   next_load = millis() + 2000;
   Serial.println("STAT\tHUMI\tTEMP\tTIME\tTYPE");
-  if (!test() && !test() && !test() && !test())
+  if (!test())
     return  test();
   return true;
   /*
