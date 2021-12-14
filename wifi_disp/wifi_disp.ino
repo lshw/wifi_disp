@@ -24,6 +24,26 @@ void setup()
   load_nvram(); //从esp8266的nvram载入数据
   nvram.boot_count++;
   nvram.change = 1;
+  proc = nvram.proc; //保存当前模式
+  switch(nvram.proc) { //快速按键进行模式切换
+    case OTA_MODE:
+      nvram.proc = OFF_MODE;
+      break;
+    case OFF_MODE:
+      nvram.proc = LORA_SEND_MODE;
+      break;
+    case LORA_SEND_MODE:
+      nvram.proc = LORA_RECEIVE_MODE;
+      break;
+    case LORA_RECEIVE_MODE:
+      nvram.proc = 0;
+      break;
+    default:
+      nvram.proc = OTA_MODE;
+      break;
+  }
+
+  save_nvram();
   if (nvram.proc == 0 || nvram.proc ==OTA_MODE ) {
     wifi_setup();
   }
@@ -39,9 +59,10 @@ void setup()
   if(__DAY__ < 10) Serial.write('0');
   Serial.print(__DAY__);
   Serial.println(F(" " __TIME__));
-  Serial.print("proc="); Serial.println(nvram.proc);
   hostname += String(ESP.getChipId(), HEX);
   WiFi.hostname(hostname);
+  ht16c21_setup(); //180ms
+  ht16c21_cmd(0x88, 0); //闪烁
   Serial.println("Hostname: " + hostname);
   Serial.flush();
   if (!ds_init() && !ds_init()) ds_init();
@@ -62,7 +83,6 @@ void setup()
     }
   }
   get_temp();
-  ht16c21_setup();
   get_batt();
   _myTicker.attach(1, timer1s);
   Serial.print("电池电压");
@@ -87,7 +107,6 @@ void setup()
     return;
   }
   Serial.flush();
-  proc = nvram.proc;
   if (millis() > 10000) proc = 0; //程序升级后第一次启动
   switch (proc) {
     case OFF_MODE: //OFF
@@ -97,19 +116,10 @@ void setup()
         nvram.change = 1;
       }
       wdt_disable();
-      if (nvram.proc != LORA_SEND_MODE) {
-        nvram.proc = LORA_SEND_MODE;
-        nvram.change = 1;
-        save_nvram(); //4秒之内重启切换功能
-      }
       disp(" OFF ");
       delay(2000);
       disp("-" VER "-");
       delay(2000);
-      if (nvram.proc != 0) {
-        nvram.proc = 0;
-        nvram.change = 1; //4秒之后关机， 重启进proc0
-      }
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
       if (ds_pin == 0) { //v2.0
         if (nvram.have_lora > -5 & lora_init())
@@ -148,14 +158,9 @@ void setup()
         Serial.println("lora  接收模式");
         wdt_disable();
         if (lora_init()) {
-          if (nvram.proc != 0) {
-            nvram.proc = 0;
-            nvram.change = 1;
-          }
           disp("L-" VER);
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
-          save_nvram();
           delay(1000);
           return;
           break;
@@ -166,14 +171,9 @@ void setup()
         Serial.println("lora  发送模式");
         wdt_disable();
         if (lora_init()) {
-          if (nvram.proc != LORA_RECEIVE_MODE) {
-            nvram.proc = LORA_RECEIVE_MODE;
-            nvram.change = 1;
-          }
           disp("S-" VER);
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
-          save_nvram();
           delay(1000);
           return;
           break;
@@ -181,9 +181,6 @@ void setup()
       }
     default:
       Serial.println("测温模式");
-      nvram.proc = OTA_MODE;
-      nvram.change = 1;
-      save_nvram();
       sprintf(disp_buf, " %3.2f ", v);
       disp(disp_buf);
       if (ds_pin == 0 && nvram.have_lora > -5) {
@@ -199,10 +196,6 @@ void setup()
 
 void wput() {
   ht16c21_cmd(0x88, 1); //开始闪烁
-  if (nvram.proc != 0) {
-    nvram.proc = 0;
-    nvram.change = 1;
-  }
   if (timer1 > 0) {
     uint16_t httpCode = wget();
     if (httpCode >= 200 || httpCode < 400) {
@@ -290,6 +283,10 @@ void loop()
   if (run_zmd) {
     run_zmd = false;
     zmd();
+  }
+  if(nvram.proc != 0 && millis() > 5000){//5秒后， 如果重启， 就测温
+    nvram.proc = 0;
+    nvram.change = 1;
   }
   if (nvram.change) save_nvram();
   system_soft_wdt_feed (); //各loop里要根据需要执行喂狗命令
