@@ -91,6 +91,11 @@ void setup()
   if (millis() > 10000) proc = 0; //程序升级后第一次启动
   switch (proc) {
     case OFF_MODE: //OFF
+      if(nvram.have_dht < 0 || nvram.have_lora < 0) {
+        nvram.have_dht = 0;  //清除无dht和lora 的标志， 重新诊断
+        nvram.have_lora = 0;
+        nvram.change = 1;
+      }
       wdt_disable();
       if (nvram.proc != LORA_SEND_MODE) {
         nvram.proc = LORA_SEND_MODE;
