@@ -166,6 +166,7 @@ void setup()
         }
       }
     default:
+      Serial.println("测温模式");
       nvram.proc = OTA_MODE;
       nvram.change = 1;
       save_nvram();
@@ -177,9 +178,6 @@ void setup()
         Serial.begin(115200);
         Serial.print("lora version=");
         Serial.println(lora_version);
-#ifdef HAVE_DHT
-        dht_setup();
-#endif
       }
       timer1 = 10;
   }
@@ -253,7 +251,7 @@ void loop()
           update_disp();
           get_temp();
           if (temp[0] < 85.00) {
-            wget();
+            wput();
             httpd_up = true;
           }
         }
