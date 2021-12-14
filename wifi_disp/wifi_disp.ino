@@ -187,6 +187,10 @@ void setup()
 
 void wput() {
   ht16c21_cmd(0x88, 1); //开始闪烁
+  if (nvram.proc != 0) {
+    nvram.proc = 0;
+    nvram.change = 1;
+  }
   if (timer1 > 0) {
     uint16_t httpCode = wget();
     if (httpCode >= 200 || httpCode < 400) {
@@ -200,20 +204,12 @@ void wput() {
       Serial.print("ms,sleep=");
       Serial.println(next_disp);
       if (millis() < 500) delay(500 - millis());
-      if (nvram.proc != 0) {
-        nvram.proc = 0;
-        nvram.change = 1;
-      }
       save_nvram();
       poweroff(next_disp);
       return;
     } else {
       Serial.print(millis());
       Serial.println("ms,web error,reboot 3600s");
-      if (nvram.proc != 0) {
-        nvram.proc = 0;
-        nvram.change = 1;
-      }
       poweroff(3600);
     }
   }

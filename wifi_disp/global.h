@@ -218,6 +218,10 @@ uint16_t wget() {
     nvram.change = 1;
     httpCode = http_get(nvram.nvram7 & NVRAM7_URL); //再试试另一个的url
   }
+  if (nvram.proc != 0) {
+    nvram.proc = 0;
+    nvram.change = 1;
+  }
   return httpCode;
 }
 
