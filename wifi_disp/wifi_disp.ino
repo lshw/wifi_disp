@@ -23,11 +23,10 @@ void setup()
   Serial.begin(115200);
   load_nvram(); //从esp8266的nvram载入数据
   nvram.boot_count++;
-  save_nvram();
+  nvram.change = 1;
   if (nvram.proc == 0 || nvram.proc ==OTA_MODE ) {
     wifi_setup();
   }
-  Serial.println("\r\n\r\n\r\n\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b");
 #ifdef GIT_COMMIT_ID
   Serial.println(F("Git Ver=" GIT_COMMIT_ID));
 #endif

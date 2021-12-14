@@ -36,7 +36,6 @@ void wifi_setup() {
   } else  { //测温时， 只用client
     WiFi.mode(WIFI_STA);
   }
-  wifi_set_sleep_type(LIGHT_SLEEP_T);
   WiFiMulti.run();
   if (SPIFFS.begin()) {
     if (!SPIFFS.exists("/ssid.txt")) {
@@ -86,6 +85,7 @@ void wifi_setup() {
     fp.close();
     SPIFFS.end();
   }
+ wifi_set_sleep_type(LIGHT_SLEEP_T);
 }
 
 bool wifi_connected_is_ok() {
