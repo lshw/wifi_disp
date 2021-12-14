@@ -27,6 +27,9 @@ void setup()
   load_nvram(); //从esp8266的nvram载入数据
   nvram.boot_count++;
   save_nvram();
+  if (nvram.proc == 0 || nvram.proc ==OTA_MODE ) {
+    wifi_setup();
+  }
   Serial.println("\r\n\r\n\r\n\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b");
 #ifdef GIT_COMMIT_ID
   Serial.println(F("Git Ver=" GIT_COMMIT_ID));
@@ -109,7 +112,6 @@ void setup()
       return;
       break;
     case OTA_MODE:
-      wifi_setup();
       httpd_listen();
       ota_setup();
       wdt_disable();
@@ -169,7 +171,6 @@ void setup()
       save_nvram();
       sprintf(disp_buf, " %3.2f ", v);
       disp(disp_buf);
-      wifi_setup();
       if (ds_pin == 0) {
         if (lora_init())
           lora.sleep();
