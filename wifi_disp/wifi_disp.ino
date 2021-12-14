@@ -25,7 +25,7 @@ void setup()
   nvram.boot_count++;
   nvram.change = 1;
   proc = nvram.proc; //保存当前模式
-  switch(nvram.proc) { //快速按键进行模式切换
+  switch(proc) { //尽快进行模式切换
     case OTA_MODE:
       nvram.proc = OFF_MODE;
       break;
@@ -33,19 +33,44 @@ void setup()
       nvram.proc = LORA_SEND_MODE;
       break;
     case LORA_SEND_MODE:
-      nvram.proc = LORA_RECEIVE_MODE;
-      break;
+      if(nvram.have_lora > -5) {
+        nvram.proc = LORA_RECEIVE_MODE;
+        break;
+      }
     case LORA_RECEIVE_MODE:
-      nvram.proc = 0;
-      break;
+      if(nvram.have_lora > -5) {
+        nvram.proc = 0;
+        break;
+      }
     default:
       nvram.proc = OTA_MODE;
       break;
   }
-
   save_nvram();
-  if (nvram.proc == 0 || nvram.proc ==OTA_MODE ) {
-    wifi_setup();
+  ht16c21_setup(); //180ms
+  ht16c21_cmd(0x88, 1); //闪烁
+
+  switch(proc) { //尽快进行模式切换
+    case OTA_MODE:
+      disp(" OTA ");
+      wifi_setup();
+      break;
+    case OFF_MODE:
+      disp(" OFF ");
+      break;
+    case LORA_SEND_MODE:
+      if(nvram.have_lora > -5) {
+        disp("S-" VER);
+        break;
+      }
+    case LORA_RECEIVE_MODE:
+      if(nvram.have_lora > -5) {
+        disp("L-" VER);
+        break;
+      }
+    default:
+      wifi_setup();
+      break;
   }
 #ifdef GIT_COMMIT_ID
   Serial.println(F("Git Ver=" GIT_COMMIT_ID));
@@ -61,8 +86,6 @@ void setup()
   Serial.println(F(" " __TIME__));
   hostname += String(ESP.getChipId(), HEX);
   WiFi.hostname(hostname);
-  ht16c21_setup(); //180ms
-  ht16c21_cmd(0x88, 0); //闪烁
   Serial.println("Hostname: " + hostname);
   Serial.flush();
   if (!ds_init() && !ds_init()) ds_init();
