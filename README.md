@@ -43,3 +43,22 @@ V2有lora功能:https://item.taobao.com/item.htm?id=601842691823
 模块支持3种通讯模式，2种传统的，和lora模式，频率433-470MHz（433,470是开放频率，可以进行智能家居，物联网等非连续通讯)
 
 第六级，我们要建立开放的基于lora的，低功耗的,低速物联网通讯协议，用无中心的p2p网络实现互联。
+
+编译方法：  
+先安装arduino开发环境， 然后增加esp8266支持, 具体就是开发环境下点设置， 增加开发板管理器的url:https://arduino.esp8266.com/stable/package_esp8266com_index.json   
+然后在开发板管理器里就可以搜到并安装esp8266的支持了，目前的源码需要选择3.0.2的esp8266支持环境  
+在开发板里选ESPDuino(ESP13 Module)  
+MMU选16KB cache 48KB IRAM  
+还要在项目-加载库-库管理-搜索DHTNEW 找到DHTNEW的库 目前最新的0.4.10的版本，可以用  
+就可以编译了。 
+
+但是编译出来的ROM， 可能会出现运行异常，   
+[code]  
+--------------- CUT HERE FOR EXCEPTION DECODER ---------------  
+
+Exception (0):  
+epc1=0x40203959 epc2=0x00000000 epc3=0x00000000 excvaddr=0x00000000 depc=0x00000000  
+[/code]  
+
+用objdump 反编译一下，elf目标文件， 会发现目标文件中， epc1=0x40203959 这个地址， 确实是个非法指令，那么，问题就出在 gcc编译器了，  看了一下编译窗口， 发现 gcc使用了Os优化参数， 优化了目标文件的体积， 尝试改成O0 不做优化,体积大了不少， 但是不发生异常了。 具体需要修改的文件就是 ~/.arduino15/packages/esp8266/hardware/esp8266/3.0.2/platform.txt , 需要修改3处  
+
