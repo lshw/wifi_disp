@@ -31,7 +31,7 @@ mkdir -p /tmp/${me}_build /tmp/${me}_cach
 
 #传递宏定义 GIT_COMMIT_ID 到源码中，源码git版本
 CXXFLAGS="-DGIT_COMMIT_ID=\"$branch-$ver\" "
-
+fqbn="esp8266:esp8266:espduino:ResetMethod=v1,UploadTool=esptool,xtal=160,vt=flash,exception=disabled,stacksmash=disabled,ssl=all,mmu=4816,non32xfer=fast,eesz=4M2M,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=460800 " 
 $arduino/arduino-builder \
 -dump-prefs \
 -logger=machine \
@@ -42,7 +42,7 @@ $arduino/arduino-builder \
 -tools $arduinoset/packages \
 -built-in-libraries $arduino/libraries \
 -libraries $sketchbook/libraries \
--fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,xtal=160,vt=flash,exception=disabled,eesz=4M3M,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=460800 \
+-fqbn=$fqbn \
 -ide-version=10813 \
 -build-path /tmp/${me}_build \
 -warnings=none \
@@ -64,7 +64,7 @@ $arduino/arduino-builder \
 -tools $arduinoset/packages \
 -built-in-libraries $arduino/libraries \
 -libraries $sketchbook/libraries \
--fqbn=esp8266com:esp8266:espduino:ResetMethod=v2,xtal=160,vt=flash,exception=disabled,eesz=4M3M,ip=hb2f,dbg=Disabled,lvl=None____,wipe=none,baud=460800 \
+-fqbn=$fqbn \
 -ide-version=10813 \
 -build-path /tmp/${me}_build \
 -warnings=none \
