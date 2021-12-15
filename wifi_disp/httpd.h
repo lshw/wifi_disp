@@ -2,7 +2,6 @@
 #define __AP_WEB_H__
 #include <ESP8266WebServer.h>
 #include <ArduinoOTA.h>
-#include <DNSServer.h>
 #include "wifi_client.h"
 extern void disp(char *);
 extern String hostname;
@@ -10,7 +9,6 @@ void poweroff(uint32_t);
 float get_batt();
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 
-DNSServer dnsServer;
 ESP8266WebServer httpd(80);
 void http204() {
   httpd.send(204, "", "");
@@ -247,9 +245,6 @@ void AP() {
   WiFi.softAP("disp", "");
   Serial.print("IP地址: ");
   Serial.println(WiFi.softAPIP());
-  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-  dnsServer.start(53, "*", WiFi.softAPIP());
-  Serial.println("泛域名dns服务器启动");
   wifi_set_sleep_type(LIGHT_SLEEP_T);
   yield();
 }
@@ -333,7 +328,6 @@ void httpd_listen() {
 
 uint32_t ms0;
 void ap_loop() {
-  dnsServer.processNextRequest();
   httpd_loop();
   ArduinoOTA.handle();
   yield();

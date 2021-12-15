@@ -1,7 +1,6 @@
 #ifndef __OTA_H__
 #define __OTA_H__
 #include <WiFiUdp.h>
-#include <DNSServer.h>
 #include <ArduinoOTA.h>
 #include "global.h"
 #include "httpd.h"
@@ -11,7 +10,6 @@ extern float get_batt();
 extern uint32_t ap_on_time;
 extern bool power_in;
 extern void poweroff(uint32_t sec);
-extern DNSServer dnsServer;
 void ota_setup() {
   ArduinoOTA.onStart([]() {
     String type;
@@ -69,7 +67,6 @@ void ota_loop() {
     }
   }
   if (millis() < 600000) {
-    dnsServer.processNextRequest();
     ArduinoOTA.handle();
     httpd_loop();
   } else {
