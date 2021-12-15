@@ -21,6 +21,7 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 //0,1-正常 2-OTA 3-off 4-lora接收 5-lora发射
 
 bool wifi_connected_is_ok();
+extern bool connected_is_ok;
 uint16_t http_get(uint8_t);
 bool run_zmd = true;
 #define ZMD_BUF_SIZE 100
@@ -140,7 +141,7 @@ void poweroff(uint32_t sec) {
 }
 void update_disp() {
   uint8_t zmdsize = strlen(zmd_disp);
-  if (wifi_connected_is_ok()) {
+  if (connected_is_ok) {
     if (proc == OTA_MODE) {
       snprintf(zmd_disp, sizeof(zmd_disp), " OTA %s -%s-  ", WiFi.localIP().toString().c_str(), VER);
     } else {
@@ -384,7 +385,7 @@ String fp_gets(File fp) {
 
 void zmd() {  //1s 一次Ticker
   uint8_t i = 0, i0 = 0;
-  if (!wifi_connected_is_ok()) return;
+  if (!connected_is_ok) return;
   zmd_size = strlen(zmd_disp);
   if (zmd_size == 0) return;
   if (zmd_size < zmd_offset) zmd_offset = 0;

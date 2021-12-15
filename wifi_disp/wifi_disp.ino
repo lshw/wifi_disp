@@ -244,8 +244,10 @@ void wput() {
 }
 
 bool httpd_up = false;
+bool connected_is_ok = false;
 void loop()
 {
+  if(!connected_is_ok && wifi_connected_is_ok()) connected_is_ok = true;
   if (power_off) {
     system_soft_wdt_feed ();
     return;
@@ -254,7 +256,7 @@ void loop()
     case OTA_MODE:
       httpd_loop();
       ota_loop();
-      if (wifi_connected_is_ok()) {
+      if (connected_is_ok) {
         if (!httpd_up) {
           wput();
           update_disp();
@@ -280,7 +282,7 @@ void loop()
         break;
       }
     default:
-      if (wifi_connected_is_ok()) {
+      if (connected_is_ok) {
         if (!httpd_up ) {
           update_disp();
           get_temp();
