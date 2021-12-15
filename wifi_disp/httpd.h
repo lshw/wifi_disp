@@ -335,6 +335,7 @@ void ap_loop() {
   if (ms0 < millis()) {
     get_batt();
     system_soft_wdt_feed ();
+    Serial.begin(115200);
     Serial.print("batt:");
     Serial.print(get_batt());
     ms0 = millis() + 1000;
@@ -359,7 +360,7 @@ void ap_loop() {
       }
     }
     yield();
-    if (power_in == 1) {
+    if (power_in == 1) {// 充电控制
       if (ds_pin != 0) digitalWrite(13, HIGH);
       else {
         Serial.flush();
