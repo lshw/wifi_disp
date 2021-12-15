@@ -112,9 +112,10 @@ void handleNotFound() {
     }
   }
   yield();
-  message = "File Not Found\n\n";
+  message = "404 File Not Found\n\n";
   message += "URI: ";
   message += httpd.uri();
+  message += "<br><a href=/>点击进入首页</a>";
   httpd.send ( 404, "text/plain", message );
   httpd.client().stop();
   message = "";
