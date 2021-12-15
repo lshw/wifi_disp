@@ -133,11 +133,6 @@ void setup()
   if (millis() > 10000) proc = 0; //程序升级后第一次启动
   switch (proc) {
     case OFF_MODE: //OFF
-      if(nvram.have_dht < 0 || nvram.have_lora < 0) {
-        nvram.have_dht = 0;  //清除无dht和lora 的标志， 重新诊断
-        nvram.have_lora = 0;
-        nvram.change = 1;
-      }
       wdt_disable();
       disp(" OFF ");
       delay(2000);
@@ -149,16 +144,16 @@ void setup()
           lora.sleep();
         Serial.begin(115200);
       }
-      save_nvram();
-      poweroff(0);
-      return;
-      break;
-    case OTA_MODE:
       if(nvram.have_dht < 0 || nvram.have_lora < 0) {
         nvram.have_dht = 0;  //清除无dht和lora 的标志， 重新诊断
         nvram.have_lora = 0;
         nvram.change = 1;
       }
+      save_nvram();
+      poweroff(0);
+      return;
+      break;
+    case OTA_MODE:
       httpd_listen();
       ota_setup();
       wdt_disable();
