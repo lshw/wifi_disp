@@ -174,7 +174,18 @@ void timer1s() {
   if (proc == OTA_MODE)  {
     if(!connected_is_ok && ap_on_time > millis()) {
       snprintf(disp_buf, sizeof(disp_buf), "AP%3d", (ap_on_time - millis())/1000);
+      Serial.begin(115200);
       disp(disp_buf);
+      if (power_in == 1) {// 充电控制
+        if (ds_pin != 0) digitalWrite(13, HIGH);
+        else {
+          Serial.flush();
+          Serial.end();
+          pinMode(1, OUTPUT);
+          digitalWrite(1, HIGH);
+        }
+      }
+
     } else
       run_zmd = true;
   }
