@@ -245,9 +245,13 @@ void wput() {
 
 bool httpd_up = false;
 bool connected_is_ok = false;
+uint32_t last_check_connected;
 void loop()
 {
-  if(!connected_is_ok && wifi_connected_is_ok()) connected_is_ok = true;
+  if(!connected_is_ok && last_check_connected < millis() &&  wifi_connected_is_ok()) {
+    connected_is_ok = true;
+    last_check_connected = millis() + 1000; //1秒检查一次connected;
+  }
   if (power_off) {
     system_soft_wdt_feed ();
     return;
