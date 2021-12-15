@@ -82,6 +82,7 @@ void handleRoot() {
              "url0:<input maxlength=100  size=30 type=text value='" + get_url(0) + "' name=url><br>"
              "url1:<input maxlength=100  size=30 type=text value='" + get_url(1) + "' name=url1><br>"
              "<input type=submit name=submit value=save>"
+             "&nbsp;<input type=submit name=reboot value='save & reboot'>"
              "</form>"
              "<hr>"
              "<form method='POST' action='/update.php' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
@@ -161,7 +162,11 @@ void httpsave() {
   File fp;
   String url, data;
   SPIFFS.begin();
+  bool reboot_now = false;
   for (uint8_t i = 0; i < httpd.args(); i++) {
+    if (httpd.argName(i).compareTo("reboot") == 0) {
+      reboot_now = true;
+    }
     if (httpd.argName(i).compareTo("data") == 0) {
       data = httpd.arg(i);
       data.trim();
@@ -215,6 +220,12 @@ void httpsave() {
   SPIFFS.end();
   httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/');</script></body></html>");
   yield();
+  if(reboot_now) {
+    nvram.proc = 0;
+    nvram.change = 1;
+    save_nvram();
+    ESP.restart();
+  }
 }
 void AP() {
   // Go into software AP mode.
