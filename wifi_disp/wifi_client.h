@@ -215,7 +215,7 @@ bool http_update()
     save_nvram();
   }
   disp("H UP. ");
-  String update_url = "http://www.anheng.com.cn/wifi_disp.bin";
+  String update_url = "http://www.anheng.com.cn/wifi_disp_new.bin";
   Serial.print("下载firmware from ");
   Serial.println(update_url);
   ESPhttpUpdate.onProgress(update_progress);
