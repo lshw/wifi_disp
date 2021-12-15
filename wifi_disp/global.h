@@ -3,11 +3,12 @@
 #include "config.h"
 #include "nvram.h"
 #include "ht16c21.h"
+#include <time.h>
 #include "Ticker.h"
 #include <ESP8266WiFiMulti.h>
 bool get_temp();
 Ticker _myTicker;
-uint8_t year, month = 1, day = 1, hour = 0, minute = 0, sec = 0;
+struct tm now;
 int16_t update_timeok = 0; //0-马上wget ，-1 关闭，>0  xx分钟后wget
 uint16_t timer1 = 0; //秒 定时测温
 uint16_t timer2 = 0; //秒
@@ -30,6 +31,7 @@ uint8_t zmd_offset = 0, zmd_size = 0;
 char disp_buf[22];
 extern uint8_t ds_pin ;
 extern bool power_in ;
+extern uint32_t ap_on_time;
 float get_batt();
 float v;
 bool power_off = false;
@@ -144,11 +146,6 @@ void update_disp() {
   if (connected_is_ok) {
     if (proc == OTA_MODE) {
       snprintf(zmd_disp, sizeof(zmd_disp), " OTA %s -%s-  ", WiFi.localIP().toString().c_str(), VER);
-    } else {
-      if (year != 0)
-        snprintf(zmd_disp, sizeof(zmd_disp), " 20%02d-%02d-%02d %02d-%02d  %s  ", year, month, day, hour, minute, WiFi.localIP().toString().c_str());
-      else
-        snprintf(zmd_disp, sizeof(zmd_disp), " %s ", WiFi.localIP().toString().c_str());
     }
   } else {
     if (proc == OTA_MODE)
@@ -160,7 +157,6 @@ void update_disp() {
 }
 
 void timer1s() {
-  char mdays;
   if (timer3 > 0) {
     if (timer3 == 1) {
       if (nvram.proc != 0) {
@@ -172,47 +168,16 @@ void timer1s() {
   }
   if (timer1 > 0) timer1--;//定时器1 测温
   if (timer2 > 0) timer2--;//定时器2
-  sec++;
-  if (sec >= 60) {
-    sec = 0;
-    minute++;
-    if (update_timeok > 0) update_timeok--;//定时器2 链接远程服务器
-    if (minute >= 60) {
-      minute = 0;
-      hour++;
-      if (hour >= 24) {
-        hour = 0;
-        day++;
-        if (day >= 28) {
-          mdays = 31;
-          switch (month) {
-            case 4:
-            case 6:
-            case 9:
-            case 11:
-              mdays = 30;
-              break;
-            case 2:
-              if (year % 4 != 0) mdays = 28;
-              else if (year % 100 == 0 && year % 400 != 0) mdays = 28;
-              else mdays = 29;
-              break;
-          }
-          if (day > mdays) {
-            month++;
-            day = 1;
-            if (month > 12) {
-              year++;
-              month = 1;
-            }
-          }
-        }
-      }
-    }
-    get_batt();
-    update_disp();
+  now.tm_sec++;
+  uint8_t min=now.tm_min;
+  mktime(&now);
+  if (proc == OTA_MODE)  {
+    if(!connected_is_ok && ap_on_time > millis()) {
+      snprintf(disp_buf, sizeof(disp_buf), "AP%3d", (ap_on_time - millis())/1000);
+      disp(disp_buf);
+    } else
+      run_zmd = true;
   }
-  if (proc == OTA_MODE)  run_zmd = true;
 }
 
 uint16_t wget() {

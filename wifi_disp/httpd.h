@@ -337,15 +337,7 @@ void ap_loop() {
     system_soft_wdt_feed ();
     Serial.print("batt:");
     Serial.print(get_batt());
-    Serial.print("V,millis()=");
-    Serial.println(ms0);
-    ms0 = (ap_on_time - millis()) / 1000;
-    if (ms0 < 10) sprintf(disp_buf, "AP  %d", ms0);
-    else if (ms0 < 100) sprintf(disp_buf, "AP %d", ms0);
-    else sprintf(disp_buf, "AP%d", ms0);
     ms0 = millis() + 1000;
-    Serial.println(disp_buf);
-    disp(disp_buf);
 
     if ( millis() > ap_on_time) {
       if (power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
