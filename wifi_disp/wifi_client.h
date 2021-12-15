@@ -125,7 +125,7 @@ uint16_t http_get(uint8_t no) {
       if (dsn[i][0] == 0) continue;
       if (i > 0)
         url0 += ",";
-      sprintf(key, "%02x%02x%02x:", dsn[i][0], dsn[i][6], dsn[i][7]);
+      snprintf(key,sizeof(key), "%02x%02x%02x:", dsn[i][0], dsn[i][6], dsn[i][7]);
       url0 += key + String(temp[i]);
     }
   }
@@ -182,7 +182,7 @@ uint16_t http_get(uint8_t no) {
     } else {
 
       if (httpCode > 0)
-        sprintf(disp_buf, ".E %03d", httpCode);
+        snprintf(disp_buf,sizeof(disp_buf), ".E%4d", httpCode);
       disp(disp_buf);
       Serial.print("http error code ");
       Serial.println(httpCode);
@@ -197,7 +197,7 @@ uint16_t http_get(uint8_t no) {
 void update_progress(int cur, int total) {
   char disp_buf[6];
   Serial.printf("HTTP update process at %d of %d bytes...\r\n", cur, total);
-  sprintf(disp_buf, "HUP.%02d", cur * 99 / total);
+  snprintf(disp_buf,sizeof(disp_buf),"HUP.%2d", cur * 99 / total);
   disp(disp_buf);
   ht16c21_cmd(0x88, 1); //闪烁
 }

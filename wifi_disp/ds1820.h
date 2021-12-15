@@ -34,7 +34,7 @@ bool ds_init() {
   if (oneWire.search(dsn[0])) {
     i = 0;
     Serial.print("DS18B20[" + String(i) + "]=");
-    sprintf(key, "%02x%02x%02x%02x%02x%02x%02x%02x", dsn[i][0], dsn[i][1], dsn[i][2], dsn[i][3], dsn[i][4], dsn[i][5], dsn[i][6], dsn[i][7]);
+    snprintf(key, sizeof(key), "%02x%02x%02x%02x%02x%02x%02x%02x", dsn[i][0], dsn[i][1], dsn[i][2], dsn[i][3], dsn[i][4], dsn[i][5], dsn[i][6], dsn[i][7]);
     Serial.println(key);
     i = 1;
   } else {
@@ -51,7 +51,7 @@ bool ds_init() {
       break;
     temp[i] = -999.0;
     Serial.print("DS18B20[" + String(i) + "]=");
-    sprintf(key, "%02x%02x%02x%02x%02x%02x%02x%02x", dsn[i][0], dsn[i][1], dsn[i][2], dsn[i][3], dsn[i][4], dsn[i][5], dsn[i][6], dsn[i][7]);
+    snprintf(key, sizeof(key), "%02x%02x%02x%02x%02x%02x%02x%02x", dsn[i][0], dsn[i][1], dsn[i][2], dsn[i][3], dsn[i][4], dsn[i][5], dsn[i][6], dsn[i][7]);
     Serial.println(key);
   }
   if (dsn[0][0] == 0) {

@@ -114,7 +114,7 @@ void setup()
     Serial.println("外接电源");
   }
   if (v < 3.50 && !power_in) {
-    sprintf(disp_buf, "OFF%f", v);
+    snprintf(disp_buf, sizeof(disp_buf), "OFF%f", v);
     disp(disp_buf); //电压过低
     if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != 0) {
       nvram.nvram7 |= NVRAM7_CHARGE; //充电
@@ -199,7 +199,7 @@ void setup()
       }
     default:
       Serial.println("测温模式");
-      sprintf(disp_buf, " %3.2f ", v);
+      snprintf(disp_buf, sizeof(disp_buf), " %3.2f ", v);
       disp(disp_buf);
       if (ds_pin == 0 && nvram.have_lora > -5) {
         if (lora_init())
