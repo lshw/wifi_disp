@@ -271,7 +271,7 @@ void loop()
         break;
       }
     default:
-      if (connected_is_ok) {
+      if (wifi_connected_is_ok()) {
         if (!httpd_up ) {
           update_disp();
           get_temp();
@@ -299,7 +299,7 @@ void loop()
     run_zmd = false;
     zmd();
   }
-  if(nvram.proc != 0 && millis() > 5000){//5秒后， 如果重启， 就测温
+  if(nvram.proc != 0 && millis() > 5000){//5秒后， 如果重启， 就进入测温程序
     nvram.proc = 0;
     nvram.change = 1;
   }

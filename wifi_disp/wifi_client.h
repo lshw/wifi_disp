@@ -53,7 +53,7 @@ void wifi_setup() {
   } else  { //测温时， 只用client
     WiFi.mode(WIFI_STA);
   }
-  WiFiMulti.run(1500);
+  wifi_set_sleep_type(LIGHT_SLEEP_T);
   if (SPIFFS.begin()) {
     if (!SPIFFS.exists("/ssid.txt")) {
       fp = SPIFFS.open("/ssid.txt", "w");
@@ -99,23 +99,26 @@ void wifi_setup() {
         WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
       }
     }
-    fp.close();
-    SPIFFS.end();
     if(ssid == "")
         WiFiMulti.addAP("test", "cfido.com");
+    WiFiMulti.run();
+    fp.close();
+    SPIFFS.end();
   }
- wifi_set_sleep_type(LIGHT_SLEEP_T);
 }
 bool connected_is_ok = false;
 bool wifi_connected_is_ok() {
   if(connected_is_ok)
     return connected_is_ok;
   if(proc == OTA_MODE && ap_client_linked  && millis() > 10000) return false;  //ota有wifi客户连上来，或者超过10秒没有连上上游AP， 就不再尝试链接AP了
-  if (WiFiMulti.run(1500) == WL_CONNECTED)
+  if (WiFiMulti.run() == WL_CONNECTED)
   {
     connected_is_ok = true;
     ht16c21_cmd(0x88, 0); //停止闪烁
-    nvram.ch =  wifi_get_channel();
+    if(nvram.ch != wifi_get_channel() ){
+      nvram.ch =  wifi_get_channel();
+      nvram.change = 1;
+    }
     return true;
   }
   ht16c21_cmd(0x88, 1); //开始闪烁
