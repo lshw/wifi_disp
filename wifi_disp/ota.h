@@ -51,29 +51,7 @@ void ota_setup() {
   });
   ArduinoOTA.begin();
   wifi_set_sleep_type(LIGHT_SLEEP_T);
-  Serial.println("Ready");
-}
-void ota_loop() {
-  if ( millis() > ap_on_time) {
-    if (power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
-    else {
-      if (nvram.proc != OFF_MODE) {
-        nvram.proc = OFF_MODE;
-        nvram.change = 1;
-        save_nvram();
-      }
-      poweroff(2);
-      return;
-    }
-  }
-  if (millis() < 600000) {
-    ArduinoOTA.handle();
-    httpd_loop();
-  } else {
-    ht16c21_cmd(0x88, 0); //不闪烁
-    ESP.restart();
-  }
-  return;
+  Serial.println("OTA Ready");
 }
 
 #endif //__OTA_H__

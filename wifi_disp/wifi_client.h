@@ -35,6 +35,7 @@ void onClientConnected(const WiFiEventSoftAPModeStationConnected& evt){
   Serial.print("\r\nclient linked:");
   for(uint8_t i = 0; i < 6; i++)
     hexprint(evt.mac[i]);
+  Serial.println();
   Serial.flush();
 }
 

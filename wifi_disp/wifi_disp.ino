@@ -144,8 +144,6 @@ void setup()
       return;
       break;
     case OTA_MODE:
-      httpd_listen();
-      ota_setup();
       wdt_disable();
       if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != OFF_MODE) {
         nvram.nvram7 |= NVRAM7_CHARGE; //充电
@@ -161,6 +159,8 @@ void setup()
       }
       ap_on_time = millis() + 200000;
       wifi_setup();
+      httpd_listen();
+      ota_setup();
       break;
     case LORA_RECEIVE_MODE:
       if (ds_pin == 0 && nvram.have_lora > -5) {
@@ -235,7 +235,7 @@ bool httpd_up = false;
 uint32_t last_check_connected;
 void loop()
 {
-  if(last_check_connected < millis() &&  wifi_connected_is_ok()) {
+  if((proc == OTA_MODE || proc <= 1) && last_check_connected < millis() &&  wifi_connected_is_ok()) {
     last_check_connected = millis() + 1000; //1秒检查一次connected;
   }
   if (power_off) {
@@ -245,7 +245,7 @@ void loop()
   switch (proc) {
     case OTA_MODE:
       httpd_loop();
-      ota_loop();
+      ArduinoOTA.handle();
       if (connected_is_ok) {
         if (!httpd_up) {
           wput();

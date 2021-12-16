@@ -231,17 +231,6 @@ void httpsave() {
   }
 }
 void AP() {
-  // Go into software AP mode.
-  struct softap_config cfgESP;
-
-  Serial.println("AP模式启动.\r\nssid:disp\r\npasswd:none");
-
-  while (!wifi_softap_get_config(&cfgESP)) {
-    system_soft_wdt_feed();
-  }
-  cfgESP.authmode = AUTH_OPEN;//无密码模式
-  wifi_softap_set_config(&cfgESP);
-  delay(10);
   WiFi.softAP("disp", "");
   Serial.print("IP地址: ");
   Serial.println(WiFi.softAPIP());
@@ -250,8 +239,6 @@ void AP() {
   yield();
 }
 void httpd_listen() {
-
-  httpd.begin();
 
   httpd.on("/", handleRoot);
   httpd.on("/save.php", httpsave); //保存设置
