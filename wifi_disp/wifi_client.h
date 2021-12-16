@@ -53,7 +53,7 @@ void wifi_setup() {
   } else  { //测温时， 只用client
     WiFi.mode(WIFI_STA);
   }
-  WiFiMulti.run();
+  WiFiMulti.run(1500);
   if (SPIFFS.begin()) {
     if (!SPIFFS.exists("/ssid.txt")) {
       fp = SPIFFS.open("/ssid.txt", "w");
@@ -106,10 +106,14 @@ void wifi_setup() {
   }
  wifi_set_sleep_type(LIGHT_SLEEP_T);
 }
-
+bool connected_is_ok = false;
 bool wifi_connected_is_ok() {
-  if (WiFiMulti.run() == WL_CONNECTED)
+  if(connected_is_ok)
+    return connected_is_ok;
+  if(proc == OTA_MODE && ap_client_linked  && millis() > 10000) return false;  //ota有wifi客户连上来，或者超过10秒没有连上上游AP， 就不再尝试链接AP了
+  if (WiFiMulti.run(1500) == WL_CONNECTED)
   {
+    connected_is_ok = true;
     ht16c21_cmd(0x88, 0); //停止闪烁
     nvram.ch =  wifi_get_channel();
     return true;

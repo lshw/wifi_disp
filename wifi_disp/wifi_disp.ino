@@ -224,18 +224,17 @@ void wput() {
     } else {
       Serial.print(millis());
       Serial.println("ms,web error,reboot 3600s");
+      ht16c21_cmd(0x88,3); //慢闪烁
       poweroff(3600);
     }
   }
 }
 
 bool httpd_up = false;
-bool connected_is_ok = false;
 uint32_t last_check_connected;
 void loop()
 {
-  if(!connected_is_ok && last_check_connected < millis() &&  wifi_connected_is_ok()) {
-    connected_is_ok = true;
+  if(last_check_connected < millis() &&  wifi_connected_is_ok()) {
     last_check_connected = millis() + 1000; //1秒检查一次connected;
   }
   if (power_off) {
