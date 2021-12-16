@@ -285,6 +285,7 @@ void loop()
         //10秒超时1小时重试。
         Serial.print(millis());
         Serial.println("ms,not link to ap,reboot 3600s");
+        ht16c21_cmd(0x88,3); //慢闪烁
         if (nvram.proc != 0) {
           nvram.proc = 0;
           nvram.change = 1;
