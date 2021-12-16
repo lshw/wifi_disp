@@ -139,6 +139,7 @@ uint16_t http_get(uint8_t no) {
           + "&rssi=" + String(WiFi.RSSI())
           + "&power=" + String(power_in)
           + "&change=" + String(nvram.nvram7 & NVRAM7_CHARGE)
+          + "&ms=" + String(millis())
           + "&temp=" + String(temp[0]);
   if(nvram.have_dht >= 0){
     dht_load();
