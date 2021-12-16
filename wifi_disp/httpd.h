@@ -113,7 +113,7 @@ void handleNotFound() {
   message = "404 File Not Found\n\n";
   message += "URI: ";
   message += httpd.uri();
-  message += "<br><a href=/><button>点击进入首页</button></a>";
+  message += "<br><a href=/?"+String(millis())+"><button>点击进入首页</button></a>";
   httpd.send(200, "text/html", "<html>"
              "<head>"
              "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
@@ -158,7 +158,7 @@ void http_add_ssid() {
   fp.println(data);
   fp.close();
   SPIFFS.end();
-  httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/');</script></body></html>");
+  httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/?"+String(millis())+"');</script></body></html>");
   yield();
 }
 void httpsave() {
