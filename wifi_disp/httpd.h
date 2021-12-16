@@ -34,12 +34,13 @@ void handleRoot() {
     wifi_scan += "<br>";
   }
   yield();
-  if (WiFiMulti.run() == WL_CONNECTED) {
+  if (connected_is_ok) {
     wifi_stat = "wifi已连接 ssid:<mark>" + String(WiFi.SSID()) + "</mark> &nbsp; "
                 + "ap:<mark>" + WiFi.BSSIDstr() + "</mark> &nbsp; "
                 + "信号:<mark>" + String(WiFi.RSSI()) + "</mark>dbm &nbsp; "
                 + "ip:<mark>" + WiFi.localIP().toString() + "</mark> &nbsp; "
                 + "电池电压:<mark>" + String(v) + "</mark>V &nbsp; ";
+  }
     if(nvram.have_dht > 0) {
       dht_load();
       yield();
@@ -49,8 +50,7 @@ void handleRoot() {
         wifi_stat += "温度:<mark>" + String(temp[0]) + "</mark>&#8451<br>";
     }else{
       wifi_stat += "温度:<mark>" + String(temp[0]) + "</mark>&#8451<br>";
-   }
-  }
+    }
   httpd.send(200, "text/html", "<html>"
              "<head>"
              "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
