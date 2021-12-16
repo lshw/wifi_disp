@@ -19,11 +19,27 @@ ESP8266WiFiMulti WiFiMulti;
 WiFiClient client;
 HTTPClient http;
 String ssid, passwd;
+bool ap_client_linked = false;
 uint8_t hex2ch(char dat) {
   dat |= 0x20; //41->61 A->a
   if (dat >= 'a') return dat - 'a' + 10;
   return dat - '0';
 }
+void hexprint(uint8_t dat) {
+  if(dat <0x10) Serial.write('0');
+  Serial.print(dat,HEX);
+}
+void onClientConnected(const WiFiEventSoftAPModeStationConnected& evt){
+  ap_client_linked = true;
+  Serial.begin(115200);
+  Serial.print("\r\nclient linked:");
+  for(uint8_t i = 0; i < 6; i++)
+    hexprint(evt.mac[i]);
+  Serial.flush();
+}
+
+WiFiEventHandler ConnectedHandler;
+
 void wifi_setup() {
   File fp;
   uint32_t i;
@@ -33,6 +49,7 @@ void wifi_setup() {
   if (proc == OTA_MODE) { //ota时要 ap 和 client
     WiFi.mode(WIFI_AP_STA);
     AP();
+    ConnectedHandler = WiFi.onSoftAPModeStationConnected(&onClientConnected);
   } else  { //测温时， 只用client
     WiFi.mode(WIFI_STA);
   }

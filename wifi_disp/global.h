@@ -31,6 +31,7 @@ uint8_t zmd_offset = 0, zmd_size = 0;
 char disp_buf[22];
 extern uint8_t ds_pin ;
 extern bool power_in ;
+extern bool ap_client_linked ;
 extern uint32_t ap_on_time;
 float get_batt();
 float v;
