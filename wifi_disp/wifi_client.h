@@ -119,6 +119,13 @@ bool wifi_connected_is_ok() {
       nvram.ch =  wifi_get_channel();
       nvram.change = 1;
     }
+
+    uint8_t ap_id=wifi_station_get_current_ap_id();
+    struct station_config config[5];
+    wifi_station_get_ap_info(config);
+    config[ap_id].bssid_set = 1; //同名ap，mac地址不同
+    wifi_station_set_config(&config[ap_id]); //保存成功的ssid,用于下次通讯
+
     return true;
   }
   ht16c21_cmd(0x88, 1); //开始闪烁

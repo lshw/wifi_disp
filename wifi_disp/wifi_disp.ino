@@ -27,6 +27,7 @@ void setup()
 {
   Serial.begin(115200);
   load_nvram(); //从esp8266的nvram载入数据
+  wifi_station_connect();
   nvram.boot_count++;
   nvram.change = 1;
   proc = nvram.proc; //保存当前模式
@@ -35,7 +36,6 @@ void setup()
       nvram.proc = OFF_MODE;
       init1();
       disp(" OTA ");
-      wifi_setup();
       break;
     case OFF_MODE:
       nvram.proc = LORA_SEND_MODE;
@@ -59,7 +59,6 @@ void setup()
     default:
       nvram.proc = OTA_MODE;
       init1();
-      wifi_setup();
       break;
   }
 
@@ -161,6 +160,7 @@ void setup()
         Serial.begin(115200);
       }
       ap_on_time = millis() + 200000;
+      wifi_setup();
       break;
     case LORA_RECEIVE_MODE:
       if (ds_pin == 0 && nvram.have_lora > -5) {
@@ -192,6 +192,7 @@ void setup()
       Serial.println("测温模式");
       snprintf(disp_buf, sizeof(disp_buf), " %3.2f ", v);
       disp(disp_buf);
+      wifi_setup();
       if (ds_pin == 0 && nvram.have_lora > -5) {
         if (lora_init())
           lora.sleep();
