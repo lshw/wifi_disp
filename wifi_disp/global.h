@@ -176,6 +176,7 @@ void timer1s() {
       snprintf(disp_buf, sizeof(disp_buf), "AP%3d", (ap_on_time - millis())/1000);
       Serial.begin(115200);
       disp(disp_buf);
+      system_soft_wdt_feed ();
       if (power_in == 1) {// 充电控制
         if (ds_pin != 0) digitalWrite(13, HIGH);
         else {

@@ -245,6 +245,7 @@ void AP() {
   WiFi.softAP("disp", "");
   Serial.print("IP地址: ");
   Serial.println(WiFi.softAPIP());
+  Serial.flush();
   wifi_set_sleep_type(LIGHT_SLEEP_T);
   yield();
 }
@@ -336,7 +337,7 @@ void ap_loop() {
     system_soft_wdt_feed ();
     Serial.begin(115200);
     Serial.print("batt:");
-    Serial.print(get_batt());
+    Serial.println(get_batt());
     ms0 = millis() + 1000;
 
     if ( millis() > ap_on_time) {
