@@ -169,9 +169,8 @@ void timer1s() {
   }
   if (timer1 > 0) timer1--;//定时器1 测温
   if (timer2 > 0) timer2--;//定时器2
-  now.tm_sec++;
-  uint8_t min=now.tm_min;
-  mktime(&now);
+  //now.tm_sec++;
+  //mktime(&now);
   if (proc == OTA_MODE)  {
     if(!connected_is_ok && ap_on_time > millis()) {
       snprintf(disp_buf, sizeof(disp_buf), "AP%3d", (ap_on_time - millis())/1000);
