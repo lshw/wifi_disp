@@ -18,6 +18,11 @@ String hostname = HOSTNAME;
 #include "lora.h"
 #include "dht.h"
 bool power_in = false;
+void init1(){
+  save_nvram();
+  ht16c21_setup(); //180ms
+  ht16c21_cmd(0x88, 1); //闪烁
+}
 void setup()
 {
   Serial.begin(115200);
@@ -28,50 +33,36 @@ void setup()
   switch(proc) { //尽快进行模式切换
     case OTA_MODE:
       nvram.proc = OFF_MODE;
-      break;
-    case OFF_MODE:
-      nvram.proc = LORA_SEND_MODE;
-      break;
-    case LORA_SEND_MODE:
-      if(nvram.have_lora > -5) {
-        nvram.proc = LORA_RECEIVE_MODE;
-        break;
-      }
-    case LORA_RECEIVE_MODE:
-      if(nvram.have_lora > -5) {
-        nvram.proc = 0;
-        break;
-      }
-    default:
-      nvram.proc = OTA_MODE;
-      break;
-  }
-  save_nvram();
-  ht16c21_setup(); //180ms
-  ht16c21_cmd(0x88, 1); //闪烁
-
-  switch(proc) { //尽快进行模式切换
-    case OTA_MODE:
+      init1();
       disp(" OTA ");
       wifi_setup();
       break;
     case OFF_MODE:
+      nvram.proc = LORA_SEND_MODE;
+      init1();
       disp(" OFF ");
       break;
     case LORA_SEND_MODE:
       if(nvram.have_lora > -5) {
+        nvram.proc = LORA_RECEIVE_MODE;
+        init1();
         disp("S-" VER);
         break;
       }
     case LORA_RECEIVE_MODE:
       if(nvram.have_lora > -5) {
+        nvram.proc = 0;
+        init1();
         disp("L-" VER);
         break;
       }
     default:
+      nvram.proc = OTA_MODE;
+      init1();
       wifi_setup();
       break;
   }
+
 #ifdef GIT_COMMIT_ID
   Serial.println(F("Git Ver=" GIT_COMMIT_ID));
 #endif
