@@ -318,6 +318,12 @@ String get_url(uint8_t no) {
     }
   }
   SPIFFS.end();
+  if(ret == ""){
+  if(no == 0 || no == '0')
+    ret=DEFAULT_URL0;
+  else
+    ret=DEFAULT_URL1;
+  }
   return ret;
 }
 String get_ssid() {
