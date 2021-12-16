@@ -84,6 +84,8 @@ void wifi_setup() {
     }
     fp.close();
     SPIFFS.end();
+    if(ssid == "")
+        WiFiMulti.addAP("test", "cfido.com");
   }
  wifi_set_sleep_type(LIGHT_SLEEP_T);
 }
