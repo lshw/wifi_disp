@@ -283,6 +283,7 @@ void httpd_listen() {
   }, []() {
     HTTPUpload& upload = httpd.upload();
     if (upload.status == UPLOAD_FILE_START) {
+      ht16c21_cmd(0x88, 0); //停闪烁
       Serial.setDebugOutput(true);
       WiFiUDP::stopAll();
       Serial.printf("Update: %s\r\n", upload.filename.c_str());

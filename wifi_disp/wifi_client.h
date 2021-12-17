@@ -37,6 +37,7 @@ void onClientConnected(const WiFiEventSoftAPModeStationConnected& evt){
     hexprint(evt.mac[i]);
   Serial.println();
   Serial.flush();
+  ht16c21_cmd(0x88, 0); //停止闪烁
 }
 
 WiFiEventHandler ConnectedHandler;
@@ -133,7 +134,8 @@ bool wifi_connected_is_ok() {
 
     return true;
   }
-  ht16c21_cmd(0x88, 1); //开始闪烁
+  if(proc != OTA_MODE)
+    ht16c21_cmd(0x88, 1); //开始闪烁
   return false;
 }
 
@@ -198,6 +200,7 @@ uint16_t http_get(uint8_t no) {
               && disp_buf[3] == 'A'
               && disp_buf[4] == 'T'
               && disp_buf[5] == 'E') {
+          ht16c21_cmd(0x88, 0); //停闪烁
           SPIFFS.begin();
           if (http_update() == false)
             http_update();
@@ -237,8 +240,8 @@ void update_progress(int cur, int total) {
   char disp_buf[6];
   Serial.printf("HTTP update process at %d of %d bytes...\r\n", cur, total);
   snprintf(disp_buf,sizeof(disp_buf),"HUP.%2d", cur * 99 / total);
+  ht16c21_cmd(0x88, 0); //停闪烁
   disp(disp_buf);
-  ht16c21_cmd(0x88, 1); //闪烁
 }
 
 bool http_update()
