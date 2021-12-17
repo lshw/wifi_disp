@@ -410,5 +410,38 @@ void zmd() {  //1s 一次Ticker
                  +(__DATE__[5]-'0'))
 
 
+void  wifi_set_add(const char * wps_ssid, const char * wps_password){
+  File fp;
+  int8_t mh_offset;
+  String wifi_sets, line;
+  if(wps_ssid[0] == 0) return;
+  if (SPIFFS.begin()) {
+    fp = SPIFFS.open("/ssid.txt", "r");
+    wifi_sets = String(wps_ssid) + ":" + String(wps_password) + "\r\n";
+    if (fp) {
+      while(fp.available()) {
+        line = fp.readStringUntil('\n');
+        line.trim();
+        if(line == "")
+          continue;
+        if(line.length() > 110)
+          line = line.substring(0, 110);
+        mh_offset = line.indexOf(':');
+        if(mh_offset < 2) continue;
+        if(line.substring(0,mh_offset) == wps_ssid)
+          continue;
+        else
+          wifi_sets += line + "\r\n";
+      }
+      fp.close();
+    }
+    fp = SPIFFS.open("/ssid.txt", "w");
+    if (fp) {
+      fp.print(wifi_sets);
+      fp.close();
+    }
+    SPIFFS.end();
+  }
+}
 
 #endif
