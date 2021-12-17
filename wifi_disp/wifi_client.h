@@ -51,6 +51,10 @@ void wifi_setup() {
     WiFi.mode(WIFI_AP_STA);
     AP();
     ConnectedHandler = WiFi.onSoftAPModeStationConnected(&onClientConnected);
+    dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+    dnsServer.start(53, "*", WiFi.softAPIP());
+    Serial.println("泛域名dns服务器启动");
+
   } else  { //测温时， 只用client
     WiFi.mode(WIFI_STA);
   }

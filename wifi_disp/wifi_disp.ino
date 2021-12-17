@@ -246,6 +246,8 @@ void loop()
     case OTA_MODE:
       httpd_loop();
       ArduinoOTA.handle();
+      if(ap_client_linked)
+        dnsServer.processNextRequest();
       if (connected_is_ok) {
         if (!httpd_up) {
           wput();

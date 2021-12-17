@@ -6,8 +6,10 @@
 #include <time.h>
 #include "Ticker.h"
 #include <ESP8266WiFiMulti.h>
+#include <DNSServer.h>
 bool get_temp();
 Ticker _myTicker;
+DNSServer dnsServer;
 struct tm now;
 int16_t update_timeok = 0; //0-马上wget ，-1 关闭，>0  xx分钟后wget
 uint16_t timer1 = 0; //秒 定时测温
