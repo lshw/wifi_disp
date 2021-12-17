@@ -4,12 +4,7 @@
 #include <ArduinoOTA.h>
 #include "global.h"
 #include "httpd.h"
-uint8_t ip_offset, ip_len;
 extern void disp(char *);
-extern float get_batt();
-extern uint32_t ap_on_time;
-extern bool power_in;
-extern void poweroff(uint32_t sec);
 void ota_setup() {
   ArduinoOTA.onStart([]() {
     String type;

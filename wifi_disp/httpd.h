@@ -314,48 +314,7 @@ void httpd_listen() {
 }
 #define httpd_loop() httpd.handleClient()
 
-uint32_t ms0;
-void ap_loop() {
-  httpd_loop();
-  ArduinoOTA.handle();
-  yield();
-  if (ms0 < millis()) {
-    get_batt();
-    system_soft_wdt_feed ();
-    Serial.begin(115200);
-    Serial.print("batt:");
-    Serial.println(get_batt());
-    ms0 = millis() + 1000;
+void ota_loop() {
 
-    if ( millis() > ap_on_time) {
-      if (power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
-      else {
-        Serial.print("batt:");
-        Serial.print(v);
-        Serial.print("V,millis()=");
-        Serial.println(millis());
-        Serial.println("power down");
-        if (nvram.proc != 0) {
-          nvram.proc = 0;
-          nvram.change = 1;
-          save_nvram();
-        }
-        disp("00000");
-        ht16c21_cmd(0x84, 0);
-        httpd.close();
-        poweroff(3600);
-      }
-    }
-    yield();
-    if (power_in == 1) {// 充电控制
-      if (ds_pin != 0) digitalWrite(13, HIGH);
-      else {
-        Serial.flush();
-        Serial.end();
-        pinMode(1, OUTPUT);
-        digitalWrite(1, HIGH);
-      }
-    }
-  }
 }
 #endif //__AP_WEB_H__

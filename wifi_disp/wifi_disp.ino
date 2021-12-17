@@ -235,17 +235,36 @@ bool httpd_up = false;
 uint32_t last_check_connected;
 void loop()
 {
-  if((proc == OTA_MODE || proc <= 1) && last_check_connected < millis() &&  wifi_connected_is_ok()) {
-    last_check_connected = millis() + 1000; //1秒检查一次connected;
-  }
   if (power_off) {
     system_soft_wdt_feed ();
     return;
   }
+  if((proc == OTA_MODE || proc <= 1) && last_check_connected < millis() &&  wifi_connected_is_ok()) {
+    last_check_connected = millis() + 1000; //1秒检查一次connected;
+    if ( millis() > ap_on_time && power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
+    if ( millis() > ap_on_time) {
+      Serial.print("batt:");
+      Serial.print(get_batt());
+      Serial.print("V,millis()=");
+      Serial.println(millis());
+      Serial.println("power down");
+      if (nvram.proc != 0) {
+	nvram.proc = 0;
+	nvram.change = 1;
+	save_nvram();
+      }
+      disp("00000");
+      ht16c21_cmd(0x84, 0);
+      httpd.close();
+      poweroff(3600);
+    }
+  }
   switch (proc) {
     case OTA_MODE:
-      httpd_loop();
-      ArduinoOTA.handle();
+      if(ap_client_linked || connected_is_ok) {
+        httpd_loop();
+        ArduinoOTA.handle();
+      }
       if(ap_client_linked)
         dnsServer.processNextRequest();
       if (connected_is_ok) {
@@ -256,8 +275,7 @@ void loop()
           httpd_up = true;
           httpd_listen();
         }
-      } else
-        ap_loop();
+      }
       break;
     case LORA_RECEIVE_MODE:
       if (ds_pin == 0 && nvram.have_lora > -5) {
