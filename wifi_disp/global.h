@@ -178,6 +178,10 @@ void timer1s() {
       ap_on_time = millis() + 10000;
     if(!connected_is_ok && ap_on_time > millis()) {
       snprintf(disp_buf, sizeof(disp_buf), "AP%3d", (ap_on_time - millis())/1000);
+      if(ota_status == 0){
+        disp_buf[0]='P';
+        disp_buf[1]='S';
+      }
       Serial.begin(115200);
       disp(disp_buf);
       system_soft_wdt_feed ();
