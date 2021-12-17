@@ -123,10 +123,9 @@ void handleNotFound() {
   message = "";
 }
 void http_add_ssid() {
-  File fp;
-  String ssid, data;
+  String data;
   char ch;
-  SPIFFS.begin();
+  int8_t mh_offset;
   for (uint8_t i = 0; i < httpd.args(); i++) {
     if (httpd.argName(i).compareTo("data") == 0) {
       data = httpd.arg(i);
@@ -134,30 +133,14 @@ void http_add_ssid() {
       data.replace("\xef\xbc\x9a", ":"); //utf8 :
       data.replace("\xa3\xba", ":"); //gbk :
       data.replace("\xa1\x47", ":"); //big5 :
+      break;
     }
   }
   if (data == "") return;
-  fp = SPIFFS.open("/ssid.txt", "r");
-  if (fp) {
-    uint16_t Fsize = fp.size();
-    ssid = "";
-    for (uint16_t i = 0; i < Fsize; i++) {
-      ch = fp.read();
-      if (ch == 0xd || ch == 0xa ) {
-        if (ssid != "" && ssid != data) { //忽略空行或者重复
-          data += "\r\n" + ssid;
-        }
-        ssid = "";
-        continue;
-      } else ssid += ch;
-    }
-    fp.close();
-  }
-  SPIFFS.remove("/ssid.txt");
-  fp = SPIFFS.open("/ssid.txt", "w");
-  fp.println(data);
-  fp.close();
-  SPIFFS.end();
+  mh_offset = data.indexOf(':');
+  if(mh_offset < 2) return;
+
+  wifi_set_add(data.substring(0, mh_offset).c_str(), data.substring(mh_offset + 1).c_str());
   httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/?"+String(millis())+"');</script></body></html>");
   yield();
 }
