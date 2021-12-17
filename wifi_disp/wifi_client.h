@@ -61,6 +61,7 @@ void wifi_setup() {
   uint32_t i;
   char buf[3];
   char ch;
+  uint8_t count = 0;
   boolean is_ssid = true;
   WiFi.mode(WIFI_STA);
   wifi_set_sleep_type(LIGHT_SLEEP_T);
@@ -104,25 +105,26 @@ void wifi_setup() {
         }
       }
       if (ssid != "" && passwd != "") {
+        if(count < 5) count ++;
         Serial.print("Ssid:"); Serial.println(ssid);
         Serial.print("Passwd:"); Serial.println(passwd);
         WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
       }
     }
-    if(ssid == "")
+    if(count == 0)
         WiFiMulti.addAP("test", "cfido.com");
-    WiFiMulti.run();
     fp.close();
     SPIFFS.end();
   }
+    WiFiMulti.run(5000);
+    wifi_connected_is_ok();
 }
 bool connected_is_ok = false;
 bool wifi_connected_is_ok() {
   if(connected_is_ok)
     return connected_is_ok;
   if(proc == OTA_MODE && ap_client_linked  && millis() > 10000) return false;  //ota有wifi客户连上来，或者超过10秒没有连上上游AP， 就不再尝试链接AP了
-  if (WiFiMulti.run() == WL_CONNECTED)
-  {
+      if(wifi_station_get_connect_status() == STATION_GOT_IP) {
     connected_is_ok = true;
     ht16c21_cmd(0x88, 0); //停止闪烁
     if(nvram.ch != wifi_get_channel() ){

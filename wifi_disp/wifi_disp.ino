@@ -160,7 +160,7 @@ void setup()
       }
       wifi_setup();
       delay(1500);
-      if(wifi_station_get_connect_status()!=5) {
+      if(wifi_station_get_connect_status() != STATION_GOT_IP) {
         ap_on_time = millis() + 30000;  //WPS 20秒
 	if(WiFi.beginWPSConfig()){
           delay(1000);
@@ -172,14 +172,12 @@ void setup()
 	  wifi_station_get_ap_info(config);
           strncpy(wps_ssid,(char *)config[ap_id].ssid,32);
           strncpy(wps_password,(char *)config[ap_id].password,64);
-
 	  config[ap_id].bssid_set = 1; //同名ap，mac地址不同
-	  Serial.printf("ssid:%s,password:%s\r\n",wps_ssid,wps_password);
           wifi_station_set_config(&config[ap_id]); //保存成功的ssid,用于下次通讯
           wifi_set_add(wps_ssid,wps_password);
        }
       }
-      if(wifi_station_get_connect_status()!=5) {
+      if(wifi_station_get_connect_status() != STATION_GOT_IP) {
       AP();
       ota_status = 1;
       get_batt();
@@ -230,6 +228,7 @@ void setup()
         Serial.println(lora_version);
       }
       timer1 = 10;
+      break;
   }
 }
 
