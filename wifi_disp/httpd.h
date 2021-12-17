@@ -79,7 +79,7 @@ void handleRoot() {
              "url0:<input maxlength=100  size=30 type=text value='" + get_url(0) + "' name=url><br>"
              "url1:<input maxlength=100  size=30 type=text value='" + get_url(1) + "' name=url1><br>"
              "<input type=submit name=submit value=save>"
-             "&nbsp;<input type=submit name=reboot value='save & reboot'>"
+             "&nbsp;<input type=submit name=reboot value='reboot'>"
              "</form>"
              "<hr>"
              "<form method='POST' action='/update.php' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
