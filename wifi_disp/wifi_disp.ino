@@ -370,6 +370,7 @@ bool smart_config() {
   Serial.println("SmartConfig start");
   for(uint8_t i = 0; i < 100; i++){
     if(WiFi.smartConfigDone()) {
+      wifi_set_clean();
       wifi_set_add(WiFi.SSID().c_str(), WiFi.psk().c_str());
       Serial.println("OK");
       return true;

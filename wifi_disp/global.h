@@ -416,7 +416,12 @@ void zmd() {  //1s 一次Ticker
 #define __DAY__ ((__DATE__[4]==' '?0:__DATE__[4]-'0')*10 \
                  +(__DATE__[5]-'0'))
 
-
+void wifi_set_clean() {
+  if (SPIFFS.begin()) {
+    SPIFFS.remove("/ssid.txt");
+    SPIFFS.end();
+  }
+}
 void  wifi_set_add(const char * wps_ssid, const char * wps_password){
   File fp;
   int8_t mh_offset;
