@@ -57,6 +57,7 @@ void setup()
         break;
       }
     default:
+      proc = 0;//让后面2个lora在不存在的时候，修正为proc=0
       nvram.proc = OTA_MODE;
       init1();
       break;
