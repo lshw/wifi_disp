@@ -14,7 +14,6 @@ void http204() {
   httpd.send(204, "", "");
   httpd.client().stop();
 }
-uint32_t ap_on_time = 120000;
 void handleRoot() {
   String wifi_stat, wifi_scan;
   String ssid;
@@ -212,14 +211,6 @@ void httpsave() {
     save_nvram();
     ESP.restart();
   }
-}
-void AP() {
-  WiFi.softAP("disp", "");
-  Serial.print("IP地址: ");
-  Serial.println(WiFi.softAPIP());
-  Serial.flush();
-  wifi_set_sleep_type(LIGHT_SLEEP_T);
-  yield();
 }
 void httpd_listen() {
 

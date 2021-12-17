@@ -42,23 +42,27 @@ void onClientConnected(const WiFiEventSoftAPModeStationConnected& evt){
 
 WiFiEventHandler ConnectedHandler;
 
+void AP() {
+  WiFi.mode(WIFI_AP_STA); //开AP
+  WiFi.softAP("disp", "");
+  Serial.print("IP地址: ");
+  Serial.println(WiFi.softAPIP());
+  Serial.flush();
+  ConnectedHandler = WiFi.onSoftAPModeStationConnected(&onClientConnected);
+  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+  dnsServer.start(53, "*", WiFi.softAPIP());
+  Serial.println("泛域名dns服务器启动");
+  wifi_set_sleep_type(LIGHT_SLEEP_T);
+  yield();
+}
+
 void wifi_setup() {
   File fp;
   uint32_t i;
   char buf[3];
   char ch;
   boolean is_ssid = true;
-  if (proc == OTA_MODE) { //ota时要 ap 和 client
-    WiFi.mode(WIFI_AP_STA);
-    AP();
-    ConnectedHandler = WiFi.onSoftAPModeStationConnected(&onClientConnected);
-    dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-    dnsServer.start(53, "*", WiFi.softAPIP());
-    Serial.println("泛域名dns服务器启动");
-
-  } else  { //测温时， 只用client
-    WiFi.mode(WIFI_STA);
-  }
+  WiFi.mode(WIFI_STA);
   wifi_set_sleep_type(LIGHT_SLEEP_T);
   if (SPIFFS.begin()) {
     if (!SPIFFS.exists("/ssid.txt")) {

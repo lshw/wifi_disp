@@ -12,6 +12,7 @@ Ticker _myTicker;
 DNSServer dnsServer;
 struct tm now;
 int16_t update_timeok = 0; //0-马上wget ，-1 关闭，>0  xx分钟后wget
+uint8_t ota_status = 0; //0:wps, 1:ap
 uint16_t timer1 = 0; //秒 定时测温
 uint16_t timer2 = 0; //秒
 uint8_t timer3 = 10;
@@ -34,7 +35,7 @@ char disp_buf[22];
 extern uint8_t ds_pin ;
 extern bool power_in ;
 extern bool ap_client_linked ;
-extern uint32_t ap_on_time;
+uint32_t ap_on_time = 200000;
 float get_batt();
 float v;
 bool power_off = false;
@@ -173,6 +174,8 @@ void timer1s() {
   //now.tm_sec++;
   //mktime(&now);
   if (proc == OTA_MODE)  {
+    if(ota_status == 0  && ap_on_time < millis())
+      ap_on_time = millis() + 10000;
     if(!connected_is_ok && ap_on_time > millis()) {
       snprintf(disp_buf, sizeof(disp_buf), "AP%3d", (ap_on_time - millis())/1000);
       Serial.begin(115200);
