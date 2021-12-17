@@ -170,7 +170,8 @@ void httpsave() {
         Serial.print(fp.size());
         Serial.println("字节");
         fp.close();
-      }
+      }else if(data.length() < 2)
+        SPIFFS.remove("/ssid.txt");
     } else if (httpd.argName(i).compareTo("url") == 0) {
       url = httpd.arg(i);
       url.trim();
