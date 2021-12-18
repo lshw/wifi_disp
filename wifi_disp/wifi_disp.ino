@@ -301,6 +301,7 @@ void loop()
         dnsServer.processNextRequest();
       if (connected_is_ok) {
         if (!httpd_up) {
+          ht16c21_cmd(0x88,0); //不闪烁
           wput();
           update_disp();
           zmd();
@@ -353,6 +354,7 @@ void loop()
   }
   yield();
   if (run_zmd) {
+    ht16c21_cmd(0x88,0); //不闪烁
     run_zmd = false;
     zmd();
   }
