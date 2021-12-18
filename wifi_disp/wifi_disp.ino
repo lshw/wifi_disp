@@ -233,6 +233,10 @@ void setup()
 }
 
 void wput() {
+  if(proc < 2) {
+    nvram.proc = 0;
+    nvram.change = 1;
+  }
   ht16c21_cmd(0x88, 1); //开始闪烁
   if (timer1 > 0) {
     uint16_t httpCode = wget();
@@ -363,6 +367,8 @@ void loop()
 bool smart_config() {
 //插上电， 等20秒， 如果没有上网成功， 就会进入 CO xx计数， 100秒之内完成下面的操作
 //手机连上2.4G的wifi,然后微信打开网页：http://wx.ai-thinker.com/api/old/wifi/config 
+    nvram.proc = 0;
+    nvram.change = 1;
   if(wifi_connected_is_ok()) return true;
   WiFi.mode(WIFI_STA);
   WiFi.beginSmartConfig();

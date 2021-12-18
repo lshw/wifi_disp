@@ -44,10 +44,8 @@ void poweroff(uint32_t sec) {
   if(nvram.have_dht > -5) {
     void dht_end();
   }
-  if(proc == 0) {
-    nvram.proc = 0;
-    nvram.change = 1;
-  }
+  nvram.proc = 0;
+  nvram.change = 1;
   if (ds_pin == 0) Serial.println("V2.0");
   else
     Serial.println("V1.0");
