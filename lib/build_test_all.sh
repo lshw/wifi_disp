@@ -4,6 +4,14 @@ if [ $1 ] ; then
 else
   count=91
 fi
+
+me=`whoami`
+if [ "$me" == "root" ] ; then
+  home=/home/liushiwei
+else
+  home=~
+fi
+
 mkdir -p ~/sketchbook/build_test
 rm -rf ~/sketchbook/build_test/*
 base=`realpath $0`
@@ -33,8 +41,8 @@ do
   err=" 编译错误"
  else
   err=""
-  ram=`grep "Global vari" /tmp/info.log |awk -F[ '{printf $2}'|tr -d ']'|awk -F' ' '{print "RAM:"$1}'`
-  rom=`grep "Sketch uses" /tmp/info.log |awk -F[ '{printf $2}'|tr -d ']'|awk -F' ' '{print "ROM:"$1}'`
+  ram=`grep "Global vari" /tmp/${me}_info.log |sed -n "s/^.* \[\([0-9]*\) \([0-9]*\) \([0-9]*\) \([0-9]*\)\].*$/\1/p"
+  rom=`grep "Sketch uses" /tmp/${me}_info.log |sed -n "s/^.* \[\([0-9]*\) \([0-9]*\) \([0-9]*\)\].*$/\1/p"
  fi
  echo ${i}_$branch-$ver $ram,$rom $log$err |tee -a readme.txt
  echo $(( i++ ))
