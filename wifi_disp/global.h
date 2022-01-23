@@ -15,7 +15,7 @@ int16_t update_timeok = 0; //0-马上wget ，-1 关闭，>0  xx分钟后wget
 uint8_t ota_status = 0; //0:wps, 1:ap
 uint16_t timer1 = 0; //秒 定时测温
 uint16_t timer2 = 0; //秒
-uint8_t timer3 = 10;
+uint8_t timer3 = 30; //最长30秒等待上线
 void timer1s();
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
 #define OTA_MODE 2
