@@ -75,6 +75,9 @@ wifi_set_country(&mycountry);
 #ifdef GIT_COMMIT_ID
   Serial.println(F("Git Ver=" GIT_COMMIT_ID));
 #endif
+  Serial.print(F("SDK Ver="));
+  Serial.println(ESP.getSdkVersion());
+
   Serial.print("Software Ver=" VER "\r\nBuildtime=");
   Serial.print(__YEAR__);
   Serial.write('-');
