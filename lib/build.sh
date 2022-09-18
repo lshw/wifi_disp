@@ -14,6 +14,9 @@ else
  sketchbook=$home/Arduino
 fi
 
+arduino=/opt/arduino-1.8.19
+astyle  --options=$arduino/lib/formatter.conf ../wifi_disp/*.h ../wifi_disp/*.ino
+
 if ! [ -x ./uncrc32 ] ; then
 gcc -o uncrc32 uncrc32.c
 fi
@@ -25,7 +28,6 @@ ver=$date-${a:0:7}
 echo $ver
 export COMMIT=$ver
 
-arduino=/opt/arduino-1.8.13
 arduinoset=$home/.arduino15
 mkdir -p /tmp/${me}_build /tmp/${me}_cach
 
@@ -43,7 +45,7 @@ $arduino/arduino-builder \
 -built-in-libraries $arduino/libraries \
 -libraries $sketchbook/libraries \
 -fqbn=$fqbn \
--ide-version=10813 \
+-ide-version=10819 \
 -build-path /tmp/${me}_build \
 -warnings=none \
 -prefs build.extra_flags="$CXXFLAGS" \
@@ -65,7 +67,7 @@ $arduino/arduino-builder \
 -built-in-libraries $arduino/libraries \
 -libraries $sketchbook/libraries \
 -fqbn=$fqbn \
--ide-version=10813 \
+-ide-version=10819 \
 -build-path /tmp/${me}_build \
 -warnings=none \
 -prefs build.extra_flags="$CXXFLAGS" \
