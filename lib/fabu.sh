@@ -9,5 +9,6 @@ echo $ver
 git tag $ver
 ./build.sh
 git log >changelog.txt
-tar cvfz wifi_disp_$ver.tar.gz wifi_disp.bin wifi_disp.php changelog.txt update.sh *.py 
-rm changelog.txt
+cp ../doc/readme3.pdf ../doc/readme3.txt .
+tar cvfz wifi_disp_$ver.tar.gz wifi_disp.bin wifi_disp.php changelog.txt readme3.* update.sh *.py
+rm changelog.txt readme3.pdf readme3.txt
