@@ -26,19 +26,19 @@ uint8_t hex2ch(char dat) {
   return dat - '0';
 }
 void hexprint(uint8_t dat) {
-  if(dat <0x10) Serial.write('0');
-  Serial.print(dat,HEX);
+  if (dat < 0x10) Serial.write('0');
+  Serial.print(dat, HEX);
 }
-void onClientConnected(const WiFiEventSoftAPModeStationConnected& evt){
+void onClientConnected(const WiFiEventSoftAPModeStationConnected& evt) {
   ap_client_linked = true;
   Serial.begin(115200);
   Serial.print("\r\nclient linked:");
-  for(uint8_t i = 0; i < 6; i++)
+  for (uint8_t i = 0; i < 6; i++)
     hexprint(evt.mac[i]);
   Serial.println();
   Serial.flush();
   ht16c21_cmd(0x88, 0); //停止闪烁
-  if(power_in)
+  if (power_in)
     ap_on_time = millis() + 1000000; //插AP模式1000秒
   else
     ap_on_time = millis() + 200000; //不插电AP模式200秒
@@ -109,34 +109,34 @@ void wifi_setup() {
         }
       }
       if (ssid != "" && passwd != "") {
-        if(count < 5) count ++;
+        if (count < 5) count ++;
         Serial.print("Ssid:"); Serial.println(ssid);
         Serial.print("Passwd:"); Serial.println(passwd);
         WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
       }
     }
-    if(count == 0)
-        WiFiMulti.addAP("test", "cfido.com");
+    if (count == 0)
+      WiFiMulti.addAP("test", "cfido.com");
     fp.close();
     SPIFFS.end();
   }
-    WiFiMulti.run();
-    wifi_connected_is_ok();
+  WiFiMulti.run();
+  wifi_connected_is_ok();
 }
 bool connected_is_ok = false;
 bool wifi_connected_is_ok() {
-  if(connected_is_ok)
+  if (connected_is_ok)
     return connected_is_ok;
-  if(proc == OTA_MODE && ap_client_linked  && millis() > 10000) return false;  //ota有wifi客户连上来，或者超过10秒没有连上上游AP， 就不再尝试链接AP了
-      if(wifi_station_get_connect_status() == STATION_GOT_IP) {
+  if (proc == OTA_MODE && ap_client_linked  && millis() > 10000) return false; //ota有wifi客户连上来，或者超过10秒没有连上上游AP， 就不再尝试链接AP了
+  if (wifi_station_get_connect_status() == STATION_GOT_IP) {
     connected_is_ok = true;
     ht16c21_cmd(0x88, 0); //停止闪烁
-    if(nvram.ch != wifi_get_channel() ){
+    if (nvram.ch != wifi_get_channel() ) {
       nvram.ch =  wifi_get_channel();
       nvram.change = 1;
     }
 
-    uint8_t ap_id=wifi_station_get_current_ap_id();
+    uint8_t ap_id = wifi_station_get_current_ap_id();
     struct station_config config[5];
     wifi_station_get_ap_info(config);
     config[ap_id].bssid_set = 1; //同名ap，mac地址不同
@@ -144,7 +144,7 @@ bool wifi_connected_is_ok() {
 
     return true;
   }
-  if(proc != OTA_MODE)
+  if (proc != OTA_MODE)
     ht16c21_cmd(0x88, 1); //开始闪烁
   return false;
 }
@@ -165,7 +165,7 @@ uint16_t http_get(uint8_t no) {
           + "&change=" + String(nvram.nvram7 & NVRAM7_CHARGE)
           + "&ms=" + String(millis())
           + "&temp=" + String(temp[0]);
-  if(nvram.have_dht >= 0){
+  if (nvram.have_dht >= 0) {
     dht_load();
     if (wendu > -300.0 && shidu >= 0.0 && shidu <= 100.0)
       url0 += "&shidu=" + String((int8_t)shidu) + "%," + String(wendu);
@@ -176,7 +176,7 @@ uint16_t http_get(uint8_t no) {
       if (dsn[i][0] == 0) continue;
       if (i > 0)
         url0 += ",";
-      snprintf(key,sizeof(key), "%02x%02x%02x:", dsn[i][0], dsn[i][6], dsn[i][7]);
+      snprintf(key, sizeof(key), "%02x%02x%02x:", dsn[i][0], dsn[i][6], dsn[i][7]);
       url0 += key + String(temp[i]);
     }
   }
@@ -234,7 +234,7 @@ uint16_t http_get(uint8_t no) {
     } else {
 
       if (httpCode > 0)
-        snprintf(disp_buf,sizeof(disp_buf), ".E%4d", httpCode);
+        snprintf(disp_buf, sizeof(disp_buf), ".E%4d", httpCode);
       disp(disp_buf);
       Serial.print("http error code ");
       Serial.println(httpCode);
@@ -249,7 +249,7 @@ uint16_t http_get(uint8_t no) {
 void update_progress(int cur, int total) {
   char disp_buf[6];
   Serial.printf("HTTP update process at %d of %d bytes...\r\n", cur, total);
-  snprintf(disp_buf,sizeof(disp_buf),"HUP.%2d", cur * 99 / total);
+  snprintf(disp_buf, sizeof(disp_buf), "HUP.%2d", cur * 99 / total);
   ht16c21_cmd(0x88, 0); //停闪烁
   disp(disp_buf);
 }

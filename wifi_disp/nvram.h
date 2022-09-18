@@ -22,9 +22,9 @@ void load_nvram() {
   ESP.rtcUserMemoryRead(0, (uint32_t*) &nvram, sizeof(nvram));
   if (nvram.crc32 != calculateCRC32((uint8_t*) &nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
     memset(&nvram, 0, sizeof(nvram));
-  }else {
-   Serial.println("\r\nwifi channel=" +String(nvram.ch) + ", proc=" + String(nvram.proc));
-   WRITE_PERI_REG(0x600011f4, 1 << 16 | nvram.ch);
+  } else {
+    Serial.println("\r\nwifi channel=" + String(nvram.ch) + ", proc=" + String(nvram.proc));
+    WRITE_PERI_REG(0x600011f4, 1 << 16 | nvram.ch);
   }
 }
 void save_nvram() {

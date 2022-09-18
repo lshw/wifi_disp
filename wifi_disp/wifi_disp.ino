@@ -18,7 +18,7 @@ String hostname = HOSTNAME;
 #include "lora.h"
 #include "dht.h"
 bool power_in = false;
-void init1(){
+void init1() {
   save_nvram();
   ht16c21_setup(); //180ms
   ht16c21_cmd(0x88, 1); //闪烁
@@ -27,20 +27,20 @@ void setup()
 {
   Serial.begin(115200);
   load_nvram(); //从esp8266的nvram载入数据
-wifi_country_t mycountry =
-{
-.cc = "CN",
-.schan = 1,
-.nchan = 13,
-.policy = WIFI_COUNTRY_POLICY_MANUAL,
-};
+  wifi_country_t mycountry =
+  {
+    .cc = "CN",
+    .schan = 1,
+    .nchan = 13,
+    .policy = WIFI_COUNTRY_POLICY_MANUAL,
+  };
 
-wifi_set_country(&mycountry);
+  wifi_set_country(&mycountry);
   wifi_station_connect();
   nvram.boot_count++;
   nvram.change = 1;
   proc = nvram.proc; //保存当前模式
-  switch(proc) { //尽快进行模式切换
+  switch (proc) { //尽快进行模式切换
     case OTA_MODE:
       nvram.proc = OFF_MODE;
       init1();
@@ -52,14 +52,14 @@ wifi_set_country(&mycountry);
       disp(" OFF ");
       break;
     case LORA_SEND_MODE:
-      if(nvram.have_lora > -5) {
+      if (nvram.have_lora > -5) {
         nvram.proc = LORA_RECEIVE_MODE;
         init1();
         disp("S-" VER);
         break;
       }
     case LORA_RECEIVE_MODE:
-      if(nvram.have_lora > -5) {
+      if (nvram.have_lora > -5) {
         nvram.proc = 0;
         init1();
         disp("L-" VER);
@@ -81,10 +81,10 @@ wifi_set_country(&mycountry);
   Serial.print("Software Ver=" VER "\r\nBuildtime=");
   Serial.print(__YEAR__);
   Serial.write('-');
-  if(__MONTH__ < 10) Serial.write('0');
+  if (__MONTH__ < 10) Serial.write('0');
   Serial.print(__MONTH__);
   Serial.write('-');
-  if(__DAY__ < 10) Serial.write('0');
+  if (__DAY__ < 10) Serial.write('0');
   Serial.print(__DAY__);
   Serial.println(F(" " __TIME__));
   hostname += String(ESP.getChipId(), HEX);
@@ -92,18 +92,18 @@ wifi_set_country(&mycountry);
   Serial.println("Hostname: " + hostname);
   Serial.flush();
   if (!ds_init() && !ds_init()) ds_init();
-  
+
   if (nvram.have_dht > -5 && dht_setup()) {
-    if(nvram.have_dht < 1) {
+    if (nvram.have_dht < 1) {
       nvram.have_dht = 1;
       nvram.change = 1;
     }
-    if(nvram.have_lora > -5) {
+    if (nvram.have_lora > -5) {
       nvram.have_lora = -5;
       nvram.change = 1;
     }
   } else {
-    if(nvram.have_dht > -5) {
+    if (nvram.have_dht > -5) {
       nvram.have_dht --;
       nvram.change = 1;
     }
@@ -147,7 +147,7 @@ wifi_set_country(&mycountry);
           lora.sleep();
         Serial.begin(115200);
       }
-      if(nvram.have_dht < 0 || nvram.have_lora < 0) {
+      if (nvram.have_dht < 0 || nvram.have_lora < 0) {
         nvram.have_dht = 0;  //清除无dht和lora 的标志， 重新诊断
         nvram.have_lora = 0;
         nvram.change = 1;
@@ -172,31 +172,31 @@ wifi_set_country(&mycountry);
       }
       wifi_setup();
       delay(1500);
-      if(wifi_station_get_connect_status() != STATION_GOT_IP) {
+      if (wifi_station_get_connect_status() != STATION_GOT_IP) {
         ap_on_time = millis() + 30000;  //WPS 20秒
-	if(WiFi.beginWPSConfig()){
+        if (WiFi.beginWPSConfig()) {
           delay(1000);
-	  uint8_t ap_id=wifi_station_get_current_ap_id();
-          char wps_ssid[33],wps_password[65];
-          memset(wps_ssid,0,sizeof(wps_ssid));
-          memset(wps_password,0,sizeof(wps_password));
-	  struct station_config config[5];
-	  wifi_station_get_ap_info(config);
-          strncpy(wps_ssid,(char *)config[ap_id].ssid,32);
-          strncpy(wps_password,(char *)config[ap_id].password,64);
-	  config[ap_id].bssid_set = 1; //同名ap，mac地址不同
+          uint8_t ap_id = wifi_station_get_current_ap_id();
+          char wps_ssid[33], wps_password[65];
+          memset(wps_ssid, 0, sizeof(wps_ssid));
+          memset(wps_password, 0, sizeof(wps_password));
+          struct station_config config[5];
+          wifi_station_get_ap_info(config);
+          strncpy(wps_ssid, (char *)config[ap_id].ssid, 32);
+          strncpy(wps_password, (char *)config[ap_id].password, 64);
+          config[ap_id].bssid_set = 1; //同名ap，mac地址不同
           wifi_station_set_config(&config[ap_id]); //保存成功的ssid,用于下次通讯
-          wifi_set_add(wps_ssid,wps_password);
-       }
+          wifi_set_add(wps_ssid, wps_password);
+        }
       }
-      if(wifi_station_get_connect_status() != STATION_GOT_IP) {
-      AP();
-      ota_status = 1;
-      get_batt();
-      if(power_in)
-        ap_on_time = millis() + 1000000; //插AP模式1000秒
-      else
-        ap_on_time = millis() + 200000; //不插电AP模式200秒
+      if (wifi_station_get_connect_status() != STATION_GOT_IP) {
+        AP();
+        ota_status = 1;
+        get_batt();
+        if (power_in)
+          ap_on_time = millis() + 1000000; //插AP模式1000秒
+        else
+          ap_on_time = millis() + 200000; //不插电AP模式200秒
       }
       httpd_listen();
       ota_setup();
@@ -245,7 +245,7 @@ wifi_set_country(&mycountry);
 }
 
 void wput() {
-  if(proc < 2) {
+  if (proc < 2) {
     nvram.proc = 0;
     nvram.change = 1;
   }
@@ -269,7 +269,7 @@ void wput() {
     } else {
       Serial.print(millis());
       Serial.println("ms,web error,reboot 3600s");
-      ht16c21_cmd(0x88,3); //慢闪烁
+      ht16c21_cmd(0x88, 3); //慢闪烁
       poweroff(3600);
     }
   }
@@ -283,7 +283,7 @@ void loop()
     system_soft_wdt_feed ();
     return;
   }
-  if((proc == OTA_MODE || proc <= 1) && last_check_connected < millis() &&  wifi_connected_is_ok()) {
+  if ((proc == OTA_MODE || proc <= 1) && last_check_connected < millis() &&  wifi_connected_is_ok()) {
     last_check_connected = millis() + 1000; //1秒检查一次connected;
     if ( millis() > ap_on_time && power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
     if ( millis() > ap_on_time) {
@@ -293,9 +293,9 @@ void loop()
       Serial.println(millis());
       Serial.println("power down");
       if (nvram.proc != 0) {
-	nvram.proc = 0;
-	nvram.change = 1;
-	save_nvram();
+        nvram.proc = 0;
+        nvram.change = 1;
+        save_nvram();
       }
       disp("00000");
       ht16c21_cmd(0x84, 0);
@@ -305,15 +305,15 @@ void loop()
   }
   switch (proc) {
     case OTA_MODE:
-      if(ap_client_linked || connected_is_ok) {
+      if (ap_client_linked || connected_is_ok) {
         httpd_loop();
         ArduinoOTA.handle();
       }
-      if(ap_client_linked)
+      if (ap_client_linked)
         dnsServer.processNextRequest();
       if (connected_is_ok) {
         if (!httpd_up) {
-          ht16c21_cmd(0x88,0); //不闪烁
+          ht16c21_cmd(0x88, 0); //不闪烁
           wput();
           update_disp();
           zmd();
@@ -324,10 +324,10 @@ void loop()
       break;
     case LORA_RECEIVE_MODE:
       if (ds_pin == 0 && nvram.have_lora > -5) {
-        if(lora_init())
+        if (lora_init())
           lora_receive_loop();
         else delay(100);
-      break;
+        break;
       }
     case LORA_SEND_MODE:
       if (ds_pin == 0 && nvram.have_lora > -5) {
@@ -348,14 +348,14 @@ void loop()
         }
         return;
       } else if (timer3 == 0) {
-          if(power_in && smart_config()) {
-            disp("6.6.6.6.6.");
-            poweroff(1);
-          }
+        if (power_in && smart_config()) {
+          disp("6.6.6.6.6.");
+          poweroff(1);
+        }
         //10秒超时1小时重试。
         Serial.print(millis());
         Serial.println("ms,not link to ap,reboot 3600s");
-        ht16c21_cmd(0x88,3); //慢闪烁
+        ht16c21_cmd(0x88, 3); //慢闪烁
         if (nvram.proc != 0) {
           nvram.proc = 0;
           nvram.change = 1;
@@ -366,11 +366,11 @@ void loop()
   }
   yield();
   if (run_zmd) {
-    ht16c21_cmd(0x88,0); //不闪烁
+    ht16c21_cmd(0x88, 0); //不闪烁
     run_zmd = false;
     zmd();
   }
-  if(nvram.proc != 0 && millis() > 5000){//5秒后， 如果重启， 就进入测温程序
+  if (nvram.proc != 0 && millis() > 5000) { //5秒后， 如果重启， 就进入测温程序
     nvram.proc = 0;
     nvram.change = 1;
   }
@@ -379,16 +379,16 @@ void loop()
 }
 
 bool smart_config() {
-//插上电， 等20秒， 如果没有上网成功， 就会进入 CO xx计数， 100秒之内完成下面的操作
-//手机连上2.4G的wifi,然后微信打开网页：http://wx.ai-thinker.com/api/old/wifi/config 
-    nvram.proc = 0;
-    nvram.change = 1;
-  if(wifi_connected_is_ok()) return true;
+  //插上电， 等20秒， 如果没有上网成功， 就会进入 CO xx计数， 100秒之内完成下面的操作
+  //手机连上2.4G的wifi,然后微信打开网页：http://wx.ai-thinker.com/api/old/wifi/config
+  nvram.proc = 0;
+  nvram.change = 1;
+  if (wifi_connected_is_ok()) return true;
   WiFi.mode(WIFI_STA);
   WiFi.beginSmartConfig();
   Serial.println("SmartConfig start");
-  for(uint8_t i = 0; i < 100; i++){
-    if(WiFi.smartConfigDone()) {
+  for (uint8_t i = 0; i < 100; i++) {
+    if (WiFi.smartConfigDone()) {
       wifi_set_clean();
       wifi_set_add(WiFi.SSID().c_str(), WiFi.psk().c_str());
       Serial.println("OK");
@@ -396,7 +396,7 @@ bool smart_config() {
     }
     Serial.write('.');
     delay(1000);
-    snprintf(disp_buf,sizeof(disp_buf),"CON%02d",i);
+    snprintf(disp_buf, sizeof(disp_buf), "CON%02d", i);
     disp(disp_buf);
   }
   snprintf(disp_buf, sizeof(disp_buf), " %3.2f ", v);

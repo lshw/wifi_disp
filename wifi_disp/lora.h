@@ -43,17 +43,17 @@ bool lora_init() {
   if (lora_version != 255) return true;
   lora.init(2, 1);
   if (lora_version == 255) {
-    if(nvram.have_lora > -5) {
+    if (nvram.have_lora > -5) {
       nvram.change = 1;
       nvram.have_lora --;
     }
     return false;
   }
-  if(nvram.have_dht > -5) {
+  if (nvram.have_dht > -5) {
     nvram.have_dht = -5;
     nvram.change = 1;
   }
-  if(nvram.have_lora < 1) {
+  if (nvram.have_lora < 1) {
     nvram.have_lora = 1;
     nvram.change = 1;
   }

@@ -40,16 +40,16 @@ void handleRoot() {
                 + "ip:<mark>" + WiFi.localIP().toString() + "</mark> &nbsp; "
                 + "电池电压:<mark>" + String(v) + "</mark>V &nbsp; ";
   }
-    if(nvram.have_dht > 0) {
-      dht_load();
-      yield();
-      if (wendu > -300.0 && shidu >= 0.0 && shidu <= 100.0)
-        wifi_stat += "湿度:<mark>" + String((int8_t)shidu) + "%</mark> &nbsp; " + "温度:<mark>" + String(wendu) + "</mark>&#8451<br>";
-      else
-        wifi_stat += "温度:<mark>" + String(temp[0]) + "</mark>&#8451<br>";
-    }else{
+  if (nvram.have_dht > 0) {
+    dht_load();
+    yield();
+    if (wendu > -300.0 && shidu >= 0.0 && shidu <= 100.0)
+      wifi_stat += "湿度:<mark>" + String((int8_t)shidu) + "%</mark> &nbsp; " + "温度:<mark>" + String(wendu) + "</mark>&#8451<br>";
+    else
       wifi_stat += "温度:<mark>" + String(temp[0]) + "</mark>&#8451<br>";
-    }
+  } else {
+    wifi_stat += "温度:<mark>" + String(temp[0]) + "</mark>&#8451<br>";
+  }
   httpd.send(200, "text/html", "<html>"
              "<head>"
              "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
@@ -112,7 +112,7 @@ void handleNotFound() {
   message = "404 File Not Found\n\n";
   message += "URI: ";
   message += httpd.uri();
-  message += "<br><a href=/?"+String(millis())+"><button>点击进入首页</button></a>";
+  message += "<br><a href=/?" + String(millis()) + "><button>点击进入首页</button></a>";
   httpd.send(200, "text/html", "<html>"
              "<head>"
              "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
@@ -137,10 +137,10 @@ void http_add_ssid() {
   }
   if (data == "") return;
   mh_offset = data.indexOf(':');
-  if(mh_offset < 2) return;
+  if (mh_offset < 2) return;
 
   wifi_set_add(data.substring(0, mh_offset).c_str(), data.substring(mh_offset + 1).c_str());
-  httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/?"+String(millis())+"');</script></body></html>");
+  httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/?" + String(millis()) + "');</script></body></html>");
   yield();
 }
 void httpsave() {
@@ -170,7 +170,7 @@ void httpsave() {
         Serial.print(fp.size());
         Serial.println("字节");
         fp.close();
-      }else if(data.length() < 2)
+      } else if (data.length() < 2)
         SPIFFS.remove("/ssid.txt");
     } else if (httpd.argName(i).compareTo("url") == 0) {
       url = httpd.arg(i);
@@ -206,7 +206,7 @@ void httpsave() {
   SPIFFS.end();
   httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/');</script></body></html>");
   yield();
-  if(reboot_now) {
+  if (reboot_now) {
     nvram.proc = 0;
     nvram.change = 1;
     save_nvram();
@@ -267,7 +267,7 @@ void httpd_listen() {
         Update.printError(Serial);
       }
     } else if (upload.status == UPLOAD_FILE_WRITE) {
-      snprintf(disp_buf,sizeof(disp_buf), "UP.%3d", upload.totalSize / 1000);
+      snprintf(disp_buf, sizeof(disp_buf), "UP.%3d", upload.totalSize / 1000);
       disp(disp_buf);
       Serial.println("size:" + String(upload.totalSize));
       if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {

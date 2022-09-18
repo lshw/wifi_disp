@@ -41,7 +41,7 @@ float v;
 bool power_off = false;
 void poweroff(uint32_t sec) {
   get_batt();
-  if(nvram.have_dht > -5) {
+  if (nvram.have_dht > -5) {
     void dht_end();
   }
   nvram.proc = 0;
@@ -49,7 +49,7 @@ void poweroff(uint32_t sec) {
   if (ds_pin == 0) Serial.println("V2.0");
   else
     Serial.println("V1.0");
-  Serial.println("开机时长:"+String(millis())+"ms");
+  Serial.println("开机时长:" + String(millis()) + "ms");
   if (power_in) Serial.println("有外接电源");
   else Serial.println("无外接电源");
   Serial.flush();
@@ -172,13 +172,13 @@ void timer1s() {
   //now.tm_sec++;
   //mktime(&now);
   if (proc == OTA_MODE)  {
-    if(ota_status == 0  && ap_on_time < millis())
+    if (ota_status == 0  && ap_on_time < millis())
       ap_on_time = millis() + 10000;
-    if(!connected_is_ok && ap_on_time > millis()) {
-      snprintf(disp_buf, sizeof(disp_buf), "AP%3d", (ap_on_time - millis())/1000);
-      if(ota_status == 0){
-        disp_buf[0]='P';
-        disp_buf[1]='S';
+    if (!connected_is_ok && ap_on_time > millis()) {
+      snprintf(disp_buf, sizeof(disp_buf), "AP%3d", (ap_on_time - millis()) / 1000);
+      if (ota_status == 0) {
+        disp_buf[0] = 'P';
+        disp_buf[1] = 'S';
       }
       Serial.begin(115200);
       disp(disp_buf);
@@ -324,11 +324,11 @@ String get_url(uint8_t no) {
     }
   }
   SPIFFS.end();
-  if(ret == ""){
-  if(no == 0 || no == '0')
-    ret=DEFAULT_URL0;
-  else
-    ret=DEFAULT_URL1;
+  if (ret == "") {
+    if (no == 0 || no == '0')
+      ret = DEFAULT_URL0;
+    else
+      ret = DEFAULT_URL1;
   }
   return ret;
 }
@@ -419,25 +419,25 @@ void wifi_set_clean() {
     SPIFFS.end();
   }
 }
-void  wifi_set_add(const char * wps_ssid, const char * wps_password){
+void  wifi_set_add(const char * wps_ssid, const char * wps_password) {
   File fp;
   int8_t mh_offset;
   String wifi_sets, line;
-  if(wps_ssid[0] == 0) return;
+  if (wps_ssid[0] == 0) return;
   if (SPIFFS.begin()) {
     fp = SPIFFS.open("/ssid.txt", "r");
     wifi_sets = String(wps_ssid) + ":" + String(wps_password) + "\r\n";
     if (fp) {
-      while(fp.available()) {
+      while (fp.available()) {
         line = fp.readStringUntil('\n');
         line.trim();
-        if(line == "")
+        if (line == "")
           continue;
-        if(line.length() > 110)
+        if (line.length() > 110)
           line = line.substring(0, 110);
         mh_offset = line.indexOf(':');
-        if(mh_offset < 2) continue;
-        if(line.substring(0,mh_offset) == wps_ssid)
+        if (mh_offset < 2) continue;
+        if (line.substring(0, mh_offset) == wps_ssid)
           continue;
         else
           wifi_sets += line + "\r\n";
