@@ -8,8 +8,30 @@ extern String hostname;
 void poweroff(uint32_t);
 float get_batt();
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
-
+String body;
 ESP8266WebServer httpd(80);
+void httpd_send_200(String javascript) {
+  httpd.sendHeader( "charset", "utf-8" );
+  httpd.send(200, "text/html", "<html>"
+             "<head>"
+             "<title>" + hostname + "</title>"
+             "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
+             "<script>"
+             "function modi(url,text,Defaulttext) {"
+             "var data=prompt(text,Defaulttext);"
+             "if (data==null) {return false;}"
+             "location.replace(url+data);"
+             "}"
+             + javascript +
+             "</script>"
+             "</head>"
+             "<body>"
+             + body +
+             "</body>"
+             "</html>");
+  httpd.client().stop();
+}
+
 void http204() {
   httpd.send(204, "", "");
   httpd.client().stop();
@@ -238,7 +260,7 @@ void httpd_listen() {
                  "</body>"
                  "</html>"
                 );
-    } else {
+    } else if (crc.finalize() == CRC_MAGIC) {
       httpd.send(200, "text/html", "<html>"
                  "<head>"
                  "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
@@ -253,6 +275,9 @@ void httpd_listen() {
       ht16c21_cmd(0x88, 1); //闪烁
       delay(5);
       ESP.restart();
+    } else {
+      body = "升级失败 <a href=/><buttom>返回首页</buttom></a>";
+      httpd_send_200("");
     }
     yield();
   }, []() {
@@ -266,7 +291,9 @@ void httpd_listen() {
       if (!Update.begin(maxSketchSpace)) { //start with max available size
         Update.printError(Serial);
       }
+      crc.reset();
     } else if (upload.status == UPLOAD_FILE_WRITE) {
+      crc.update((uint8_t *)upload.buf, upload.currentSize);
       snprintf(disp_buf, sizeof(disp_buf), "UP.%3d", upload.totalSize / 1000);
       disp(disp_buf);
       Serial.println("size:" + String(upload.totalSize));
@@ -275,7 +302,10 @@ void httpd_listen() {
       }
     } else if (upload.status == UPLOAD_FILE_END) {
       if (Update.end(true)) { //true to set the size to the current progress
-        Serial.printf("Update Success: %u\r\nRebooting...\r\n", upload.totalSize);
+        if (crc.finalize() != CRC_MAGIC)
+          Serial.printf(PSTR("File Update : %u\r\nCRC32 error ...\r\n"), upload.totalSize);
+        else
+          Serial.printf(PSTR("Update Success: %u\r\nRebooting...\r\n"), upload.totalSize);
       } else {
         Update.printError(Serial);
       }

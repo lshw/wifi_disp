@@ -21,6 +21,7 @@ if ! [ -x ./uncrc32 ] ; then
 gcc -o uncrc32 uncrc32.c
 fi
 cd ..
+CRC_MAGIC=$( grep CRC_MAGIC wifi_disp/config.h | awk '{printf $3}' )
 branch=`git branch |grep "^\*" |awk '{print $2}'`
 a=`git rev-parse --short HEAD`
 date=`git log --date=short -1 |grep ^Date: |awk '{print $2}' |tr -d '-'`
@@ -81,7 +82,7 @@ if [ $? == 0 ] ; then
   grep "Sketch uses" /tmp/${me}_info.log |sed -n "s/^.* \[\([0-9]*\) \([0-9]*\) \([0-9]*\)\].*$/ROM:使用\1字节(\3%)/p"
 
   cp -a /tmp/${me}_build/wifi_disp.ino.bin lib/wifi_disp.bin
-lib/uncrc32 lib/wifi_disp.bin 0
+lib/uncrc32 lib/wifi_disp.bin $CRC_MAGIC
  if [ "a$1" != "a"  ] ;then
   $arduino/hardware/esp8266com/esp8266/tools/espota.py -p 8266 -i $1 -f lib/wifi_disp.bin
  fi
