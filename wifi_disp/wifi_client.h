@@ -269,7 +269,7 @@ bool http_update()
     save_nvram();
   }
   disp("H UP. ");
-  String update_url = "http://www.anheng.com.cn/wifi_disp_new.bin";
+  String update_url = "http://wifi_disp.anheng.com.cn/firmware.php?type=WIFI_DISP&SN=" + hostname + "&GIT=" GIT_VER "&ver=" VER;
   Serial.print("下载firmware from ");
   Serial.println(update_url);
   ESPhttpUpdate.onProgress(update_progress);

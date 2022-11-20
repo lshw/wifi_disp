@@ -72,8 +72,8 @@ void setup()
       break;
   }
 
-#ifdef GIT_COMMIT_ID
-  Serial.println(F("Git Ver=" GIT_COMMIT_ID));
+#ifdef GIT_VER
+  Serial.println(F("Git Ver=" GIT_VER));
 #endif
   Serial.print(F("SDK Ver="));
   Serial.println(ESP.getSdkVersion());

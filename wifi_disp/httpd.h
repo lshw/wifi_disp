@@ -14,7 +14,7 @@ void httpd_send_200(String javascript) {
   httpd.sendHeader( "charset", "utf-8" );
   httpd.send(200, "text/html", "<html>"
              "<head>"
-             "<title>" + hostname + "</title>"
+             "<title>" + hostname + " " + GIT_VER + "</title>"
              "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
              "<script>"
              "function modi(url,text,Defaulttext) {"
