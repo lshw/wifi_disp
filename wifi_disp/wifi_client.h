@@ -120,6 +120,8 @@ void wifi_setup() {
     fp.close();
     SPIFFS.end();
   }
+  WiFi.setAutoConnect(true);//自动链接上次
+  WiFi.setAutoReconnect(true);//断线自动重连
   WiFiMulti.run();
   wifi_connected_is_ok();
 }
