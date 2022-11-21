@@ -33,7 +33,7 @@ arduinoset=$home/.arduino15
 mkdir -p /tmp/${me}_build /tmp/${me}_cach
 
 #传递宏定义 GIT_VER 到源码中，源码git版本
-fqbn="esp8266:esp8266:espduino:ResetMethod=v1,UploadTool=esptool,xtal=160,vt=flash,exception=disabled,stacksmash=disabled,ssl=all,mmu=4816,non32xfer=fast,eesz=4M2M,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=460800 " 
+fqbn="esp8266:esp8266:espduino:ResetMethod=v1,UploadTool=esptool,xtal=160,vt=flash,exception=disabled,stacksmash=disabled,ssl=all,mmu=4816,non32xfer=fast,eesz=4M2M,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=460800"
 CXXFLAGS="-DGIT_VER=\"$ver\" -DBUILD_SET=\"$fqbn\""
 $arduino/arduino-builder \
 -dump-prefs \
