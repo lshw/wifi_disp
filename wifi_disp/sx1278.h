@@ -38,9 +38,9 @@ bool LoRa::init(uint8_t _NSSPin, uint8_t _NRESETPin)
 
   // check version
   lora_version = readRegister(LR_RegVERSION);
-  //if (lora_version != 0x12) {
-  //return 0;
-  //}
+  if (lora_version != 0x12) {
+    return 0;
+  }
 
   // reset lora
   powerOnReset();
