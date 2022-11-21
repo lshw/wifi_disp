@@ -105,7 +105,7 @@ void handleRoot() {
              "</form>"
              "<hr>"
              "<form method='POST' action='/update.php' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
-             "<hr><table width=100%><tr><td align=left width=50%>程序源码:<a href=https://github.com/lshw/wifi_disp target=_blank>https://github.com/lshw/wifi_disp</a><td><td align=right width=50%>程序编译时间: <mark>" __DATE__ " " __TIME__ "</mark><br>编译参数:[" BUILD_SET "]</td></tr></table>"
+             "<hr><table width=100%><tr><td align=left width=50%>程序源码:<a href=https://github.com/lshw/wifi_disp target=_blank>https://github.com/lshw/wifi_disp</a><td><td align=right width=50%>程序编译时间: <mark>" __DATE__ " " __TIME__ "</mark><br>编译参数:[" BUILD_SET "] GCC" + String(__GNUC__) + "." + String(__GNUC_MINOR__) + "</td></tr></table>"
              "<hr></body>"
              "</html>");
   httpd.client().stop();

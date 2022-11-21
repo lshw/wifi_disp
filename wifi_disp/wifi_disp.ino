@@ -73,12 +73,12 @@ void setup()
   }
 
 #ifdef GIT_VER
-  Serial.println(F("Git Ver=" GIT_VER));
+  Serial.println(PSTR("Git Ver=" GIT_VER));
 #endif
-  Serial.print(F("SDK Ver="));
+  Serial.print(PSTR("SDK Ver="));
   Serial.println(ESP.getSdkVersion());
-
-  Serial.print("Software Ver=" VER "\r\nBuildtime=");
+  Serial.printf(PSTR("GCC%d.%d\r\n"), __GNUC__, __GNUC_MINOR__);
+  Serial.print(PSTR("Software Ver=" VER "\r\nBuildtime="));
   Serial.print(__YEAR__);
   Serial.write('-');
   if (__MONTH__ < 10) Serial.write('0');
@@ -111,13 +111,13 @@ void setup()
   get_temp();
   get_batt();
   _myTicker.attach(1, timer1s);
-  Serial.print("电池电压");
+  Serial.print(PSTR("电池电压"));
   Serial.println(v);
   if (power_in) {
-    Serial.println("外接电源");
+    Serial.println(PSTR("外接电源"));
   }
   if (v < 3.50 && !power_in) {
-    snprintf(disp_buf, sizeof(disp_buf), "OFF%f", v);
+    snprintf(disp_buf, sizeof(disp_buf), PSTR("OFF%f"), v);
     disp(disp_buf); //电压过低
     if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != 0) {
       nvram.nvram7 |= NVRAM7_CHARGE; //充电
