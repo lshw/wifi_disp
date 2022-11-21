@@ -86,13 +86,13 @@ void setup()
   Serial.write('-');
   if (__DAY__ < 10) Serial.write('0');
   Serial.print(__DAY__);
-  Serial.println(F(" " __TIME__));
+  Serial.println(PSTR(" " __TIME__));
+  Serial.printf(PSTR("build_set:[" BUILD_SET "]\r\n"));
   hostname += String(ESP.getChipId(), HEX);
   WiFi.hostname(hostname);
-  Serial.println("Hostname: " + hostname);
+  Serial.println(PSTR("Hostname: ") + hostname);
   Serial.flush();
   if (!ds_init() && !ds_init()) ds_init();
-
   if (nvram.have_dht > -5 && dht_setup()) {
     if (nvram.have_dht < 1) {
       nvram.have_dht = 1;
