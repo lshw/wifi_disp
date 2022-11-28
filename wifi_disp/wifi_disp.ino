@@ -44,25 +44,25 @@ void setup()
     case OTA_MODE:
       nvram.proc = OFF_MODE;
       init1();
-      disp(" OTA ");
+      disp((char *)" OTA ");
       break;
     case OFF_MODE:
       nvram.proc = LORA_SEND_MODE;
       init1();
-      disp(" OFF ");
+      disp((char *)" OFF ");
       break;
     case LORA_SEND_MODE:
       if (nvram.have_lora > -5) {
         nvram.proc = LORA_RECEIVE_MODE;
         init1();
-        disp("S-" VER);
+        disp((char *)"S-" VER);
         break;
       }
     case LORA_RECEIVE_MODE:
       if (nvram.have_lora > -5) {
         nvram.proc = 0;
         init1();
-        disp("L-" VER);
+        disp((char *)"L-" VER);
         break;
       }
     default:
@@ -137,9 +137,9 @@ void setup()
   switch (proc) {
     case OFF_MODE: //OFF
       wdt_disable();
-      disp(" OFF ");
+      disp((char *)" OFF ");
       delay(2000);
-      disp("-" VER "-");
+      disp((char *)"-" VER "-");
       delay(2000);
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
       if (ds_pin == 0) { //v2.0
@@ -164,7 +164,7 @@ void setup()
         nvram.change = 1;
         save_nvram();
       }
-      disp(" OTA ");
+      disp((char *)" OTA ");
       if (ds_pin == 0) { //v2.0
         if (nvram.have_lora > -5 && lora_init())
           lora.sleep();
@@ -206,7 +206,7 @@ void setup()
         Serial.println("lora  接收模式");
         wdt_disable();
         if (lora_init()) {
-          disp("L-" VER);
+          disp((char *)"L-" VER);
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
           delay(1000);
@@ -219,7 +219,7 @@ void setup()
         Serial.println("lora  发送模式");
         wdt_disable();
         if (lora_init()) {
-          disp("S-" VER);
+          disp((char *)"S-" VER);
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
           delay(1000);
@@ -297,7 +297,7 @@ void loop()
         nvram.change = 1;
         save_nvram();
       }
-      disp("00000");
+      disp((char *)"00000");
       ht16c21_cmd(0x84, 0);
       httpd.close();
       poweroff(3600);
@@ -349,7 +349,7 @@ void loop()
         return;
       } else if (timer3 == 0) {
         if (power_in && smart_config()) {
-          disp("6.6.6.6.6.");
+          disp((char *)"6.6.6.6.6.");
           poweroff(1);
         }
         //10秒超时1小时重试。

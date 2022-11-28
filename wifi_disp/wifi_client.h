@@ -268,7 +268,7 @@ bool http_update()
     nvram.change = 1;
     save_nvram();
   }
-  disp("H UP. ");
+  disp((char *)"H UP. ");
   String update_url = "http://wifi_disp.anheng.com.cn/firmware.php?type=WIFI_DISP&SN=" + hostname + "&GIT=" GIT_VER "&ver=" VER;
   Serial.print("下载firmware from ");
   Serial.println(update_url);
