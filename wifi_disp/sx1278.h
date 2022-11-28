@@ -47,7 +47,7 @@ bool LoRa::init(uint8_t _NSSPin, uint8_t _NRESETPin)
   // Set RF parameter,like frequency,data rate etc
   config();
 
-  return 1;
+  return true;
 }
 void LoRa::powerOnReset()
 {
@@ -102,7 +102,7 @@ bool LoRa::config()
 
   // default payload length is 10 bytes in implicit mode
   setPayloadLength(10);
-
+  return true;
 }
 bool LoRa::setFrequency(uint32_t freq)
 {
@@ -136,6 +136,7 @@ bool LoRa::setFrequency(uint32_t freq)
   // read if the value has been in register
   if ((reg[0] != readRegister(LR_RegFrMsb)) || (reg[1] != readRegister(LR_RegFrMid)) || (reg[2] != readRegister(LR_RegFrLsb)))
     return false;
+  return true;
 }
 bool LoRa::setRFpara(uint8_t BW, uint8_t CR, uint8_t SF, uint8_t payloadCRC)
 {
@@ -183,6 +184,7 @@ bool LoRa::setPreambleLen(uint16_t length)
   writeRegister(LR_RegPreambleMsb, length >> 8);
   // the actual preamble len is length+4.25
   writeRegister(LR_RegPreambleLsb, length & 0xff);
+  return true;
 }
 bool LoRa::setHeaderMode(uint8_t mode)
 {
@@ -195,6 +197,7 @@ bool LoRa::setHeaderMode(uint8_t mode)
   temp = readRegister(LR_RegModemConfig1);
   temp = temp & 0xfe;
   writeRegister(LR_RegModemConfig1, temp | mode);
+  return true;
 }
 // in implict header mode, the payload length is fix len
 // need to set payload length first in this mode
@@ -202,12 +205,14 @@ bool LoRa::setPayloadLength(uint8_t len)
 {
   payloadLength = len;
   writeRegister(LR_RegPayloadLength, len);
+  return true;
 }
 bool LoRa::setTxPower(uint8_t power)
 {
   if (power > 0x0f)
     return false;
   writeRegister(LR_RegPaConfig, LR_PASELECT_PA_POOST | 0x70 | power);
+  return true;
 }
 // only valid in rx single mode
 bool LoRa::setRxTimeOut(uint16_t symbTimeOut)
@@ -221,6 +226,7 @@ bool LoRa::setRxTimeOut(uint16_t symbTimeOut)
   temp = temp & 0xfc;
   writeRegister(LR_RegModemConfig2, temp | (symbTimeOut >> 8 & 0x03));
   writeRegister(LR_RegSymbTimeoutLsb, symbTimeOut & 0xff);
+  return true;
 }
 // RSSI[dBm]=-137+rssi value
 uint8_t LoRa::readRSSI(uint8_t mode)
@@ -241,6 +247,7 @@ bool LoRa::rxInit()
   clearIRQFlags();		// clear irq flag
   setFifoAddrPtr(LR_RegFifoRxBaseAddr);	// set FIFO addr
   enterRxMode();		// start rx
+  return true;
 }
 bool LoRa::sendPackage(uint8_t* sendbuf, uint8_t sendLen)
 {
