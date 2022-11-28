@@ -1,7 +1,7 @@
 #include <SPI.h>
-#include "sx1278.h"
 #define NSS_PIN    	2
 #define RESET_PIN 	1
+#include "sx1278.h"
 LoRa lora;
 uint8_t len;
 uint8_t rxBuf[256];

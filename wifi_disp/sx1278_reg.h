@@ -10,11 +10,11 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#if 0
-#define NSS_PIN    	D2 // 25
-#define RESET_PIN 	D3 // 26
-#else
+#ifndef NSS_PIN
 #define NSS_PIN    	10
+#endif
+
+#ifndef RESET_PIN
 #define RESET_PIN 	9
 #endif
 
