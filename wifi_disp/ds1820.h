@@ -33,8 +33,8 @@ bool ds_init() {
   oneWire.begin(ds_pin);
   if (oneWire.search(dsn[0])) {
     i = 0;
-    Serial.print("DS18B20[" + String(i) + "]=");
-    snprintf(key, sizeof(key), "%02x%02x%02x%02x%02x%02x%02x%02x", dsn[i][0], dsn[i][1], dsn[i][2], dsn[i][3], dsn[i][4], dsn[i][5], dsn[i][6], dsn[i][7]);
+    Serial.printf_P(PSTR("DS18B20[%d]="), i);
+    snprintf_P(key, sizeof(key), PSTR("%02x%02x%02x%02x%02x%02x%02x%02x"), dsn[i][0], dsn[i][1], dsn[i][2], dsn[i][3], dsn[i][4], dsn[i][5], dsn[i][6], dsn[i][7]);
     Serial.println(key);
     i = 1;
   } else {
@@ -44,19 +44,17 @@ bool ds_init() {
     oneWire.begin(ds_pin);
     i = 0;
   }
-  Serial.print("ds_pin=");
-  Serial.println(ds_pin);
+  Serial.printf_P(PSTR("ds_pin=%d\r\n"), ds_pin);
   for (; i < 32; i++) {
     if (!oneWire.search(dsn[i]))
       break;
     temp[i] = -999.0;
-    Serial.print("DS18B20[" + String(i) + "]=");
-    snprintf(key, sizeof(key), "%02x%02x%02x%02x%02x%02x%02x%02x", dsn[i][0], dsn[i][1], dsn[i][2], dsn[i][3], dsn[i][4], dsn[i][5], dsn[i][6], dsn[i][7]);
+    Serial.printf_P(PSTR("DS18B20[%d]="), i);
+    snprintf_P(key, sizeof(key), PSTR("%02x%02x%02x%02x%02x%02x%02x%02x"), dsn[i][0], dsn[i][1], dsn[i][2], dsn[i][3], dsn[i][4], dsn[i][5], dsn[i][6], dsn[i][7]);
     Serial.println(key);
   }
   if (dsn[0][0] == 0) {
-    Serial.println("没找到ds1820.");
-    Serial.println();
+    Serial.println(F("没找到ds1820.\r\n"));
     SPIFFS.end();
     return false;
   }
@@ -127,8 +125,10 @@ bool get_temp() {
         ret = false;
       }
 
-    } else
-      Serial.println("温度" + String(n) + "=" + String(temp[n]));
+    } else {
+      Serial.printf_P(PSTR("温度%d="), n);
+      Serial.println(temp[n]);
+    }
   }
   if (ret == true) {
     digitalWrite(ds_pin, LOW);

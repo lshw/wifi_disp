@@ -48,16 +48,16 @@ void poweroff(uint32_t sec) {
   }
   nvram.proc = 0;
   nvram.change = 1;
-  if (ds_pin == 0) Serial.println("V2.0");
+  if (ds_pin == 0) Serial.println(F("V2.0"));
   else
-    Serial.println("V1.0");
-  Serial.println("开机时长:" + String(millis()) + "ms");
-  if (power_in) Serial.println("有外接电源");
-  else Serial.println("无外接电源");
+    Serial.println(F("V1.0"));
+  Serial.printf_P(PSTR("开机时长:%ld ms"), (uint32_t)millis());
+  if (power_in) Serial.println(F("有外接电源"));
+  else Serial.println(F("无外接电源"));
   Serial.flush();
   if (nvram.nvram7 & NVRAM7_CHARGE) {
     if (v > 4.20) {
-      Serial.println("v=" + String(v) + ",停止充电");
+      Serial.printf_P(PSTR("v=%f,停止充电"), v);
       nvram.nvram7 &= ~NVRAM7_CHARGE;
       nvram.change = 1;
     }
@@ -65,16 +65,16 @@ void poweroff(uint32_t sec) {
   wifi_set_sleep_type(LIGHT_SLEEP_T);
   if (power_in && (nvram.nvram7 & NVRAM7_CHARGE)) { //如果外面接了电， 就进入LIGHT_SLEEP模式 电流0.8ma， 保持充电
     sec = sec / 2;
-    Serial.print("休眠");
+    Serial.print(F("休眠"));
     if (sec > 60) {
       Serial.print(sec / 60);
-      Serial.print("分钟");
+      Serial.print(F("分钟"));
     }
     if ((sec % 60) != 0) {
       Serial.print(sec % 60);
-      Serial.print("秒");
+      Serial.print(F("秒"));
     }
-    Serial.println("\r\n充电中");
+    Serial.println(F("\r\n充电中"));
     Serial.flush();
     wdt_disable();
     uint8_t no_power_in = 0;
@@ -108,18 +108,18 @@ void poweroff(uint32_t sec) {
     Serial.println();
   }
   if ((nvram.nvram7 & NVRAM7_CHARGE) && power_in)
-    Serial.println("充电结束");
-  Serial.print("关机");
+    Serial.println(F("充电结束"));
+  Serial.print(F("关机"));
   if (sec > 0) {
     if (sec > 60) {
       Serial.print(sec / 60);
-      Serial.print("分钟");
+      Serial.print(F("分钟"));
     }
     if ((sec % 60) != 0) {
       Serial.print(sec % 60);
-      Serial.print("秒");
+      Serial.print(F("秒"));
     }
-    Serial.println("\r\nbye!");
+    Serial.println(F("\r\nbye!"));
   }
   uint64_t sec0 = sec * 1000000;
   Serial.flush();
@@ -127,7 +127,7 @@ void poweroff(uint32_t sec) {
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH); //v1.0硬件
   } else {
-    Serial.println("关闭充电");
+    Serial.println(F("关闭充电"));
     Serial.flush();
     Serial.end();
     pinMode(1, OUTPUT);
@@ -148,13 +148,13 @@ void update_disp() {
   uint8_t zmdsize = strlen(zmd_disp);
   if (connected_is_ok) {
     if (proc == OTA_MODE) {
-      snprintf(zmd_disp, sizeof(zmd_disp), " OTA %s -%s-  ", WiFi.localIP().toString().c_str(), VER);
+      snprintf_P(zmd_disp, sizeof(zmd_disp), PSTR(" OTA %s -%s-  "), WiFi.localIP().toString().c_str(), VER);
     }
   } else {
     if (proc == OTA_MODE)
-      snprintf(zmd_disp, sizeof(zmd_disp), " AP -%s- ", VER);
+      snprintf_P(zmd_disp, sizeof(zmd_disp), PSTR(" AP -%s- "), VER);
     else
-      snprintf(zmd_disp, sizeof(zmd_disp), " %3.2f -%s-  ", v, VER);
+      snprintf_P(zmd_disp, sizeof(zmd_disp), PSTR(" %3.2f -%s-  "), v, VER);
   }
   if (zmdsize != strlen(zmd_disp)) zmd_offset = 0; //长度有变化， 就从头开始显示
 }
@@ -177,7 +177,7 @@ void timer1s() {
     if (ota_status == 0  && ap_on_time < millis())
       ap_on_time = millis() + 10000;
     if (!connected_is_ok && ap_on_time > millis()) {
-      snprintf(disp_buf, sizeof(disp_buf), "AP%3d", (ap_on_time - millis()) / 1000);
+      snprintf_P(disp_buf, sizeof(disp_buf), PSTR("AP%3d"), (ap_on_time - millis()) / 1000);
       if (ota_status == 0) {
         disp_buf[0] = 'P';
         disp_buf[1] = 'S';
@@ -274,7 +274,7 @@ float get_batt() {
         if (v0 > v) {
           if (!power_in) {
             power_in = true;
-            Serial.println("测得电源插入");
+            Serial.println(F("测得电源插入"));
           }
         } else power_in = false;
       } else power_in = false;
@@ -343,15 +343,15 @@ String get_ssid() {
       ssid = fp.readString();
       fp.close();
     } else {
-      Serial.println("/ssid.txt open error");
+      Serial.println(F("/ssid.txt open error"));
       fp = SPIFFS.open("/ssid.txt", "w");
       ssid = "test:cfido.com";
       fp.println(ssid);
       fp.close();
     }
   } else
-    Serial.println("SPIFFS begin error");
-  Serial.print("载入ssid设置:");
+    Serial.println(F("SPIFFS begin error"));
+  Serial.print(F("载入ssid设置:"));
   Serial.println(ssid);
   SPIFFS.end();
   return ssid;

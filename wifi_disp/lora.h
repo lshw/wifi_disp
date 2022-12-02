@@ -12,7 +12,7 @@ void lora_send_loop() {
   system_soft_wdt_feed ();
   send_delay = millis();
   lora_count++;
-  snprintf(disp_buf, sizeof(disp_buf), "S%4d", lora_count % 10000);
+  snprintf_P(disp_buf, sizeof(disp_buf), PSTR("S%4d"), lora_count % 10000);
   disp(disp_buf);
   lora.sendPackage((uint8_t *)disp_buf, 5); // sending data
   lora.idle();    // turn to standby mode
@@ -30,11 +30,11 @@ void lora_receive_loop() {
     Serial.write(rxBuf, len);
     Serial.println();
     uint8_t rssi = 137 - lora.readRSSI(1);
-    snprintf(disp_buf, sizeof(disp_buf), "%3d.%c%c", rssi, rxBuf[3], rxBuf[4]);
+    snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%3d.%c%c"), rssi, rxBuf[3], rxBuf[4]);
     disp(disp_buf);
-    Serial.print("with RSSI ");
+    Serial.print(F("with RSSI "));
     Serial.print(rssi);
-    Serial.println("dBm");
+    Serial.println(F("dBm"));
     system_soft_wdt_feed ();
   }
   yield();

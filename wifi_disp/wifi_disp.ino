@@ -73,12 +73,12 @@ void setup()
   }
 
 #ifdef GIT_VER
-  Serial.println(PSTR("Git Ver=" GIT_VER));
+  Serial.println(F("Git Ver=" GIT_VER));
 #endif
-  Serial.print(PSTR("SDK Ver="));
+  Serial.print(F("SDK Ver="));
   Serial.println(ESP.getSdkVersion());
-  Serial.printf(PSTR("GCC%d.%d\r\n"), __GNUC__, __GNUC_MINOR__);
-  Serial.print(PSTR("Software Ver=" VER "\r\nBuildtime="));
+  Serial.printf_P(PSTR("GCC%d.%d\r\n"), __GNUC__, __GNUC_MINOR__);
+  Serial.print(F("Software Ver=" VER "\r\nBuildtime="));
   Serial.print(__YEAR__);
   Serial.write('-');
   if (__MONTH__ < 10) Serial.write('0');
@@ -86,11 +86,11 @@ void setup()
   Serial.write('-');
   if (__DAY__ < 10) Serial.write('0');
   Serial.print(__DAY__);
-  Serial.println(PSTR(" " __TIME__));
-  Serial.printf(PSTR("build_set:[" BUILD_SET "]\r\n"));
+  Serial.println(F(" " __TIME__));
+  Serial.printf_P(PSTR("build_set:[" BUILD_SET "]\r\n"));
   hostname += String(ESP.getChipId(), HEX);
   WiFi.hostname(hostname);
-  Serial.println(PSTR("Hostname: ") + hostname);
+  Serial.println(F("Hostname: ") + hostname);
   Serial.flush();
   if (!ds_init() && !ds_init()) ds_init();
   if (nvram.have_dht > -5 && dht_setup()) {
@@ -111,13 +111,13 @@ void setup()
   get_temp();
   get_batt();
   _myTicker.attach(1, timer1s);
-  Serial.print(PSTR("电池电压"));
+  Serial.print(F("电池电压"));
   Serial.println(v);
   if (power_in) {
-    Serial.println(PSTR("外接电源"));
+    Serial.println(F("外接电源"));
   }
   if (v < 3.50 && !power_in) {
-    snprintf(disp_buf, sizeof(disp_buf), PSTR("OFF%f"), v);
+    snprintf_P(disp_buf, sizeof(disp_buf), PSTR("OFF%f"), v);
     disp(disp_buf); //电压过低
     if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != 0) {
       nvram.nvram7 |= NVRAM7_CHARGE; //充电
@@ -203,7 +203,7 @@ void setup()
       break;
     case LORA_RECEIVE_MODE:
       if (ds_pin == 0 && nvram.have_lora > -5) {
-        Serial.println("lora  接收模式");
+        Serial.println(F("lora  接收模式"));
         wdt_disable();
         if (lora_init()) {
           disp((char *)"L-" VER);
@@ -216,7 +216,7 @@ void setup()
       }
     case LORA_SEND_MODE:
       if (ds_pin == 0 && nvram.have_lora > -5) {
-        Serial.println("lora  发送模式");
+        Serial.println(F("lora  发送模式"));
         wdt_disable();
         if (lora_init()) {
           disp((char *)"S-" VER);
@@ -228,15 +228,15 @@ void setup()
         }
       }
     default:
-      Serial.println("测温模式");
-      snprintf(disp_buf, sizeof(disp_buf), " %3.2f ", v);
+      Serial.println(F("测温模式"));
+      snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
       disp(disp_buf);
       wifi_setup();
       if (ds_pin == 0 && nvram.have_lora > -5) {
         if (lora_init())
           lora.sleep();
         Serial.begin(115200);
-        Serial.print("lora version=");
+        Serial.print(F("lora version="));
         Serial.println(lora_version);
       }
       timer1 = 10;
@@ -257,10 +257,10 @@ void wput() {
         ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
       else
         ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
-      Serial.print("uptime=");
+      Serial.print(F("uptime="));
       Serial.print(millis());
       if (next_disp < 60) next_disp = 1800;
-      Serial.print("ms,sleep=");
+      Serial.print(F("ms,sleep="));
       Serial.println(next_disp);
       if (millis() < 500) delay(500 - millis());
       save_nvram();
@@ -268,7 +268,7 @@ void wput() {
       return;
     } else {
       Serial.print(millis());
-      Serial.println("ms,web error,reboot 3600s");
+      Serial.println(F("ms,web error,reboot 3600s"));
       ht16c21_cmd(0x88, 3); //慢闪烁
       poweroff(3600);
     }
@@ -287,11 +287,11 @@ void loop()
     last_check_connected = millis() + 1000; //1秒检查一次connected;
     if ( millis() > ap_on_time && power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
     if ( millis() > ap_on_time) {
-      Serial.print("batt:");
+      Serial.print(F("batt:"));
       Serial.print(get_batt());
-      Serial.print("V,millis()=");
+      Serial.print(F("V,millis()="));
       Serial.println(millis());
-      Serial.println("power down");
+      Serial.println(F("power down"));
       if (nvram.proc != 0) {
         nvram.proc = 0;
         nvram.change = 1;
@@ -354,7 +354,7 @@ void loop()
         }
         //10秒超时1小时重试。
         Serial.print(millis());
-        Serial.println("ms,not link to ap,reboot 3600s");
+        Serial.println(F("ms,not link to ap,reboot 3600s"));
         ht16c21_cmd(0x88, 3); //慢闪烁
         if (nvram.proc != 0) {
           nvram.proc = 0;
@@ -386,20 +386,20 @@ bool smart_config() {
   if (wifi_connected_is_ok()) return true;
   WiFi.mode(WIFI_STA);
   WiFi.beginSmartConfig();
-  Serial.println("SmartConfig start");
+  Serial.println(F("SmartConfig start"));
   for (uint8_t i = 0; i < 100; i++) {
     if (WiFi.smartConfigDone()) {
       wifi_set_clean();
       wifi_set_add(WiFi.SSID().c_str(), WiFi.psk().c_str());
-      Serial.println("OK");
+      Serial.println(F("OK"));
       return true;
     }
     Serial.write('.');
     delay(1000);
-    snprintf(disp_buf, sizeof(disp_buf), "CON%02d", i);
+    snprintf_P(disp_buf, sizeof(disp_buf), PSTR("CON%02d"), i);
     disp(disp_buf);
   }
-  snprintf(disp_buf, sizeof(disp_buf), " %3.2f ", v);
+  snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
   disp(disp_buf);
   return false;
 }

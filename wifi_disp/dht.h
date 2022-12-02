@@ -24,7 +24,7 @@ void dht_load() { //阻塞测试
   }
   shidu = mySensor.getHumidity();
   wendu = mySensor.getTemperature();
-  Serial.println("型号:" + String(mySensor.getType()) + " 湿度:" + String(shidu) + " 温度" + String(wendu));
+  Serial.printf_P(PSTR("型号:%d,湿度:%f,温度:%f\r\n"), mySensor.getType(), shidu, wendu);
 }
 bool dht_loop()
 { //不阻塞测试
@@ -34,7 +34,7 @@ bool dht_loop()
     if (mySensor.read() == DHTLIB_OK) {
       shidu = mySensor.getHumidity();
       wendu = mySensor.getTemperature();
-      Serial.println("型号:" + String(mySensor.getType()) + "湿度:" + String(shidu) + " 温度" + String(wendu));
+      Serial.printf_P(PSTR("型号:%d,湿度:%f,温度:%f\r\n"), mySensor.getType(), shidu, wendu);
       return true;
     }
   }
@@ -47,22 +47,22 @@ bool dht_setup()
   pinMode(DHT_VCC, OUTPUT); //gpio13 电源
   digitalWrite(DHT_VCC, HIGH);
   next_load = millis() + 2000;
-  Serial.println("STAT\tHUMI\tTEMP\tTIME\tTYPE");
+  Serial.println(F("STAT\tHUMI\tTEMP\tTIME\tTYPE"));
   if (!test())
     return  test();
   return true;
   /*
-    Serial.println("\n4. LastRead test");
+    Serial.println(F("\n4. LastRead test"));
     mySensor.read();
     for (int i = 0; i < 20; i++)
     {
       if (millis() - mySensor.lastRead() > 1000)
       {
         mySensor.read();
-        Serial.println("actual read");
+        Serial.println(F("actual read"));
       }
       Serial.print(mySensor.humidity, 1);
-      Serial.print(",\t");
+      Serial.print(F(",\t"));
       Serial.println(mySensor.temperature, 1);
       delay(250);
     }
@@ -86,47 +86,47 @@ bool test()
   uint32_t start = micros();
   int chk = mySensor.read();
   uint32_t stop = micros();
-  //  Serial.print("vcc="); Serial.print(digitalRead(DHT_VCC));
-  //  Serial.print(",data="); Serial.println(digitalRead(DHTPIN));
+  //  Serial.print(F("vcc=")); Serial.print(digitalRead(DHT_VCC));
+  //  Serial.print(F(",data=")); Serial.println(digitalRead(DHTPIN));
 
   switch (chk)
   {
     case DHTLIB_OK:
-      Serial.print("OK,\t");
+      Serial.print(F("OK,\t"));
       break;
     case DHTLIB_ERROR_CHECKSUM:
-      Serial.print("Checksum error,\t");
+      Serial.print(F("Checksum error,\t"));
       break;
     case DHTLIB_ERROR_TIMEOUT_A:
-      Serial.print("Time out A error,\t");
+      Serial.print(F("Time out A error,\t"));
       break;
     case DHTLIB_ERROR_TIMEOUT_B:
-      Serial.print("Time out B error,\t");
+      Serial.print(F("Time out B error,\t"));
       break;
     case DHTLIB_ERROR_TIMEOUT_C:
-      Serial.print("Time out C error,\t");
+      Serial.print(F("Time out C error,\t"));
       break;
     case DHTLIB_ERROR_TIMEOUT_D:
-      Serial.print("Time out D error,\t");
+      Serial.print(F("Time out D error,\t"));
       break;
     default:
-      Serial.print("Unknown error,\t");
+      Serial.print(F("Unknown error,\t"));
       break;
   }
   // DISPLAY DATA
   Serial.print(mySensor.getHumidity(), 1);
-  Serial.print(",\t");
+  Serial.print(F(",\t"));
   Serial.print(mySensor.getTemperature(), 1);
-  Serial.print(",\t");
+  Serial.print(F(",\t"));
   uint32_t duration = stop - start;
   Serial.print(duration);
-  Serial.print(",\t");
+  Serial.print(F(",\t"));
   Serial.println(mySensor.getType());
 
   if (chk == DHTLIB_OK) {
     shidu = mySensor.getHumidity();
     wendu = mySensor.getTemperature();
-    Serial.println("型号:" + String(mySensor.getType()) + "湿度:" + String(shidu) + " 温度" + String(wendu));
+    Serial.printf_P(PSTR("型号:%d,湿度:%f,温度:%f\r\n"), mySensor.getType(), shidu, wendu);
     return true;
   }
   delay(500);

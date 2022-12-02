@@ -23,7 +23,7 @@ void load_nvram() {
   if (nvram.crc32 != calculateCRC32((uint8_t*) &nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
     memset(&nvram, 0, sizeof(nvram));
   } else if (nvram.ch > 0 && nvram.ch <= 14) {
-    Serial.println("\r\nwifi channel=" + String(nvram.ch) + ", proc=" + String(nvram.proc));
+    Serial.printf_P(PSTR("\r\nwifi channel=%d, proc=%d\r\n"), nvram.ch, nvram.proc);
     WRITE_PERI_REG(0x600011f4, 1 << 16 | nvram.ch);
   }
 }

@@ -105,8 +105,8 @@ void handleRoot() {
              "</form>"
              "<hr>"
              "<form method='POST' action='/update.php' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
-             "<hr><table width=100%><tr><td align=left width=50%>程序源码:<a href=https://github.com/lshw/wifi_disp/releases/tag/V"  GIT_VER " target=_blank>https://github.com/lshw/wifi_disp/release/tag/V" GIT_VER "</a><td><td align=right width=50%>程序编译时间: <mark>" __DATE__ " " __TIME__ "</mark><br>编译参数:[" BUILD_SET "] GCC" + String(__GNUC__) + "." + String(__GNUC_MINOR__) + "</td></tr></table>"
-             "<hr></body>"
+             "<hr><table width=100%><tr><td align=left width=50%>程序源码:<a href=https://github.com/lshw/wifi_disp/releases/tag/V"  GIT_VER " target=_blank>https://github.com/lshw/wifi_disp/release/tag/V" GIT_VER "</a><td><td align=right width=50%>程序编译时间: <mark>" __DATE__ " " __TIME__ "</mark></td</tr></table><br>编译参数:[" BUILD_SET "] GCC" + String(__GNUC__) + "." + String(__GNUC_MINOR__)
+             + "<hr></body>"
              "</html>");
   httpd.client().stop();
 }
@@ -181,16 +181,14 @@ void httpsave() {
       data.replace("\xa3\xba", ":"); //gbk :
       data.replace("\xa1\x47", ":"); //big5 :
       if (data.length() > 8) {
-        Serial.println("data:[" + data + "]");
-        //  Serial.print(data);
-        // Serial.println("]");
+        Serial.printf_P(PSTR("data:[%s]\r\n"), data.c_str());
         fp = SPIFFS.open("/ssid.txt", "w");
         fp.println(data);
         fp.close();
         fp = SPIFFS.open("/ssid.txt", "r");
-        Serial.print("保存wifi设置到文件/ssid.txt ");
+        Serial.print(F("保存wifi设置到文件/ssid.txt "));
         Serial.print(fp.size());
-        Serial.println("字节");
+        Serial.println(F("字节"));
         fp.close();
       } else if (data.length() < 2)
         SPIFFS.remove("/ssid.txt");
@@ -198,12 +196,10 @@ void httpsave() {
       url = httpd.arg(i);
       url.trim();
       if (url.length() == 0) {
-        Serial.println("删除url0设置");
+        Serial.println(F("删除url0设置"));
         SPIFFS.remove("/url.txt");
       } else {
-        Serial.print("url0:[");
-        Serial.print(url);
-        Serial.println("]");
+        Serial.printf_P(PSTR("url0:[%s]\r\n"), url.c_str());
         fp = SPIFFS.open("/url.txt", "w");
         fp.println(url);
         fp.close();
@@ -212,12 +208,10 @@ void httpsave() {
       url = httpd.arg(i);
       url.trim();
       if (url.length() == 0) {
-        Serial.println("删除url1设置");
+        Serial.println(F("删除url1设置"));
         SPIFFS.remove("/url1.txt");
       } else {
-        Serial.print("url1:[");
-        Serial.print(url);
-        Serial.println("]");
+        Serial.printf_P(PSTR("url1:[%s]\r\n"), url.c_str());
         fp = SPIFFS.open("/url1.txt", "w");
         fp.println(url);
         fp.close();
@@ -250,7 +244,7 @@ void httpd_listen() {
     }
     httpd.sendHeader("Connection", "close");
     if (Update.hasError()) {
-      Serial.println("上传失败");
+      Serial.println(F("上传失败"));
       httpd.send(200, "text/html", "<html>"
                  "<head>"
                  "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
@@ -270,7 +264,7 @@ void httpd_listen() {
                  "</body>"
                  "</html>"
                 );
-      Serial.println("上传成功");
+      Serial.println(F("上传成功"));
       Serial.flush();
       ht16c21_cmd(0x88, 1); //闪烁
       delay(5);
@@ -286,7 +280,7 @@ void httpd_listen() {
       ht16c21_cmd(0x88, 0); //停闪烁
       Serial.setDebugOutput(true);
       WiFiUDP::stopAll();
-      Serial.printf("Update: %s\r\n", upload.filename.c_str());
+      Serial.printf_P(PSTR("Update: %s\r\n"), upload.filename.c_str());
       uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
       if (!Update.begin(maxSketchSpace)) { //start with max available size
         Update.printError(Serial);
@@ -294,18 +288,18 @@ void httpd_listen() {
       crc.reset();
     } else if (upload.status == UPLOAD_FILE_WRITE) {
       crc.update((uint8_t *)upload.buf, upload.currentSize);
-      snprintf(disp_buf, sizeof(disp_buf), "UP.%3d", upload.totalSize / 1000);
+      snprintf_P(disp_buf, sizeof(disp_buf), PSTR("UP.%3d"), upload.totalSize / 1000);
       disp(disp_buf);
-      Serial.println("size:" + String(upload.totalSize));
+      Serial.printf_P(PSTR("size:%ld\r\n"), (uint32_t)upload.totalSize);
       if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
         Update.printError(Serial);
       }
     } else if (upload.status == UPLOAD_FILE_END) {
       if (Update.end(true)) { //true to set the size to the current progress
         if (crc.finalize() != CRC_MAGIC)
-          Serial.printf(PSTR("File Update : %u\r\nCRC32 error ...\r\n"), upload.totalSize);
+          Serial.printf_P(PSTR("File Update : %u\r\nCRC32 error ...\r\n"), upload.totalSize);
         else
-          Serial.printf(PSTR("Update Success: %u\r\nRebooting...\r\n"), upload.totalSize);
+          Serial.printf_P(PSTR("Update Success: %u\r\nRebooting...\r\n"), upload.totalSize);
       } else {
         Update.printError(Serial);
       }
@@ -316,7 +310,7 @@ void httpd_listen() {
   httpd.onNotFound(handleNotFound);
   httpd.begin();
 
-  Serial.printf("HTTP服务器启动! 用浏览器打开 http://%s.local\r\n", hostname.c_str());
+  Serial.printf_P(PSTR("HTTP服务器启动! 用浏览器打开 http://%s.local\r\n"), hostname.c_str());
 }
 #define httpd_loop() httpd.handleClient()
 
