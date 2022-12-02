@@ -158,15 +158,15 @@ uint16_t http_get(uint8_t no) {
     url0 += '&';
   else
     url0 += '?';
-  url0 += "ver="  VER  "&sn=" + hostname
-          + "&ssid=" + String(WiFi.SSID())
-          + "&bssid=" + WiFi.BSSIDstr()
-          + "&batt=" + String(v)
-          + "&rssi=" + String(WiFi.RSSI())
-          + "&power=" + String(power_in)
-          + "&change=" + String(nvram.nvram7 & NVRAM7_CHARGE)
-          + "&ms=" + String(millis())
-          + "&temp=" + String(temp[0]);
+  url0 +=  "GIT=" GIT_VER "&ver=" VER "&sn=" + hostname
+           + "&ssid=" + String(WiFi.SSID())
+           + "&bssid=" + WiFi.BSSIDstr()
+           + "&batt=" + String(v)
+           + "&rssi=" + String(WiFi.RSSI())
+           + "&power=" + String(power_in)
+           + "&charge=" + String(nvram.nvram7 & NVRAM7_CHARGE)
+           + "&ms=" + String(millis())
+           + "&temp=" + String(temp[0]);
   if (nvram.have_dht >= 0) {
     dht_load();
     if (wendu > -300.0 && shidu >= 0.0 && shidu <= 100.0)
