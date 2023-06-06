@@ -49,10 +49,6 @@ bool lora_init() {
     }
     return false;
   }
-  if (nvram.have_dht > -5) {
-    nvram.have_dht = -5;
-    nvram.change = 1;
-  }
   if (nvram.have_lora < 1) {
     nvram.have_lora = 1;
     nvram.change = 1;

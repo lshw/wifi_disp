@@ -16,7 +16,6 @@ String hostname = HOSTNAME;
 #include "httpd.h"
 #include "ht16c21.h"
 #include "lora.h"
-#include "dht.h"
 bool power_in = false;
 void init1() {
   save_nvram();
@@ -93,21 +92,6 @@ void setup()
   Serial.println(F("Hostname: ") + hostname);
   Serial.flush();
   if (!ds_init() && !ds_init()) ds_init();
-  if (nvram.have_dht > -5 && dht_setup()) {
-    if (nvram.have_dht < 1) {
-      nvram.have_dht = 1;
-      nvram.change = 1;
-    }
-    if (nvram.have_lora > -5) {
-      nvram.have_lora = -5;
-      nvram.change = 1;
-    }
-  } else {
-    if (nvram.have_dht > -5) {
-      nvram.have_dht --;
-      nvram.change = 1;
-    }
-  }
   get_temp();
   get_batt();
   _myTicker.attach(1, timer1s);
@@ -147,8 +131,7 @@ void setup()
           lora.sleep();
         Serial.begin(115200);
       }
-      if (nvram.have_dht < 0 || nvram.have_lora < 0) {
-        nvram.have_dht = 0;  //清除无dht和lora 的标志， 重新诊断
+      if (nvram.have_lora < 0) {
         nvram.have_lora = 0;
         nvram.change = 1;
       }

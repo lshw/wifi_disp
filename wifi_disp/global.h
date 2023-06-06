@@ -43,9 +43,6 @@ float v;
 bool power_off = false;
 void poweroff(uint32_t sec) {
   get_batt();
-  if (nvram.have_dht > -5) {
-    void dht_end();
-  }
   nvram.proc = 0;
   nvram.change = 1;
   if (ds_pin == 0) Serial.println(F("V2.0"));
