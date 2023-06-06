@@ -144,6 +144,8 @@ bool get_temp() {
       digitalWrite(ds_pin, HIGH);
     }
   }
+  wendu = temp[0];
+  shidu = 101.0;
   return ret;
 }
 

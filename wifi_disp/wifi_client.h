@@ -163,10 +163,11 @@ uint16_t http_get(uint8_t no) {
            + "&rssi=" + String(WiFi.RSSI())
            + "&power=" + String(power_in)
            + "&charge=" + String(nvram.nvram7 & NVRAM7_CHARGE)
-           + "&ms=" + String(millis())
-           + "&temp=" + String(temp[0]);
-  if (wendu > -300.0 && shidu >= 0.0 && shidu <= 100.0)
-    url0 += "&shidu=" + String((int8_t)shidu) + "%," + String(wendu);
+           + "&ms=" + String(millis());
+  if (wendu > -300.0)
+    url0 += "&temp=" + String(wendu);
+  if (shidu >= 0.0 && shidu <= 100.0)
+    url0 += "&shidu=" + String((int8_t)shidu) + "%";
   if (dsn[1][0] != 0) {
     url0 += "&temps=";
     for (uint8_t i = 0; i < 32; i++) {
