@@ -2,7 +2,7 @@
 #define __DS1820_H__
 #include <OneWire.h>
 OneWire  oneWire(12);
-
+float wendu, shidu;
 byte dsn[32][8]; //ds1820 sn
 float temp[32];
 uint8_t ds_pin = 12;

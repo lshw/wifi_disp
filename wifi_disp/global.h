@@ -37,6 +37,7 @@ char disp_buf[22];
 extern uint8_t ds_pin ;
 extern bool power_in ;
 extern bool ap_client_linked ;
+extern float wendu, shidu;
 uint32_t ap_on_time = 200000;
 float get_batt();
 float v;

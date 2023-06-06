@@ -16,6 +16,7 @@ String hostname = HOSTNAME;
 #include "httpd.h"
 #include "ht16c21.h"
 #include "lora.h"
+#include "dht22.h"
 bool power_in = false;
 void init1() {
   save_nvram();
@@ -91,7 +92,7 @@ void setup()
   WiFi.hostname(hostname);
   Serial.println(F("Hostname: ") + hostname);
   Serial.flush();
-  if (!ds_init() && !ds_init()) ds_init();
+  if (!dht(0) && !ds_init() && !ds_init()) ds_init();
   get_temp();
   get_batt();
   _myTicker.attach(1, timer1s);

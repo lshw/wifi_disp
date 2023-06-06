@@ -1,11 +1,14 @@
 #ifndef __DHT_H__
 #define __DHT_H__
-long levelTime(byte level, int firstWait, int interval) {
+
+extern float wendu, shidu;
+uint8_t dht22_data[5];
+long levelTime(uint8_t pin, bool level) {
   unsigned long time_start = micros();
   long time = 0;
   bool loop = true;
   for (int i = 0 ; loop; i++) {
-    if (time < 0 || time > levelTimeout) {
+    if (time < 0 || time > 300) {
       return -1;
     }
     time = micros() - time_start;
@@ -13,7 +16,6 @@ long levelTime(byte level, int firstWait, int interval) {
   }
   return time;
 }
-uint8_t dht22_data[5];
 bool dht(uint8_t pin) {
   // empty output data.
   memset(dht22_data, 0, 5);
@@ -37,10 +39,10 @@ bool dht(uint8_t pin) {
   //    1. T(rel), PULL LOW 80us(75-85us).
   //    2. T(reh), PULL HIGH 80us(75-85us).
   long t = 0;
-  if ((t = levelTime(LOW)) < 30) {
+  if ((t = levelTime(pin, LOW)) < 30) {
     return false;
   }
-  if ((t = levelTime(HIGH)) < 50) {
+  if ((t = levelTime(pin, HIGH)) < 50) {
     return false;
   }
 
@@ -49,13 +51,13 @@ bool dht(uint8_t pin) {
   //    2. T(H0), PULL HIGH 26us(22-30us), bit(0)
   //    3. T(H1), PULL HIGH 70us(68-75us), bit(1)
   for (int j = 0; j < 40; j++) {
-    t = levelTime(LOW);          // 1.
+    t = levelTime(pin, LOW);          // 1.
     if (t < 24) {                    // specs says: 50us
       return false;
     }
 
     // read a bit
-    t = levelTime(HIGH);              // 2.
+    t = levelTime(pin, HIGH);              // 2.
     if (t < 11) {                     // specs say: 26us
       return false;
     }
@@ -64,11 +66,20 @@ bool dht(uint8_t pin) {
 
   // DHT22 EOF:
   //    1. T(en), PULL LOW 50us(45-55us).
-  t = levelTime(LOW);
+  t = levelTime(pin, LOW);
   if (t < 24) {
     return false;
   }
 
-  return dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3] == dht22_data[4];
+  if ( dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3] == dht22_data[4]) {
+    wendu = 0.1 * (dht22_data[2] << 8 | dht22_data[3]);
+    shidu = 0.1 * (dht22_data[0] << 8 | dht22_data[1]);
+    Serial.printf("wendu=%f,shidu=%f\r\n", wendu, shidu);
+    return true;
+  } else {
+    wendu = -999.0;
+    shidu = -999.0;
+    return false;
+  }
 }
 #endif
