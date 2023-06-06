@@ -77,7 +77,8 @@ $arduino/arduino-builder \
 -verbose \
 ./wifi_disp/wifi_disp.ino |tee /tmp/${me}_info.log
 
-if [ $? == 0 ] ; then
+if [ -e /tmp/${me}_build/wifi_disp.ino.bin ] ; then
+
   grep "Global vari" /tmp/${me}_info.log |sed -n "s/^.* \[\([0-9]*\) \([0-9]*\) \([0-9]*\) \([0-9]*\)\].*$/RAM:使用\1字节(\3%),剩余\4字节/p"
   grep "Sketch uses" /tmp/${me}_info.log |sed -n "s/^.* \[\([0-9]*\) \([0-9]*\) \([0-9]*\)\].*$/ROM:使用\1字节(\3%)/p"
 
