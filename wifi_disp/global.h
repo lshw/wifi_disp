@@ -198,7 +198,6 @@ void timer1s() {
 }
 
 uint16_t wget() {
-  get_temp();
   uint16_t httpCode = http_get( nvram.nvram7 & NVRAM7_URL); //先试试上次成功的url
   if (httpCode < 200  || httpCode >= 400) {
     nvram.nvram7 = (nvram.nvram7 & ~ NVRAM7_URL) | (~ nvram.nvram7 & NVRAM7_URL);
@@ -238,53 +237,56 @@ float get_batt() {
   }
   delay(1);
   get_batt0();
-  v0 = v;
-  if (ds_pin != 0) //v1.0硬件
-    digitalWrite(13, LOW); //充电
-  else //v2.0硬件
-    digitalWrite(1, HIGH); //充电
-  delay(1);
-  get_batt0();
-  if (v > v0) { //有外接电源
+  if (v > 4.3) power_in = true;
+  else {
     v0 = v;
+    if (ds_pin != 0) //v1.0硬件
+      digitalWrite(13, LOW); //充电
+    else //v2.0硬件
+      digitalWrite(1, HIGH); //充电
+    delay(1);
+    get_batt0();
+    if (v > v0) { //有外接电源
+      v0 = v;
+      if (ds_pin != 0)
+        digitalWrite(13, HIGH); //不充电
+      else
+        digitalWrite(1, LOW); //不充电
+      delay(1);
+      get_batt0();
+      if (v0 > v) {
+        v0 = v;
+        if (ds_pin != 0)
+          digitalWrite(13, LOW); //充电
+        else
+          digitalWrite(1, HIGH); //充电
+        delay(1);
+        get_batt0();
+        if (v > v0) {
+          v0 = v;
+          if (ds_pin != 0)
+            digitalWrite(13, HIGH); //不充电
+          else
+            digitalWrite(1, LOW); //不充电
+          delay(1);
+          get_batt0();
+          if (v0 > v) {
+            if (!power_in) {
+              power_in = true;
+              Serial.println(F("测得电源插入"));
+            }
+          } else power_in = false;
+        } else power_in = false;
+      } else power_in = false;
+    } else power_in = false;
+
     if (ds_pin != 0)
       digitalWrite(13, HIGH); //不充电
     else
       digitalWrite(1, LOW); //不充电
     delay(1);
     get_batt0();
-    if (v0 > v) {
-      v0 = v;
-      if (ds_pin != 0)
-        digitalWrite(13, LOW); //充电
-      else
-        digitalWrite(1, HIGH); //充电
-      delay(1);
-      get_batt0();
-      if (v > v0) {
-        v0 = v;
-        if (ds_pin != 0)
-          digitalWrite(13, HIGH); //不充电
-        else
-          digitalWrite(1, LOW); //不充电
-        delay(1);
-        get_batt0();
-        if (v0 > v) {
-          if (!power_in) {
-            power_in = true;
-            Serial.println(F("测得电源插入"));
-          }
-        } else power_in = false;
-      } else power_in = false;
-    } else power_in = false;
-  } else power_in = false;
-
-  if (ds_pin != 0)
-    digitalWrite(13, HIGH); //不充电
-  else
-    digitalWrite(1, LOW); //不充电
-  delay(1);
-  get_batt0();
+  }
   if ((nvram.nvram7 & NVRAM7_CHARGE) == 0) {
     if (v < 3.8) {
       nvram.nvram7 |= NVRAM7_CHARGE;

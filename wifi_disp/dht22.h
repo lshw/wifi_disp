@@ -3,7 +3,8 @@
 
 extern float wendu, shidu;
 uint8_t dht22_data[5];
-long levelTime(uint8_t pin, bool level) {
+/*
+  long levelTime(uint8_t pin, bool level) {
   unsigned long time_start = micros();
   long time = 0;
   bool loop = true;
@@ -15,10 +16,19 @@ long levelTime(uint8_t pin, bool level) {
     loop = (digitalRead(pin) == level);
   }
   return time;
-}
+  }
+*/
+uint32_t dht_next = 500;
 bool dht(uint8_t pin) {
   // empty output data.
-  memset(dht22_data, 0, 5);
+  pinMode(pin, INPUT_PULLUP);
+  if ( millis()  < dht_next) {
+    dht_next = dht_next - millis();
+    if (dht_next > 500) dht_next = 500;
+    Serial.printf("delay(%d)\r\n", dht_next);
+    delay(dht_next);
+  }
+  dht_next = millis() + 500;
 
   // According to protocol: http://akizukidenshi.com/download/ds/aosong/AM2302.pdf
   // notify DHT22 to start:
@@ -27,7 +37,7 @@ bool dht(uint8_t pin) {
   //    3. SET TO INPUT or INPUT_PULLUP.
   pinMode(pin, OUTPUT);
   digitalWrite(pin, LOW);
-  delayMicroseconds(1000);
+  delayMicroseconds(10000);
   // Pull high and set to input, before wait 40us.
   // @see https://github.com/winlinvip/SimpleDHT/issues/4
   // @see https://github.com/winlinvip/SimpleDHT/pull/5
@@ -38,47 +48,27 @@ bool dht(uint8_t pin) {
   // DHT22 starting:
   //    1. T(rel), PULL LOW 80us(75-85us).
   //    2. T(reh), PULL HIGH 80us(75-85us).
-  long t = 0;
-  if ((t = levelTime(pin, LOW)) < 30) {
-    return false;
-  }
-  if ((t = levelTime(pin, HIGH)) < 50) {
-    return false;
-  }
-
+  //levelTime(pin, LOW);
+  //levelTime(pin, HIGH);
+  pulseIn(pin, HIGH, 200);
   // DHT22 data transmite:
   //    1. T(LOW), 1bit start, PULL LOW 50us(48-55us).
   //    2. T(H0), PULL HIGH 26us(22-30us), bit(0)
   //    3. T(H1), PULL HIGH 70us(68-75us), bit(1)
   for (int j = 0; j < 40; j++) {
-    t = levelTime(pin, LOW);          // 1.
-    if (t < 24) {                    // specs says: 50us
-      return false;
-    }
-
-    // read a bit
-    t = levelTime(pin, HIGH);              // 2.
-    if (t < 11) {                     // specs say: 26us
-      return false;
-    }
-    dht22_data[j / 8] = (dht22_data[j / 8] << 1) | (t > 40 ? 1 : 0);     // specs: 22-30us -> 0, 70us -> 1
+    dht22_data[j / 8] = (dht22_data[j / 8] << 1) | (pulseIn(pin, HIGH, 200) > 40 ? 1 : 0);    // specs: 22-30us -> 0, 70us -> 1
   }
 
-  // DHT22 EOF:
-  //    1. T(en), PULL LOW 50us(45-55us).
-  t = levelTime(pin, LOW);
-  if (t < 24) {
-    return false;
-  }
-
-  if ( dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3] == dht22_data[4]) {
+  if ( dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3] == dht22_data[4]
+       && dht22_data[0] | dht22_data[1] | dht22_data[2] | dht22_data[3] | dht22_data[4] != 0) {
     wendu = 0.1 * (dht22_data[2] << 8 | dht22_data[3]);
     shidu = 0.1 * (dht22_data[0] << 8 | dht22_data[1]);
-    Serial.printf("wendu=%f,shidu=%f\r\n", wendu, shidu);
+    Serial.printf("温度=%.1f, 湿度=%.1f%%\r\n", wendu, shidu);
     return true;
   } else {
     wendu = -999.0;
     shidu = -999.0;
+    Serial.println(F("数据校验错"));
     return false;
   }
 }

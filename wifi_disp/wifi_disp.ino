@@ -92,8 +92,11 @@ void setup()
   WiFi.hostname(hostname);
   Serial.println(F("Hostname: ") + hostname);
   Serial.flush();
-  if (!dht(0) && !ds_init() && !ds_init()) ds_init();
-  get_temp();
+  if (!dht(0) && !dht(0)) {
+    if (!ds_init() && !ds_init() && !ds_init())
+      get_temp();
+  } else
+    pinMode(0, INPUT_PULLUP);
   get_batt();
   _myTicker.attach(1, timer1s);
   Serial.print(F("电池电压"));
@@ -324,11 +327,7 @@ void loop()
       if (wifi_connected_is_ok()) {
         if (!httpd_up ) {
           update_disp();
-          get_temp();
-          if (temp[0] < 85.00) {
-            wput();
-            httpd_up = true;
-          }
+          wput();
         }
         return;
       } else if (timer3 == 0) {
