@@ -1,7 +1,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#define VER "1.68"
+#define VER "1.69"
 #define HOSTNAME "disp_"
 #define CRC_MAGIC 3
 
