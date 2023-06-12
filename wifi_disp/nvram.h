@@ -10,7 +10,7 @@ struct {
   uint8_t nvram7;
   uint8_t change;
   uint32_t boot_count;
-  int8_t  have_dht;  //失败一次就减1, 减到-5就不再测试dht，直接认为没有
+  int8_t  have_dht;
   int8_t  have_lora; //失败一次就减1，减到-5,  设置ota模式， 会清0， 上同
   uint8_t ch;
   uint32_t crc32;

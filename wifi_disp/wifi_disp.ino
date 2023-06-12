@@ -92,10 +92,21 @@ void setup()
   WiFi.hostname(hostname);
   Serial.println(F("Hostname: ") + hostname);
   Serial.flush();
-  if (!dht(0) && !dht(0)) {
-    if (!ds_init() && !ds_init() && !ds_init())
-      get_temp();
-  } else
+  if (nvram.have_dht > 0 ) {
+    if (!dht() &&  !dht()) {
+      nvram.have_dht = 0;
+      nvram.change = 1; //电压过低
+    }
+  }
+  if (nvram.have_dht <= 0) {
+    if (!ds_init()  && !ds_init()) {
+      nvram.have_dht = 1;
+      nvram.change = 1; //电压过低
+    }
+  }
+  if (nvram.have_dht <= 0)
+    get_temp();
+  else
     pinMode(0, INPUT_PULLUP);
   get_batt();
   _myTicker.attach(1, timer1s);

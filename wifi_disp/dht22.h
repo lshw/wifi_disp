@@ -3,25 +3,11 @@
 
 extern float wendu, shidu;
 uint8_t dht22_data[5];
-/*
-  long levelTime(uint8_t pin, bool level) {
-  unsigned long time_start = micros();
-  long time = 0;
-  bool loop = true;
-  for (int i = 0 ; loop; i++) {
-    if (time < 0 || time > 300) {
-      return -1;
-    }
-    time = micros() - time_start;
-    loop = (digitalRead(pin) == level);
-  }
-  return time;
-  }
-*/
 uint32_t dht_next = 500;
-bool dht(uint8_t pin) {
+#define DHT_PIN 0
+bool dht() {
   // empty output data.
-  pinMode(pin, INPUT_PULLUP);
+  pinMode(DHT_PIN, INPUT_PULLUP);
   if ( millis()  < dht_next) {
     dht_next = dht_next - millis();
     if (dht_next > 500) dht_next = 500;
@@ -35,14 +21,14 @@ bool dht(uint8_t pin) {
   //    1. T(be), PULL LOW 1ms(0.8-20ms).
   //    2. T(go), PULL HIGH 30us(20-200us), use 40us.
   //    3. SET TO INPUT or INPUT_PULLUP.
-  pinMode(pin, OUTPUT);
-  digitalWrite(pin, LOW);
+  pinMode(DHT_PIN, OUTPUT);
+  digitalWrite(DHT_PIN, LOW);
   delayMicroseconds(10000);
   // Pull high and set to input, before wait 40us.
   // @see https://github.com/winlinvip/SimpleDHT/issues/4
   // @see https://github.com/winlinvip/SimpleDHT/pull/5
-  digitalWrite(pin, HIGH);
-  pinMode(pin, INPUT_PULLUP);
+  digitalWrite(DHT_PIN, HIGH);
+  pinMode(DHT_PIN, INPUT_PULLUP);
   delayMicroseconds(40);
 
   // DHT22 starting:
@@ -50,15 +36,16 @@ bool dht(uint8_t pin) {
   //    2. T(reh), PULL HIGH 80us(75-85us).
   //levelTime(pin, LOW);
   //levelTime(pin, HIGH);
-  pulseIn(pin, HIGH, 200);
+  if (pulseIn(DHT_PIN, HIGH, 200) > 120) return false;
   // DHT22 data transmite:
   //    1. T(LOW), 1bit start, PULL LOW 50us(48-55us).
   //    2. T(H0), PULL HIGH 26us(22-30us), bit(0)
   //    3. T(H1), PULL HIGH 70us(68-75us), bit(1)
+  cli();
   for (int j = 0; j < 40; j++) {
-    dht22_data[j / 8] = (dht22_data[j / 8] << 1) | (pulseIn(pin, HIGH, 200) > 40 ? 1 : 0);    // specs: 22-30us -> 0, 70us -> 1
+    dht22_data[j / 8] = (dht22_data[j / 8] << 1) | (pulseIn(DHT_PIN, HIGH, 200) > 40 ? 1 : 0);    // specs: 22-30us -> 0, 70us -> 1
   }
-
+  sei();
   if ( dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3] == dht22_data[4]
        && dht22_data[0] | dht22_data[1] | dht22_data[2] | dht22_data[3] | dht22_data[4] != 0) {
     wendu = 0.1 * (dht22_data[2] << 8 | dht22_data[3]);
