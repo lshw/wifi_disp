@@ -46,10 +46,14 @@ bool dht() {
     dht22_data[j / 8] = (dht22_data[j / 8] << 1) | (pulseIn(DHT_PIN, HIGH, 200) > 40 ? 1 : 0);    // specs: 22-30us -> 0, 70us -> 1
   }
   sei();
-  if ( dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3] == dht22_data[4]
-       && dht22_data[0] | dht22_data[1] | dht22_data[2] | dht22_data[3] | dht22_data[4] != 0) {
-    wendu = 0.1 * (dht22_data[2] << 8 | dht22_data[3]);
+  if (
+    ((dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3]) & 0xff) == dht22_data[4]
+    && ((dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3] + dht22_data[4]) != 0)
+  ) {
+    wendu = 0.1 * ((dht22_data[2] & 0x7f) << 8 | dht22_data[3]);
     shidu = 0.1 * (dht22_data[0] << 8 | dht22_data[1]);
+    if ((dht22_data[2] & 0x80 ) != 0)
+      wendu = -wendu;
     Serial.printf("温度=%.1f, 湿度=%.1f%%\r\n", wendu, shidu);
     return true;
   } else {
