@@ -39,21 +39,29 @@ void http204() {
 void handleRoot() {
   String wifi_stat, wifi_scan;
   String ssid;
-  int n = WiFi.scanNetworks();
-  if (n > 0) {
-    wifi_scan = "自动扫描到如下WiFi,点击连接:<br>";
-    for (int i = 0; i < n; ++i) {
-      ssid = String(WiFi.SSID(i));
-      if (WiFi.encryptionType(i) != ENC_TYPE_NONE)
-        wifi_scan += "&nbsp;<button onclick=get_passwd('" + ssid + "')>*";
-      else
-        wifi_scan += "&nbsp;<button onclick=select_ssid('" + ssid + "')>";
-      wifi_scan += String(WiFi.SSID(i)) + "(" + String(WiFi.RSSI(i)) + "dbm)";
-      wifi_scan += "</button>";
-      delay(10);
+  for (uint8_t i = 0; i < httpd.args(); i++) {
+    if (httpd.argName(i).compareTo("scan") == 0) {
+      int n = WiFi.scanNetworks();
+      if (n > 0) {
+        wifi_scan = "自动扫描到如下WiFi,点击连接:<br>";
+        for (int i = 0; i < n; ++i) {
+          ssid = String(WiFi.SSID(i));
+          if (WiFi.encryptionType(i) != ENC_TYPE_NONE)
+            wifi_scan += "&nbsp;<button onclick=get_passwd('" + ssid + "')>*";
+          else
+            wifi_scan += "&nbsp;<button onclick=select_ssid('" + ssid + "')>";
+          wifi_scan += String(WiFi.SSID(i)) + "(" + String(WiFi.RSSI(i)) + "dbm)";
+          wifi_scan += "</button>";
+          delay(10);
+        }
+        wifi_scan += "<br>";
+      }
     }
-    wifi_scan += "<br>";
   }
+  if (wifi_scan == "") {
+    wifi_scan = "<a href=/?scan=1><buttom>扫描WiFi</buttom></a>";
+  }
+
   yield();
   if (connected_is_ok) {
     wifi_stat = "wifi已连接 ssid:<mark>" + String(WiFi.SSID()) + "</mark> &nbsp; "
