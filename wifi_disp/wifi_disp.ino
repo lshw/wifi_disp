@@ -95,13 +95,13 @@ void setup()
   if (nvram.have_dht > 0 ) {
     if (!dht() &&  !dht()) {
       nvram.have_dht = 0;
-      nvram.change = 1; //电压过低
+      nvram.change = 1;
     }
   }
   if (nvram.have_dht <= 0) {
     if (!ds_init()  && !ds_init()) {
       nvram.have_dht = 1;
-      nvram.change = 1; //电压过低
+      nvram.change = 1;
     }
   }
   if (nvram.have_dht <= 0)

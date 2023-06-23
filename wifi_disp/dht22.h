@@ -6,6 +6,7 @@ uint8_t dht22_data[5];
 uint32_t dht_next = 500;
 #define DHT_PIN 0
 bool dht() {
+  uint8_t p1, dat[40];
   // empty output data.
   pinMode(DHT_PIN, INPUT_PULLUP);
   if ( millis()  < dht_next) {
@@ -23,7 +24,7 @@ bool dht() {
   //    3. SET TO INPUT or INPUT_PULLUP.
   pinMode(DHT_PIN, OUTPUT);
   digitalWrite(DHT_PIN, LOW);
-  delayMicroseconds(10000);
+  delayMicroseconds(20000);
   // Pull high and set to input, before wait 40us.
   // @see https://github.com/winlinvip/SimpleDHT/issues/4
   // @see https://github.com/winlinvip/SimpleDHT/pull/5
@@ -36,16 +37,31 @@ bool dht() {
   //    2. T(reh), PULL HIGH 80us(75-85us).
   //levelTime(pin, LOW);
   //levelTime(pin, HIGH);
-  if (pulseIn(DHT_PIN, HIGH, 200) > 120) return false;
+  p1 = pulseIn(DHT_PIN, HIGH, 200);
+  if (p1 > 120) return false;
   // DHT22 data transmite:
   //    1. T(LOW), 1bit start, PULL LOW 50us(48-55us).
   //    2. T(H0), PULL HIGH 26us(22-30us), bit(0)
   //    3. T(H1), PULL HIGH 70us(68-75us), bit(1)
   cli();
   for (int j = 0; j < 40; j++) {
-    dht22_data[j / 8] = (dht22_data[j / 8] << 1) | (pulseIn(DHT_PIN, HIGH, 200) > 40 ? 1 : 0);    // specs: 22-30us -> 0, 70us -> 1
+    dat[j] = pulseIn(DHT_PIN, HIGH, 200);
   }
   sei();
+  for (int j = 0; j < 40; j++) {
+    dht22_data[j / 8] = (dht22_data[j / 8] << 1) | (dat[j] > 40 ? 1 : 0);    // specs: 22-30us -> 0, 70us -> 1
+  }
+  Serial.printf("start=%d, %02x%02x %02x%02x %02x\r\n", p1,
+                dht22_data[0],
+                dht22_data[1],
+                dht22_data[2],
+                dht22_data[3],
+                dht22_data[4]);
+  for (int j = 0; j < 40; j++) {
+    Serial.printf(" %02d", dat[j]);
+    if (j % 8 == 7)
+      Serial.println();
+  }
   if (
     ((dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3]) & 0xff) == dht22_data[4]
     && ((dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3] + dht22_data[4]) != 0)
