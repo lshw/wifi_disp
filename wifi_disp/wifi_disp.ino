@@ -106,7 +106,7 @@ void setup()
   }
   if (nvram.have_dht <= 0)
     get_temp();
-  else{
+  else {
     pinMode(0, INPUT_PULLUP);
     ds_pin = 0;//DHT22使用V2.0的硬件
   }
