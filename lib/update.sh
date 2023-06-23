@@ -22,5 +22,7 @@ else
  fi
 #先试试 esptool.py
  lib/esptool.py --chip esp8266 --port $port --after soft_reset --baud 460800 write_flash 0 lib/wifi_disp.bin
-lib/run.sh
+if [ $? == 0 ] ; then
+ lib/run.sh
+fi
 fi
