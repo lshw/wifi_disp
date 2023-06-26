@@ -201,28 +201,18 @@ uint16_t http_get(uint8_t no) {
       // file found at server
       if (httpCode == HTTP_CODE_OK) {
         String payload = http.getString();
-        memset(disp_buf, 0, sizeof(disp_buf));
-        payload.toCharArray(disp_buf, 15); //.1.2.3.4.5,1800
-        uint8_t    i1 = payload.indexOf(',');
-        Serial.println(disp_buf);
-        Serial.println();
-        if (  disp_buf[0] == 'U'
-              && disp_buf[1] == 'P'
-              && disp_buf[2] == 'D'
-              && disp_buf[3] == 'A'
-              && disp_buf[4] == 'T'
-              && disp_buf[5] == 'E') {
-          ht16c21_cmd(0x88, 0); //停闪烁
-          SPIFFS.begin();
-          if (http_update() == false)
-            http_update();
-          poweroff(1800);
-        } else if ( disp_buf[0] < '0' || disp_buf[0] > '9') { //非数字， 就是web下发的命令
+        payload.trim();
+        char ch = payload.charAt(0);
+        if ( ch < '0' || ch > '9') { //非数字， 就是web下发的命令
           web_cmd(payload);
           disp((char *) "8.8.8.8.8.");
           break;
         }
 
+        memset(disp_buf, 0, sizeof(disp_buf));
+        payload.toCharArray(disp_buf, 15); //.1.2.3.4.5,1800
+        uint8_t    i1 = payload.indexOf(',');
+        Serial.println(disp_buf);
         next_disp = atoi(&disp_buf[i1 + 1]);
         if (next_disp < 6)
           next_disp = 6;
