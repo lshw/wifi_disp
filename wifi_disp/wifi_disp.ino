@@ -1,7 +1,9 @@
 #include <FS.h>
+#ifndef __ESP32_C3__
 extern "C" {
 #include "user_interface.h"
 }
+#endif
 #include "config.h"
 #include "global.h"
 bool temp_ok = false; //测温ok
