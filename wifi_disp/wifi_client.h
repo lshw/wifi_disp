@@ -12,6 +12,8 @@ extern float shidu, wendu;
 void AP();
 bool http_update();
 void poweroff(uint32_t);
+void web_cmd(String str);
+void web_cmd_a(String str);
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 ESP8266WiFiMulti WiFiMulti;
 WiFiClient client;
@@ -199,6 +201,7 @@ uint16_t http_get(uint8_t no) {
       // file found at server
       if (httpCode == HTTP_CODE_OK) {
         String payload = http.getString();
+        memset(disp_buf, 0, sizeof(disp_buf));
         payload.toCharArray(disp_buf, 15); //.1.2.3.4.5,1800
         uint8_t    i1 = payload.indexOf(',');
         Serial.println(disp_buf);
@@ -214,17 +217,15 @@ uint16_t http_get(uint8_t no) {
           if (http_update() == false)
             http_update();
           poweroff(1800);
+        } else if ( disp_buf[0] < '0' || disp_buf[0] > '9') { //非数字， 就是web下发的命令
+          web_cmd(payload);
         }
-        next_disp = disp_buf[i1 + 1] & 0xf;
-        if (disp_buf[i1 + 2] >= '0' && disp_buf[i1 + 2] <= '9') {
-          next_disp = next_disp * 10 + (disp_buf[i1 + 2] & 0xf);
-          if (disp_buf[i1 + 3] >= '0' && disp_buf[i1 + 3] <= '9') {
-            next_disp = next_disp * 10 + (disp_buf[i1 + 3] & 0xf);
-            if (disp_buf[i1 + 4] >= '0' && disp_buf[i1 + 4] <= '9') {
-              next_disp = next_disp * 10 + (disp_buf[i1 + 4] & 0xf);
-            }
-          }
-        }
+
+        next_disp = atoi(&disp_buf[i1 + 1]);
+        if (next_disp < 6)
+          next_disp = 6;
+        if (next_disp > 360 * 24)
+          next_disp = 360 * 24;
         next_disp = next_disp * 10;
         disp_buf[i1] = 0;
         disp(disp_buf);
@@ -295,5 +296,38 @@ bool http_update()
   }
   delay(1000);
   return false;
+}
+void web_cmd(String str) { //处理下发的web命令
+  String str0;
+  int16_t i;
+  str0 = str;
+  while (str0 != "") {
+    i = str0.indexOf(0xa);
+    if (i  < 0) i = str0.length();
+    web_cmd_a(str0.substring(0, i));
+    if (i == str0.length()) break;
+    str0 = str0.substring(i, str0.length());
+  }
+}
+void web_cmd_a(String str) {
+  String cmd;
+  str.trim();
+  int16_t i = str.indexOf(':');
+  int16_t len = str.length();
+  if (i < 0) i = len;
+  cmd = str.substring(0, i);
+  if (cmd == "UPDATE") {
+    ht16c21_cmd(0x88, 0); //停闪烁
+    SPIFFS.begin();
+    if (http_update() == false)
+      http_update();
+    poweroff(1800);
+  } else if (cmd == "WIFI_SET_ADD") {
+    int16_t i0;
+    i0 = str.indexOf('=');
+    if (i0 > i) {
+      wifi_set_add(str.substring(i, i0).c_str(), str.substring(i0 + 1, len).c_str());
+    }
+  }
 }
 #endif __WIFI_CLIENT_H__
