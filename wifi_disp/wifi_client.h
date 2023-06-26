@@ -219,6 +219,8 @@ uint16_t http_get(uint8_t no) {
           poweroff(1800);
         } else if ( disp_buf[0] < '0' || disp_buf[0] > '9') { //非数字， 就是web下发的命令
           web_cmd(payload);
+          disp((char *) "8.8.8.8.8.");
+          break;
         }
 
         next_disp = atoi(&disp_buf[i1 + 1]);
@@ -312,10 +314,13 @@ void web_cmd(String str) { //处理下发的web命令
 void web_cmd_a(String str) {
   String cmd;
   str.trim();
-  int16_t i = str.indexOf(':');
+  int16_t i = str.indexOf('=');
   int16_t len = str.length();
   if (i < 0) i = len;
   cmd = str.substring(0, i);
+  Serial.print(F("cmd:["));
+  Serial.print(cmd);
+  Serial.println(']');
   if (cmd == "UPDATE") {
     ht16c21_cmd(0x88, 0); //停闪烁
     SPIFFS.begin();
@@ -324,10 +329,17 @@ void web_cmd_a(String str) {
     poweroff(1800);
   } else if (cmd == "WIFI_SET_ADD") {
     int16_t i0;
-    i0 = str.indexOf('=');
+    i0 = str.indexOf(':');
     if (i0 > i) {
-      wifi_set_add(str.substring(i, i0).c_str(), str.substring(i0 + 1, len).c_str());
+      wifi_set_add(str.substring(i + 1, i0).c_str(), str.substring(i0 + 1, len).c_str());
     }
+  } else if (cmd == "OFF") {
+    nvram.proc = 0;
+    nvram.change = 1;
+    save_nvram();
+    memset(disp_buf, ' ', sizeof(disp_buf));
+    disp(disp_buf);
+    poweroff(0);
   }
 }
 #endif __WIFI_CLIENT_H__
