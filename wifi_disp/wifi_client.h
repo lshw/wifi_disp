@@ -1,10 +1,17 @@
 #ifndef __WIFI_CLIENT_H__
 #define __WIFI_CLIENT_H__
 #include "config.h"
+#ifdef CONFIG_IDF_TARGET_ESP32C3
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <WiFiMulti.h>
+#include <Update.h>
+#else
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266httpUpdate.h>
+#endif
 #include "ds1820.h"
 extern bool power_in;
 bool wifi_connected = false;

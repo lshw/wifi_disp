@@ -1,6 +1,10 @@
 #ifndef __AP_WEB_H__
 #define __AP_WEB_H__
+#ifdef CONFIG_IDF_TARGET_ESP32C3
+#include <WebServer.h>
+#else
 #include <ESP8266WebServer.h>
+#endif
 #include <ArduinoOTA.h>
 #include "wifi_client.h"
 extern void disp(char *);

@@ -5,7 +5,13 @@
 #include "ht16c21.h"
 #include <time.h>
 #include "Ticker.h"
+#ifdef CONFIG_IDF_TARGET_ESP32C3
+#include <WiFiMulti.h>
+#define  LIGHT_SLEEP_T ESP_LIGHT_SLEEP
+#define wdt_disable() rtc_wdt_disable()
+#else
 #include <ESP8266WiFiMulti.h>
+#endif
 #include <DNSServer.h>
 #include "CRC32.h"
 CRC32 crc;
