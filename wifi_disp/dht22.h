@@ -2,7 +2,7 @@
 #define __DHT_H__
 
 extern float wendu, shidu;
-uint8_t dht22_data[5];
+uint8_t temp_data[6];
 uint32_t dht_next = 500;
 #define DHT_PIN 0
 bool dht() {
@@ -49,26 +49,26 @@ bool dht() {
   }
   sei();
   for (int j = 0; j < 40; j++) {
-    dht22_data[j / 8] = (dht22_data[j / 8] << 1) | (dat[j] > 40 ? 1 : 0);    // specs: 22-30us -> 0, 70us -> 1
+    temp_data[j / 8] = (temp_data[j / 8] << 1) | (dat[j] > 40 ? 1 : 0);    // specs: 22-30us -> 0, 70us -> 1
   }
   Serial.printf("start=%d, %02x%02x %02x%02x %02x\r\n", p1,
-                dht22_data[0],
-                dht22_data[1],
-                dht22_data[2],
-                dht22_data[3],
-                dht22_data[4]);
+                temp_data[0],
+                temp_data[1],
+                temp_data[2],
+                temp_data[3],
+                temp_data[4]);
   for (int j = 0; j < 40; j++) {
     Serial.printf(" %02d", dat[j]);
     if (j % 8 == 7)
       Serial.println();
   }
   if (
-    ((dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3]) & 0xff) == dht22_data[4]
-    && ((dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3] + dht22_data[4]) != 0)
+    ((temp_data[0] + temp_data[1] + temp_data[2] + temp_data[3]) & 0xff) == temp_data[4]
+    && ((temp_data[0] + temp_data[1] + temp_data[2] + temp_data[3] + temp_data[4]) != 0)
   ) {
-    wendu = 0.1 * ((dht22_data[2] & 0x7f) << 8 | dht22_data[3]);
-    shidu = 0.1 * (dht22_data[0] << 8 | dht22_data[1]);
-    if ((dht22_data[2] & 0x80 ) != 0)
+    wendu = 0.1 * ((temp_data[2] & 0x7f) << 8 | temp_data[3]);
+    shidu = 0.1 * (temp_data[0] << 8 | temp_data[1]);
+    if ((temp_data[2] & 0x80 ) != 0)
       wendu = -wendu;
     Serial.printf("温度=%.1f, 湿度=%.1f%%\r\n", wendu, shidu);
     return true;

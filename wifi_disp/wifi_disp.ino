@@ -1,5 +1,5 @@
 #include <FS.h>
-#ifndef __ESP32_C3__
+#ifndef CONFIG_IDF_TARGET_ESP32C3
 extern "C" {
 #include "user_interface.h"
 }
@@ -19,6 +19,7 @@ String hostname = HOSTNAME;
 #include "ht16c21.h"
 #include "lora.h"
 #include "dht22.h"
+#include "sht4x.h"
 bool power_in = false;
 void init1() {
   save_nvram();
@@ -94,23 +95,35 @@ void setup()
   WiFi.hostname(hostname);
   Serial.println(F("Hostname: ") + hostname);
   Serial.flush();
-  if (nvram.have_dht > 0 ) {
-    if (!dht() &&  !dht()) {
-      nvram.have_dht = 0;
-      nvram.change = 1;
-    }
-  }
-  if (nvram.have_dht <= 0) {
-    if (!ds_init()  && !ds_init()) {
-      nvram.have_dht = 1;
-      nvram.change = 1;
-    }
-  }
-  if (nvram.have_dht <= 0)
-    get_temp();
-  else {
+  Serial.println(F("load SHT40"));
+  if (sht4x_load()) {
     pinMode(0, INPUT_PULLUP);
     ds_pin = 0;//DHT22使用V2.0的硬件
+    for (uint8_t i = 0; i < 6; i++)
+      Serial.printf_P(PSTR(" %02x"), temp_data[i]);
+    Serial.println();
+    sht4x_temp();
+    sht4x_rh();
+    Serial.printf_P(PSTR("温度:%3.1f,湿度:%3.1f%%\r\n"), wendu, shidu);
+  } else {
+    if (nvram.have_dht > 0 ) {
+      if (!dht() &&  !dht()) {
+        nvram.have_dht = 0;
+        nvram.change = 1;
+      }
+    }
+    if (nvram.have_dht <= 0) {
+      if (!ds_init()  && !ds_init()) {
+        nvram.have_dht = 1;
+        nvram.change = 1;
+      }
+    }
+    if (nvram.have_dht <= 0)
+      get_temp();
+    else {
+      pinMode(0, INPUT_PULLUP);
+      ds_pin = 0;//DHT22使用V2.0的硬件
+    }
   }
   get_batt();
   _myTicker.attach(1, timer1s);
