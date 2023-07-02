@@ -6,7 +6,7 @@ echo "$_GET[temp],720";
 $t = date('Y-m-d H:i:s'); //2023-07-02 15:52:00
 file_put_contents("/tmp/data.csv", "$t,$_GET[temp],$_GET[shidu]%\r\n", FILE_APPEND);
 注释结束 */
-
+error_reporting(E_ALL ^ E_NOTICE);
 ignore_user_abort(true);//客户端断开链接后继续执行php程序。
 ob_start();
 switch ($_GET['type']) {
