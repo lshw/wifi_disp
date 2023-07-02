@@ -1,10 +1,11 @@
 <?php
 
-/*最基本的,只需要3行代码就行了,显示当前温度，然后数据存到 /tmp/data.csv
+/* 本段为注释，不会执行
+ 最基本的,只需要3行代码就行了,显示当前温度，然后数据存到 /tmp/data.csv
 echo "$_GET[temp],720";
 $t = date('Y-m-d H:i:s'); //2023-07-02 15:52:00
 file_put_contents("/tmp/data.csv", "$t,$_GET[temp],$_GET[shidu]%\r\n", FILE_APPEND);
- */
+注释结束 */
 
 ignore_user_abort(true);//客户端断开链接后继续执行php程序。
 ob_start();
@@ -28,7 +29,7 @@ switch ($_GET['type']) {
                 break;
             default:
                 if ($_GET['shidu'] != '') {
-                    printf("%02d-%02d,360", (int)$_GET['temp'], (int)$_GET['shidu']);
+                    printf("%02d-%02d,360", round($_GET['temp'],0), round($_GET['shidu'],0));
                 } else {
                     echo "$_GET[temp],720"; //显示温度，2小时(720*10s)后再上线。
                 }
