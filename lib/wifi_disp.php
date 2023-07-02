@@ -20,7 +20,11 @@ switch ($_GET['type']) {
         echo "$hl,360";
         break;
     default:
-        echo "$_GET[temp],720"; //显示温度，2小时(720*10s)后再上线。
+        if ($_GET['shidu'] != '') {
+            printf("%2.1f-%2.1f,360", $_GET['temp'], $_GET['shidu']);
+        } else {
+            echo "$_GET[temp],720"; //显示温度，2小时(720*10s)后再上线。
+        }
         break;
 }
 $size=ob_get_length();
