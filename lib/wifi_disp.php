@@ -42,6 +42,7 @@ header('Connection: close');//不需要持续链接
 header("Content-Length: $size");  //明确告诉浏览器数据长度,浏览器接收到此长度数据后就不再接收数据
 ob_end_flush();
 //断开链接后，再保存数据，让探头尽快休眠，节省探头电量。
+date_default_timezone_set('Asia/ShangHai');
 $t=date('Y-m-d H:i:s'); //2023-07-02 15:52:00
 file_put_contents("/tmp/data.csv", "$t,$_GET[sn],$_GET[temp],$_GET[shidu]%\r\n", FILE_APPEND);
 exit();
