@@ -20,10 +20,19 @@ switch ($_GET['type']) {
         echo "$hl,360";
         break;
     default:
-        if ($_GET['shidu'] != '') {
-            printf("%2.1f-%2.1f,360", $_GET['temp'], $_GET['shidu']);
-        } else {
-            echo "$_GET[temp],720"; //显示温度，2小时(720*10s)后再上线。
+        switch ($_GET['sn']) {
+            case 'disp_4d1230':
+                $hl = api("https://open.er-api.com/v6/latest/USD", "rates", "CNY");
+                $hl = round($hl, 3);
+                echo "$hl,360";
+                break;
+            default:
+                if ($_GET['shidu'] != '') {
+                    printf("%02d-%02d,360", (int)$_GET['temp'], (int)$_GET['shidu']);
+                } else {
+                    echo "$_GET[temp],720"; //显示温度，2小时(720*10s)后再上线。
+                }
+                break;
         }
         break;
 }
