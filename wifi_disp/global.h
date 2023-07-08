@@ -231,7 +231,6 @@ float get_batt0() {//锂电池电压
   return v;
 }
 float get_batt() {
-  float v0;
   if (ds_pin != 0) { //v1.0硬件
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH); //不充电
@@ -243,47 +242,51 @@ float get_batt() {
   }
   delay(1);
   get_batt0();
-  v0 = v;
-  if (ds_pin != 0) //v1.0硬件
-    digitalWrite(13, LOW); //充电
-  else //v2.0硬件
-    digitalWrite(1, HIGH); //充电
-  delay(1);
-  get_batt0();
-  if (v > v0) { //有外接电源
+  if (v < 1.0) //电压低于1.0v但是还能运行，使用的是外接电源
+    power_in = true;
+  else {
+    float v0;
     v0 = v;
-    if (ds_pin != 0)
-      digitalWrite(13, HIGH); //不充电
-    else
-      digitalWrite(1, LOW); //不充电
+    if (ds_pin != 0) //v1.0硬件
+      digitalWrite(13, LOW); //充电
+    else //v2.0硬件
+      digitalWrite(1, HIGH); //充电
     delay(1);
     get_batt0();
-    if (v0 > v) {
+    if (v > v0) { //有外接电源
       v0 = v;
       if (ds_pin != 0)
-        digitalWrite(13, LOW); //充电
+        digitalWrite(13, HIGH); //不充电
       else
-        digitalWrite(1, HIGH); //充电
+        digitalWrite(1, LOW); //不充电
       delay(1);
       get_batt0();
-      if (v > v0) {
+      if (v0 > v) {
         v0 = v;
         if (ds_pin != 0)
-          digitalWrite(13, HIGH); //不充电
+          digitalWrite(13, LOW); //充电
         else
-          digitalWrite(1, LOW); //不充电
+          digitalWrite(1, HIGH); //充电
         delay(1);
         get_batt0();
-        if (v0 > v) {
-          if (!power_in) {
-            power_in = true;
-            Serial.println(F("测得电源插入"));
-          }
+        if (v > v0) {
+          v0 = v;
+          if (ds_pin != 0)
+            digitalWrite(13, HIGH); //不充电
+          else
+            digitalWrite(1, LOW); //不充电
+          delay(1);
+          get_batt0();
+          if (v0 > v) {
+            if (!power_in) {
+              power_in = true;
+              Serial.println(F("测得电源插入"));
+            }
+          } else power_in = false;
         } else power_in = false;
       } else power_in = false;
     } else power_in = false;
-  } else power_in = false;
-
+  }
   if (ds_pin != 0)
     digitalWrite(13, HIGH); //不充电
   else
