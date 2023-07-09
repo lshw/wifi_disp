@@ -7,6 +7,7 @@
 #endif
 #include <ArduinoOTA.h>
 #include "wifi_client.h"
+#include <Wire.h>
 extern void disp(char *);
 extern String hostname;
 void poweroff(uint32_t);
@@ -41,10 +42,34 @@ void http204() {
   httpd.client().stop();
 }
 void handleRoot() {
-  String wifi_stat, wifi_scan;
+  String wifi_stat, wifi_scan, i2c_scan;
   String ssid;
   for (uint8_t i = 0; i < httpd.args(); i++) {
-    if (httpd.argName(i).compareTo("scan") == 0) {
+    if (httpd.argName(i).compareTo("i2c_scan") == 0) {
+      Wire.begin();
+      for (uint16_t i0 = 0 ; i0 < 0x80; i0++) {
+        Wire.beginTransmission(i0);
+        if (Wire.endTransmission() == 0) {
+          switch (i0) {
+            case 0x38:
+              Serial.println(F("0x38:LCD控制器"));
+              i2c_scan += "<br>0x38:lcd控制器";
+              break;
+            case 0x44:
+              Serial.println(F("0x44:SHT44温湿度探头"));
+              i2c_scan += "<br>0x44:SHT44温湿度探头";
+              break;
+            case 0x77:
+              Serial.println(F("0x77:BMP180气压探头"));
+              i2c_scan += "<br>0x77:BMP180气压探头";
+              break;
+            default:
+              Serial.printf_P(PSTR("0x%02x:未知设备\r\n"), i0);
+              i2c_scan += "<br>0x" + String(i0, HEX) + ":未知设备";
+          }
+        }
+      }
+    } else if (httpd.argName(i).compareTo("wifi_scan") == 0) {
       int n = WiFi.scanNetworks();
       if (n > 0) {
         wifi_scan = "自动扫描到如下WiFi,点击连接:<br>";
@@ -63,8 +88,12 @@ void handleRoot() {
     }
   }
   if (wifi_scan == "") {
-    wifi_scan = "<a href=/?scan=1><buttom>扫描WiFi</buttom></a>";
+    wifi_scan = "<a href=/?wifi_scan=1><buttom>扫描WiFi</buttom></a>";
   }
+  if (i2c_scan == "") {
+    wifi_scan += "<hr><a href=/?i2c_scan=1><buttom>扫描i2c设备</buttom></a>";
+  } else
+    wifi_scan += "<hr>找到i2c设备:" + i2c_scan;
 
   yield();
   if (connected_is_ok) {
