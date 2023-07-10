@@ -29,7 +29,7 @@ switch ($_GET['type']) {
                 break;
             default:
                 if ($_GET['shidu'] != '') {
-                    printf("%02d-%02d,360", round($_GET['temp'],0), round($_GET['shidu'],0));
+                    printf("%02d-%02d,360", round($_GET['temp'], 0), round($_GET['shidu'], 0));
                 } else {
                     echo "$_GET[temp],720"; //显示温度，2小时(720*10s)后再上线。
                 }
@@ -47,24 +47,26 @@ $t=date('Y-m-d H:i:s'); //2023-07-02 15:52:00
 file_put_contents("/tmp/data.csv", "$t,$_GET[sn],$_GET[temp],$_GET[shidu]%\r\n", FILE_APPEND);
 exit();
 
-function api($url, $field, $fieldx = '')
+function api($url, $field, $field2 = '')
 {
- //可以通过其它网站的api获取json格式的数据， 展示到探头上。
-    $urlmd5 = md5($url.$field.$fieldx);
-    $t = filemtime("/tmp/${urlmd5}.txt"); //结果本地缓存半小时
-    if ($t < time() + 1800) {
+//可以通过其它网站的api获取json格式的数据， 展示到探头上。第一个参数是url ,
+//返回值: $ar[$field] 或者$ar[$field][$field2]
+    $urlmd5 = md5($url);
+    $cache_file="/tmp/$urlmd5.txt";
+    $a=array();
+    if (file_exists($cache_file) and filemtime($cache_file) > time() - 1800) { //结果本地缓存半>小时
         $str = file_get_contents("/tmp/${urlmd5}.txt");
-    }
-    if ($str == '') {
+    } else {
         $str = file_get_contents($url);
-        $a = json_decode($str, true);
-        if ($fieldx != '') {
-            $str = $a[$field][$fieldx];
-        } else {
-            $str = $a[$field];
-        }
-        $str = round($str, 3);
         file_put_contents("/tmp/${urlmd5}.txt", $str);
     }
-    return $str;
+        $a = json_decode($str, true);
+    if (empty($a)) {
+        return;
+    }
+    if ($field2 != '') {
+            return $a[$field][$field2];
+    } else {
+        return $a[$field];
+    }
 }
