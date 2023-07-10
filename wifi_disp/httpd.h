@@ -47,7 +47,7 @@ void handleRoot() {
   for (uint8_t i = 0; i < httpd.args(); i++) {
     if (httpd.argName(i).compareTo("i2c_scan") == 0) {
       Wire.begin();
-      for (uint16_t i0 = 0 ; i0 < 0x80; i0++) {
+      for (uint16_t i0 = 1 ; i0 < 0x80; i0++) {
         Wire.beginTransmission(i0);
         if (Wire.endTransmission() == 0) {
           switch (i0) {
