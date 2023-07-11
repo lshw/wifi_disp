@@ -57,7 +57,7 @@ void poweroff(uint32_t sec) {
   if (ds_pin == 0) Serial.println(F("V2.0"));
   else
     Serial.println(F("V1.0"));
-  Serial.printf_P(PSTR("开机时长:%ld ms"), (uint32_t)millis());
+  Serial.printf_P(PSTR("开机时长:%ld ms\r\n"), (uint32_t)millis());
   if (power_in) Serial.println(F("有外接电源"));
   else Serial.println(F("无外接电源"));
   Serial.flush();
@@ -239,7 +239,6 @@ float get_batt() {
           if (v0 > v) {
             if (!power_in) {
               power_in = true;
-              Serial.println(F("测得电源插入"));
             }
           } else power_in = false;
         } else power_in = false;
