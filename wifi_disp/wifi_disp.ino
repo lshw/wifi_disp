@@ -92,6 +92,7 @@ void setup()
   Serial.println(F("load SHT40"));
   if (sht4x_load()) {
     pinMode(0, INPUT_PULLUP);
+    pcb_ver = 2;
     ds_pin = 0;//DHT22使用V2.0的硬件
     for (uint8_t i = 0; i < 6; i++)
       Serial.printf_P(PSTR(" %02x"), temp_data[i]);
@@ -118,7 +119,12 @@ void setup()
       pinMode(0, INPUT_PULLUP);
       ds_pin = 0;//DHT22使用V2.0的硬件
     }
+    if (ds_pin == 0)
+      pcb_ver = 1;
+    else
+      pcb_ver = 0;
   }
+  Serial.printf_P(PSTR("pcb ver = %d\r\n"), pcb_ver);
   get_batt();
   _myTicker.attach(1, timer1s);
   Serial.print(F("电池电压"));
