@@ -80,17 +80,11 @@ void setup()
 #endif
   Serial.print(F("SDK Ver="));
   Serial.println(ESP.getSdkVersion());
-  Serial.printf_P(PSTR("GCC%d.%d\r\n"), __GNUC__, __GNUC_MINOR__);
-  Serial.print(F("Software Ver=" VER "\r\nBuildtime="));
-  Serial.print(__YEAR__);
-  Serial.write('-');
-  if (__MONTH__ < 10) Serial.write('0');
-  Serial.print(__MONTH__);
-  Serial.write('-');
-  if (__DAY__ < 10) Serial.write('0');
-  Serial.print(__DAY__);
-  Serial.println(F(" " __TIME__));
-  Serial.printf_P(PSTR("build_set:[" BUILD_SET "]\r\n"));
+  Serial.printf_P(PSTR("GCC%d.%d\r\n"
+                       "Software Ver=" VER "\r\n"
+                       "Buildtime=%d-%02d-%02d " __TIME__ "\r\n"
+                       "build_set:[" BUILD_SET "]\r\n"), __GNUC__, __GNUC_MINOR__,
+                  __YEAR__, __MONTH__, __DAY__);
   hostname += String(ESP.getChipId(), HEX);
   WiFi.hostname(hostname);
   Serial.println(F("Hostname: ") + hostname);
