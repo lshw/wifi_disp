@@ -35,6 +35,8 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 bool wifi_connected_is_ok();
 extern bool connected_is_ok;
 uint16_t http_get(uint8_t);
+void charge_off();
+void charge_on();
 bool run_zmd = true;
 #define ZMD_BUF_SIZE 100
 char zmd_disp[ZMD_BUF_SIZE];
@@ -460,5 +462,43 @@ void  wifi_set_add(const char * wps_ssid, const char * wps_password) {
     SPIFFS.end();
   }
 }
-
+uint8_t pcb_ver = 2;
+void charge_on() {
+  switch (pcb_ver) {
+    case 0: //pcb0
+      pinMode(13, OUTPUT);
+      digitalWrite(13, LOW);
+      break;
+    default:
+    case 1: //pcb1
+      Serial.flush();
+      Serial.end();
+      pinMode(1, OUTPUT);
+      digitalWrite(1, HIGH);
+      break;
+    case 2: //pcb2
+      pinMode(15, OUTPUT);
+      digitalWrite(15, HIGH);
+      break;
+  }
+}
+void charge_off() {
+  switch (pcb_ver) {
+    case 0: //pcb0
+      pinMode(13, OUTPUT);
+      digitalWrite(13, HIGH);
+      break;
+    default:
+    case 1: //pcb1
+      Serial.flush();
+      Serial.end();
+      pinMode(1, OUTPUT);
+      digitalWrite(1, LOW);
+      break;
+    case 2: //pcb2
+      pinMode(15, OUTPUT);
+      digitalWrite(15, LOW);
+      break;
+  }
+}
 #endif
