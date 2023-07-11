@@ -90,14 +90,7 @@ void poweroff(uint32_t sec) {
       delay(1000); //空闲时进入LIGHT_SLEEP_T模式
       power_in = i % 2;
       get_batt();
-      if (ds_pin != 0) {
-        pinMode(13, OUTPUT); //v1.0充电控制
-        digitalWrite(13, LOW); //1.0硬件
-      } else {
-        Serial.end();
-        pinMode(1, OUTPUT);
-        digitalWrite(1, HIGH); //2.0硬件
-      }
+      charge_on();
       if (!power_in) {
         no_power_in++;
       } else {
@@ -129,16 +122,7 @@ void poweroff(uint32_t sec) {
   }
   uint64_t sec0 = sec * 1000000;
   Serial.flush();
-  if (ds_pin != 0) {
-    pinMode(13, OUTPUT);
-    digitalWrite(13, HIGH); //v1.0硬件
-  } else {
-    Serial.println(F("关闭充电"));
-    Serial.flush();
-    Serial.end();
-    pinMode(1, OUTPUT);
-    digitalWrite(1, LOW);
-  }
+  charge_off();
   _myTicker.detach();
   wdt_disable();
   system_deep_sleep_set_option(2);
@@ -192,13 +176,7 @@ void timer1s() {
       disp(disp_buf);
       system_soft_wdt_feed ();
       if (power_in == 1) {// 充电控制
-        if (ds_pin != 0) digitalWrite(13, HIGH);
-        else {
-          Serial.flush();
-          Serial.end();
-          pinMode(1, OUTPUT);
-          digitalWrite(1, HIGH);
-        }
+        charge_on();
       }
     } else
       run_zmd = true;
@@ -230,53 +208,34 @@ float get_batt0() {//锂电池电压
     v = (float) dat / 8 * (499 + 97.6) / 97.6 / 1023 ;
   else    //V2.0硬件 分压电阻 470k/100k
     v = (float) dat / 8 * (470.0 + 100.0) / 100.0 / 1023 ;
+  Serial.begin(115200);
+  Serial.printf("batt=%f\r\n", v);
   return v;
 }
 float get_batt() {
-  if (ds_pin != 0) { //v1.0硬件
-    pinMode(13, OUTPUT);
-    digitalWrite(13, HIGH); //不充电
-  } else { //v2.0硬件
-    Serial.flush();
-    Serial.end();
-    pinMode(1, OUTPUT);
-    digitalWrite(1, LOW); //不充电
-  }
+  charge_off();
   delay(1);
-  get_batt0();
-  if (v < 1.0) //电压低于1.0v但是还能运行，使用的是外接电源
+  if (get_batt0() < 1.0) //电压低于1.0v但是还能运行，使用的是外接电源
     power_in = true;
   else {
     float v0;
-    v0 = v;
-    if (ds_pin != 0) //v1.0硬件
-      digitalWrite(13, LOW); //充电
-    else //v2.0硬件
-      digitalWrite(1, HIGH); //充电
+    v0 = v; //不充电时的电压
+    charge_on();
     delay(1);
     get_batt0();
     if (v > v0) { //有外接电源
       v0 = v;
-      if (ds_pin != 0)
-        digitalWrite(13, HIGH); //不充电
-      else
-        digitalWrite(1, LOW); //不充电
+      charge_off();
       delay(1);
       get_batt0();
       if (v0 > v) {
         v0 = v;
-        if (ds_pin != 0)
-          digitalWrite(13, LOW); //充电
-        else
-          digitalWrite(1, HIGH); //充电
+        charge_on();
         delay(1);
         get_batt0();
         if (v > v0) {
           v0 = v;
-          if (ds_pin != 0)
-            digitalWrite(13, HIGH); //不充电
-          else
-            digitalWrite(1, LOW); //不充电
+          charge_off();
           delay(1);
           get_batt0();
           if (v0 > v) {
@@ -289,10 +248,7 @@ float get_batt() {
       } else power_in = false;
     } else power_in = false;
   }
-  if (ds_pin != 0)
-    digitalWrite(13, HIGH); //不充电
-  else
-    digitalWrite(1, LOW); //不充电
+  charge_off();
   delay(1);
   get_batt0();
   if ((nvram.nvram7 & NVRAM7_CHARGE) == 0) {
