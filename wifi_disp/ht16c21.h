@@ -9,20 +9,25 @@ void ht16c21_cmd(uint8_t cmd, uint8_t dat) {
   Wire.beginTransmission(HT1621);
   Wire.write(byte(cmd));
   Wire.write(byte(dat));
-  Wire.endTransmission();
+  if (Wire.endTransmission() != 0) {
+    pinMode(5, OUTPUT);
+    digitalWrite(5, LOW);
+    delay(80);
+    for (uint8_t i = 0; i < 10; i++) {
+      digitalWrite(5, HIGH);
+      delay(1);
+      digitalWrite(5, LOW);
+      delay(1);
+    }
+    delay(80);
+    Wire.begin(4, 5);
+    Wire.beginTransmission(HT1621);
+    Wire.write(byte(cmd));
+    Wire.write(byte(dat));
+    Wire.endTransmission();
+  }
 }
 void ht16c21_setup() {
-  pinMode(5, OUTPUT);
-  digitalWrite(5, LOW);
-  delay(80);
-  for (uint8_t i = 0; i < 10; i++) {
-    digitalWrite(5, HIGH);
-    delay(1);
-    digitalWrite(5, LOW);
-    delay(1);
-  }
-  delay(80);
-  Wire.begin(4, 5);
   Wire.begin(4, 5);
   load_ram();
   ht16c21_cmd(0x84, 3); //1621文档20页 系统模式命令 开关ht1621时钟/显示  0-关闭  3-开启

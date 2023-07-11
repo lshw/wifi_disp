@@ -208,8 +208,6 @@ float get_batt0() {//锂电池电压
     v = (float) dat / 8 * (499 + 97.6) / 97.6 / 1023 ;
   else    //V2.0硬件 分压电阻 470k/100k
     v = (float) dat / 8 * (470.0 + 100.0) / 100.0 / 1023 ;
-  Serial.begin(115200);
-  Serial.printf("batt=%f\r\n", v);
   return v;
 }
 float get_batt() {
