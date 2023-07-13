@@ -44,6 +44,21 @@ void setup()
   nvram.change = 1;
   proc = nvram.proc; //保存当前模式
   switch (proc) { //尽快进行模式切换
+    case PRESSURE_MODE:
+      nvram.proc = OTA_MODE;
+      nvram.change = 1;
+      init1();
+      disp((char *)"1 PE ");
+      delay(200);
+      bmp.begin();
+      snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%f"), bmp.readAltitude());
+      disp(disp_buf);
+      nvram.proc = PRESSURE_MODE;
+      nvram.change = 1;
+      save_nvram();
+      poweroff(60);
+      return;
+      break;
     case OTA_MODE:
       nvram.proc = OFF_MODE;
       init1();
@@ -70,7 +85,7 @@ void setup()
       }
     default:
       proc = 0;//让后面2个lora在不存在的时候，修正为proc=0
-      nvram.proc = OTA_MODE;
+      nvram.proc = PRESSURE_MODE;
       init1();
       break;
   }

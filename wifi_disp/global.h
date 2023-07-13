@@ -28,10 +28,11 @@ uint16_t timer2 = 0; //秒
 uint8_t timer3 = 30; //最长30秒等待上线
 void timer1s();
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
-#define OTA_MODE 2
-#define OFF_MODE 3
-#define LORA_RECEIVE_MODE 4
-#define LORA_SEND_MODE 5
+#define PRESSURE_MODE 2
+#define OTA_MODE 3
+#define OFF_MODE 4
+#define LORA_RECEIVE_MODE 5
+#define LORA_SEND_MODE 6
 //0,1-正常 2-OTA 3-off 4-lora接收 5-lora发射
 
 bool wifi_connected_is_ok();
@@ -53,12 +54,11 @@ float get_batt();
 float v;
 bool power_off = false;
 void poweroff(uint32_t sec) {
+  if (nvram.proc != PRESSURE_MODE) {
+    nvram.proc = 0;
+    nvram.change = 1;
+  }
   get_batt();
-  nvram.proc = 0;
-  nvram.change = 1;
-  if (ds_pin == 0) Serial.println(F("V2.0"));
-  else
-    Serial.println(F("V1.0"));
   Serial.printf_P(PSTR("开机时长:%ld ms\r\n"), (uint32_t)millis());
   if (power_in) Serial.println(F("有外接电源"));
   else Serial.println(F("无外接电源"));
@@ -130,8 +130,6 @@ void poweroff(uint32_t sec) {
   system_deep_sleep_set_option(2);
   digitalWrite(LED_BUILTIN, LOW);
   if (sec0 == 0) ht16c21_cmd(0x84, 0x2); //lcd off
-  nvram.proc = 0;
-  nvram.change = 1;
   save_nvram();
   ESP.deepSleepInstant(sec0, RF_NO_CAL);
   power_off = true;
