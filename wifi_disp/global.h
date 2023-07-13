@@ -15,6 +15,8 @@
 #include <DNSServer.h>
 #include "CRC32.h"
 CRC32 crc;
+#include <Adafruit_BMP085.h>
+Adafruit_BMP085 bmp;
 bool get_temp();
 Ticker _myTicker;
 DNSServer dnsServer;

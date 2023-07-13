@@ -60,8 +60,11 @@ void handleRoot() {
               i2c_scan += "<br>0x44:SHT44温湿度探头";
               break;
             case 0x77:
+              bmp.begin(); //需要安装Adafruit BMP085 Library 库
               Serial.println(F("0x77:BMP180气压探头"));
-              i2c_scan += "<br>0x77:BMP180气压探头";
+              i2c_scan += "<br>0x77:BMP180气压探头  温度:" + String(bmp.readTemperature(), 1)
+                          + "摄氏度, 气压:" + String(bmp.readPressure())
+                          + "帕, 海拔:" + String(bmp.readAltitude(), 0) + "米";
               break;
             default:
               Serial.printf_P(PSTR("0x%02x:未知设备\r\n"), i0);
