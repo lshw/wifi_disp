@@ -43,22 +43,6 @@ void setup()
   nvram.change = 1;
   proc = nvram.proc; //保存当前模式
   switch (proc) { //尽快进行模式切换
-    case PRESSURE_MODE:
-      nvram.proc = OTA_MODE;
-      system_deep_sleep_set_option(1); //重启时校准无线电
-      nvram.change = 1;
-      init1();
-      disp((char *)"1 PE ");
-      delay(200);
-      bmp.begin();
-      snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%f"), bmp.readAltitude());
-      disp(disp_buf);
-      nvram.proc = PRESSURE_MODE;
-      nvram.change = 1;
-      save_nvram();
-      poweroff(60);
-      return;
-      break;
     case OTA_MODE:
       wifi_station_connect();
       nvram.proc = OFF_MODE;
@@ -88,6 +72,30 @@ void setup()
         disp((char *)"L-" VER);
         break;
       }
+    case PRESSURE_MODE:
+      nvram.proc = OTA_MODE;
+      system_deep_sleep_set_option(1); //重启时校准无线电
+      nvram.change = 1;
+      init1();
+      disp((char *)"1 PE ");
+      delay(200);
+      if (bmp.begin()) {
+        snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%f"), bmp.readAltitude());
+        disp(disp_buf);
+        nvram.proc = PRESSURE_MODE;
+        nvram.change = 1;
+        save_nvram();
+        poweroff(60);
+        return;
+        break;
+      } else {
+        nvram.proc = GENERAL_MODE;
+        proc = GENERAL_MODE;
+        system_deep_sleep_set_option(2); //重启不校准无线电
+        nvram.change = 1;
+        init1();
+      }
+    case GENERAL_MODE:
     default:
       wifi_station_connect();
       proc = 0;//让后面2个lora在不存在的时候，修正为proc=0
