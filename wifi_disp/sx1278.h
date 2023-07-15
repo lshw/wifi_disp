@@ -149,10 +149,13 @@ bool LoRa::setRFpara(uint8_t BW, uint8_t CR, uint8_t SF, uint8_t payloadCRC)
   if ((payloadCRC & 0xfb) != 0)
     return false;
   uint8_t temp;
-  if(BW <= LR_BW_62p5k)
-    temp = LR_TCX0_INPUT_ON;
-  else
+  if (BW <= LR_BW_62p5k) {
+    temp = LR_TCXO_INPUT_ON;
+    writeRegister(LR_RegModemConfig3, readRegister(LR_RegModemConfig3) | LR_MOBILE_MODE); //LowDataRateOptimize
+  } else {
+    writeRegister(LR_RegModemConfig3, readRegister(LR_RegModemConfig3) &  ~LR_MOBILE_MODE); //LowDataRateO
     temp = LR_EXT_CRYSTAL;
+  }
   writeRegister(LR_RegTCXO, temp);
   //SF=6 must be use in implicit header mode,and have some special setting
   if (SF == LR_SPREADING_FACTOR_6)
