@@ -20,11 +20,13 @@ void ota_setup() {
     // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
     Serial.print(F("Start updating "));
     Serial.println(type);
+    upgrading = true;
     type = "";
   });
   ArduinoOTA.onEnd([]() {
     ht16c21_cmd(0x88, 1); //闪烁
     Serial.println(F("\nEnd"));
+    upgrading = false;
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
     Serial.printf_P(PSTR("Progress: %u%%\r"), (progress / (total / 100)));

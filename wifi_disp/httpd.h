@@ -282,6 +282,7 @@ void httpd_listen() {
     }
     httpd.sendHeader("Connection", "close");
     if (Update.hasError()) {
+      upgrading = false;
       Serial.println(F("上传失败"));
       httpd.send(200, "text/html", "<html>"
                  "<head>"
@@ -324,6 +325,7 @@ void httpd_listen() {
         Update.printError(Serial);
       }
       crc.reset();
+      upgrading = true;
     } else if (upload.status == UPLOAD_FILE_WRITE) {
       crc.update((uint8_t *)upload.buf, upload.currentSize);
       snprintf_P(disp_buf, sizeof(disp_buf), PSTR("UP.%3d"), upload.totalSize / 1000);

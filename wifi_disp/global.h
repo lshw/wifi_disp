@@ -21,6 +21,7 @@ bool get_temp();
 Ticker _myTicker;
 DNSServer dnsServer;
 struct tm now;
+bool upgrading = false;
 int16_t update_timeok = 0; //0-马上wget ，-1 关闭，>0  xx分钟后wget
 uint8_t ota_status = 0; //0:wps, 1:ap
 uint16_t timer1 = 0; //秒 定时测温
@@ -153,6 +154,8 @@ void update_disp() {
 }
 
 void timer1s() {
+  if(upgrading)
+    return;
   if (timer3 > 0) {
     if (timer3 == 1) {
       if (nvram.proc != 0) {
@@ -164,8 +167,6 @@ void timer1s() {
   }
   if (timer1 > 0) timer1--;//定时器1 测温
   if (timer2 > 0) timer2--;//定时器2
-  //now.tm_sec++;
-  //mktime(&now);
   if (proc == OTA_MODE)  {
     if (ota_status == 0  && ap_on_time < millis())
       ap_on_time = millis() + 10000;
