@@ -41,7 +41,7 @@ void lora_receive_loop() {
 }
 bool lora_init() {
   if (lora_version != 255) return true;
-  lora.init(2, 1);
+  lora.init(2); //cs=2
   if (lora_version == 255) {
     if (nvram.have_lora > -5) {
       nvram.change = 1;

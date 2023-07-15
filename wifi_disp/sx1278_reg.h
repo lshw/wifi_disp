@@ -243,7 +243,7 @@ class LoRa {
       Initialise lora module
       @return  1 if ok, 0 otherwise
     */
-    bool init(uint8_t NSSPin = NSS_PIN, uint8_t NRESETPin = RESET_PIN);
+    bool init(uint8_t NSSPin = NSS_PIN);
 
     /**
        Initialise rx mode.

@@ -27,11 +27,10 @@ void LoRa::pinInit()
   //  pinMode(NRESETPin, OUTPUT);
   //  digitalWrite(NRESETPin, LOW);
 }
-bool LoRa::init(uint8_t _NSSPin, uint8_t _NRESETPin)
+bool LoRa::init(uint8_t _NSSPin)
 {
 
   NSSPin = _NSSPin;
-  //  NRESETPin = _NRESETPin;
 
   pinInit();
   spiInit();
