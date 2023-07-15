@@ -53,14 +53,14 @@ bool lora_init() {
     nvram.have_lora = 1;
     nvram.change = 1;
   }
-  lora.idle();    // turn to standby mode
   lora.setFrequency(434500000); //434Mhz
-  lora.setRFpara(LR_BW_250k, LR_CODINGRATE_2, 12, LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC
+  lora.setRFpara(nvram.bw, nvram.codingrate, nvram.factor, LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC
   // preamble length is 6~65535
   lora.setPreambleLen(12); //前导12
-  //lora.setPayloadLength(10);//数据长度10
-  //lora.setTxPower(15); //default 最大发送20db
+  lora.setPayloadLength(10);//数据长度10
+  lora.setTxPower(15); //default 最大发送20db
   // mode LR_IMPLICIT_HEADER_MODE or LR_EXPLICIT_HEADER_MODE
   lora.setHeaderMode(LR_EXPLICIT_HEADER_MODE);//不要header
+  lora.idle();    // turn to standby mode
   return true;
 }
