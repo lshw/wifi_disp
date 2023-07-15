@@ -154,7 +154,7 @@ void update_disp() {
 }
 
 void timer1s() {
-  if(upgrading)
+  if (upgrading)
     return;
   if (timer3 > 0) {
     if (timer3 == 1) {
