@@ -10,11 +10,40 @@
 #include <Wire.h>
 extern void disp(char *);
 extern String hostname;
+extern uint8_t lora_version;
 void poweroff(uint32_t);
 float get_batt();
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 String body;
 ESP8266WebServer httpd(80);
+String select_option(uint8_t value, uint8_t dat, String str) {
+  String selected = "";
+  if (value == dat) selected = " selected";
+  return F("<option value=") + String(value) + selected + ">" + str + F("</option>");
+}
+String lora_set() {
+  if (lora_version == 255 || lora_version == 0) return "";
+  return F("<hr>"
+           "lora扩频调制带宽:<select name=lora_bw>")
+         + select_option(0x00, nvram.bw, String(F("LR_BW_7p8k")))
+         + select_option(0x10, nvram.bw, String(F("LR_BW_10p4k")))
+         + select_option(0x20, nvram.bw, String(F("LR_BW_15p6k")))
+         + select_option(0x30, nvram.bw, String(F("LR_BW_20p8k")))
+         + select_option(0x40, nvram.bw, String(F("LR_BW_31p25k")))
+         + select_option(0x50, nvram.bw, String(F("LR_BW_41p7k")))
+         + select_option(0x60, nvram.bw, String(F("LR_BW_62p5k")))
+         + select_option(0x70, nvram.bw, String(F("LR_BW_125k")))
+         + select_option(0x80, nvram.bw, String(F("LR_BW_250k")))
+         + select_option(0x90, nvram.bw, String(F("LR_BW_500k")))
+         + F("</select>&nbsp;"
+             "lora纠错率:<select name=lora_codingrate>")
+         + select_option(0x02, nvram.bw, String(F("LR_CODINGRATE_1p25")))
+         + select_option(0x04, nvram.bw, String(F("LR_CODINGRATE_1p5")))
+         + select_option(0x06, nvram.bw, String(F("LR_CODINGRATE_1p75")))
+         + select_option(0x08, nvram.bw, String(F("LR_CODINGRATE_2")))
+         + F("</select>&nbsp;"
+             "lora扩频因子(6-12):<input name=lora_factor value=") + String(nvram.factor) + ">";
+}
 void httpd_send_200(String javascript) {
   httpd.sendHeader( "charset", "utf-8" );
   httpd.send(200, "text/html", "<html>"
@@ -138,7 +167,8 @@ void handleRoot() {
              "可以设置自己的服务器地址(清空恢复)<br>"
              "url0:<input maxlength=100  size=30 type=text value='" + get_url(0) + "' name=url><br>"
              "url1:<input maxlength=100  size=30 type=text value='" + get_url(1) + "' name=url1><br>"
-             "<input type=submit name=submit value=save>"
+             + lora_set()
+             + "<hr><input type=submit name=submit value=save>"
              "&nbsp;<input type=submit name=reboot value='reboot'>"
              "</form>"
              "<hr>"
@@ -242,6 +272,27 @@ void httpsave() {
         fp.println(url);
         fp.close();
       }
+    } else if (httpd.argName(i).compareTo(F("lora_bw")) == 0) {
+      nvram.bw = httpd.arg(i).toInt();
+      nvram.bw = nvram.bw & 0xf0;
+      if (nvram.bw > LR_BW_500k) nvram.bw = LR_BW_500k;
+      nvram.change = 1;
+      save_nvram();
+    } else if (httpd.argName(i).compareTo(F("lora_codingrate")) == 0) {
+      nvram.codingrate = httpd.arg(i).toInt();
+      nvram.codingrate &= 0xe;
+      if (nvram.codingrate < LR_CODINGRATE_1p25) nvram.codingrate = LR_CODINGRATE_1p25;
+      if (nvram.codingrate > LR_CODINGRATE_2) nvram.codingrate = LR_CODINGRATE_2;
+      nvram.change = 1;
+      save_nvram();
+    } else if (httpd.argName(i).compareTo(F("lora_factor")) == 0) {
+      nvram.factor = httpd.arg(i).toInt();
+      if (nvram.factor < 6)
+        nvram.factor = 6;
+      if (nvram.factor > 12)
+        nvram.factor = 12;
+      nvram.change = 1;
+      save_nvram();
     } else if (httpd.argName(i).compareTo("url1") == 0) {
       url = httpd.arg(i);
       url.trim();
