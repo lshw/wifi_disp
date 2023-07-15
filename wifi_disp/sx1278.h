@@ -81,7 +81,7 @@ bool LoRa::config()
   // bandwidth = 500Hz, spreading factor=7,
   // coding rate = 4/5,implict header mode
   setHeaderMode(headerMode);
-  setRFpara(LR_BW_125k, LR_CODINGRATE_1p5, LR_SPREADING_FACTOR_11, LR_PAYLOAD_CRC_ON);
+  setRFpara(LR_BW_125k, LR_CODINGRATE_2, LR_SPREADING_FACTOR_11, LR_PAYLOAD_CRC_ON);
   // LNA
   writeRegister(LR_RegModemConfig3, LR_MOBILE_MODE);
   // max rx time out
@@ -148,8 +148,12 @@ bool LoRa::setRFpara(uint8_t BW, uint8_t CR, uint8_t SF, uint8_t payloadCRC)
     return false;
   if ((payloadCRC & 0xfb) != 0)
     return false;
-
   uint8_t temp;
+  if(BW <= LR_BW_62p5k)
+    temp = LR_TCX0_INPUT_ON;
+  else
+    temp = LR_EXT_CRYSTAL;
+  writeRegister(LR_RegTCXO, temp);
   //SF=6 must be use in implicit header mode,and have some special setting
   if (SF == LR_SPREADING_FACTOR_6)
   {
