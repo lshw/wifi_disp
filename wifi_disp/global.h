@@ -28,12 +28,12 @@ uint16_t timer2 = 0; //秒
 uint8_t timer3 = 30; //最长30秒等待上线
 void timer1s();
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
+#define GENERAL_MODE 1
 #define PRESSURE_MODE 2
-#define OTA_MODE 3
-#define OFF_MODE 4
-#define LORA_RECEIVE_MODE 5
-#define LORA_SEND_MODE 6
-//0,1-正常 2-OTA 3-off 4-lora接收 5-lora发射
+#define OTA_MODE 3 //设置模式
+#define OFF_MODE 4 //关机
+#define LORA_RECEIVE_MODE 5 //lora接收测试
+#define LORA_SEND_MODE 6 //lora发送测试
 
 bool wifi_connected_is_ok();
 extern bool connected_is_ok;
@@ -127,7 +127,10 @@ void poweroff(uint32_t sec) {
   charge_off();
   _myTicker.detach();
   wdt_disable();
-  system_deep_sleep_set_option(2);
+  if (nvram.proc ==  PRESSURE_MODE)
+    system_deep_sleep_set_option(4); //下次开机关闭wifi
+  else
+    system_deep_sleep_set_option(2); //下次启动不做无线电校准
   digitalWrite(LED_BUILTIN, LOW);
   if (sec0 == 0) ht16c21_cmd(0x84, 0x2); //lcd off
   save_nvram();

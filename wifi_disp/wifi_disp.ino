@@ -46,6 +46,7 @@ void setup()
   switch (proc) { //尽快进行模式切换
     case PRESSURE_MODE:
       nvram.proc = OTA_MODE;
+      system_deep_sleep_set_option(1); //重启时校准无线电
       nvram.change = 1;
       init1();
       disp((char *)"1 PE ");
@@ -61,17 +62,20 @@ void setup()
       break;
     case OTA_MODE:
       nvram.proc = OFF_MODE;
+      system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
       disp((char *)" OTA ");
       break;
     case OFF_MODE:
       nvram.proc = LORA_SEND_MODE;
+      system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
       disp((char *)" OFF ");
       break;
     case LORA_SEND_MODE:
       if (nvram.have_lora > -5) {
         nvram.proc = LORA_RECEIVE_MODE;
+        system_deep_sleep_set_option(4); //下次开机关闭wifi
         init1();
         disp((char *)"S-" VER);
         break;
@@ -79,6 +83,7 @@ void setup()
     case LORA_RECEIVE_MODE:
       if (nvram.have_lora > -5) {
         nvram.proc = 0;
+        system_deep_sleep_set_option(2); //重启时不校准无线电
         init1();
         disp((char *)"L-" VER);
         break;
@@ -86,6 +91,7 @@ void setup()
     default:
       proc = 0;//让后面2个lora在不存在的时候，修正为proc=0
       nvram.proc = PRESSURE_MODE;
+      system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
       break;
   }
@@ -153,6 +159,7 @@ void setup()
     if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != 0) {
       nvram.nvram7 |= NVRAM7_CHARGE; //充电
       nvram.proc = 0;
+      system_deep_sleep_set_option(2); //重启时不校准无线电
       nvram.change = 1; //电压过低
     }
     ht16c21_cmd(0x88, 0); //闪烁
@@ -191,6 +198,7 @@ void setup()
       if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != OFF_MODE) {
         nvram.nvram7 |= NVRAM7_CHARGE; //充电
         nvram.proc = OFF_MODE;//ota以后，
+        system_deep_sleep_set_option(4); //重启时关闭无线电
         nvram.change = 1;
         save_nvram();
       }
@@ -278,6 +286,7 @@ void wput() {
   if (proc < 2) {
     nvram.proc = 0;
     nvram.change = 1;
+    system_deep_sleep_set_option(2); //重启时不校准无线电
   }
   ht16c21_cmd(0x88, 1); //开始闪烁
   if (timer1 > 0) {
@@ -325,6 +334,7 @@ void loop()
       if (nvram.proc != 0) {
         nvram.proc = 0;
         nvram.change = 1;
+        system_deep_sleep_set_option(2); //重启时不校准无线电
         save_nvram();
       }
       disp((char *)"00000");
@@ -385,6 +395,7 @@ void loop()
         if (nvram.proc != 0) {
           nvram.proc = 0;
           nvram.change = 1;
+          system_deep_sleep_set_option(2); //重启时不校准无线电
         }
         poweroff(3600);
         return;
@@ -399,6 +410,7 @@ void loop()
   if (nvram.proc != 0 && millis() > 5000) { //5秒后， 如果重启， 就进入测温程序
     nvram.proc = 0;
     nvram.change = 1;
+    system_deep_sleep_set_option(2); //重启时不校准无线电
   }
   if (nvram.change) save_nvram();
   system_soft_wdt_feed (); //各loop里要根据需要执行喂狗命令
@@ -409,6 +421,7 @@ bool smart_config() {
   //手机连上2.4G的wifi,然后微信打开网页：http://wx.ai-thinker.com/api/old/wifi/config
   nvram.proc = 0;
   nvram.change = 1;
+  system_deep_sleep_set_option(2); //重启时不校准无线电
   if (wifi_connected_is_ok()) return true;
   WiFi.mode(WIFI_STA);
   WiFi.beginSmartConfig();
