@@ -39,7 +39,6 @@ void setup()
   };
 
   wifi_set_country(&mycountry);
-  wifi_station_connect();
   nvram.boot_count++;
   nvram.change = 1;
   proc = nvram.proc; //保存当前模式
@@ -61,6 +60,7 @@ void setup()
       return;
       break;
     case OTA_MODE:
+      wifi_station_connect();
       nvram.proc = OFF_MODE;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
@@ -89,6 +89,7 @@ void setup()
         break;
       }
     default:
+      wifi_station_connect();
       proc = 0;//让后面2个lora在不存在的时候，修正为proc=0
       nvram.proc = PRESSURE_MODE;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
