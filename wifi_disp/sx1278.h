@@ -148,6 +148,7 @@ bool LoRa::setRFpara(uint8_t BW, uint8_t CR, uint8_t SF, uint8_t payloadCRC)
     return false;
   if ((payloadCRC & 0xfb) != 0)
     return false;
+  Serial.printf_P(PSTR("BW:0x%02x,SF:0x%02x,CR:0x%02x\r\n"), BW, SF, CR);
   uint8_t temp;
   if (BW <= LR_BW_62p5k) {
     temp = LR_TCXO_INPUT_ON;

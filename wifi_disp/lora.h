@@ -1,6 +1,4 @@
 #include <SPI.h>
-#define NSS_PIN    	2
-#define RESET_PIN 	1
 #include "sx1278.h"
 LoRa lora;
 uint8_t len;
@@ -55,7 +53,7 @@ bool lora_init() {
     nvram.change = 1;
   }
   lora.setFrequency(434500000); //434Mhz
-  lora.setRFpara(nvram.bw, nvram.codingrate, nvram.factor, LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC
+  lora.setRFpara(nvram.bw, nvram.cr, nvram.sf, LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC
   // preamble length is 6~65535
   lora.setPreambleLen(12); //前导12
   lora.setPayloadLength(10);//数据长度10

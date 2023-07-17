@@ -152,7 +152,7 @@
 /**
   #define LR_RegModemConfig1               0x1D
 */
-#define LR_BW_7p8k                		   0x00
+#define LR_BW_7p8k				0x00
 #define LR_BW_10p4k                        0x10
 #define LR_BW_15p6k                        0x20
 #define LR_BW_20p8k                        0x30

@@ -14,8 +14,8 @@ struct {
   int8_t  have_lora; //失败一次就减1，减到-5,  设置ota模式， 会清0， 上同
   uint8_t ch;
   uint8_t bw;
-  uint8_t codingrate;
-  uint8_t factor;
+  uint8_t cr;
+  uint8_t sf;
   uint32_t crc32;
 } nvram;
 
@@ -27,8 +27,8 @@ void load_nvram() {
     memset(&nvram, 0, sizeof(nvram));
     nvram.ch = 6;
     nvram.bw = LR_BW_125k;
-    nvram.codingrate = LR_CODINGRATE_2;
-    nvram.factor = LR_SPREADING_FACTOR_11;
+    nvram.cr = LR_CODINGRATE_2;
+    nvram.sf = LR_SPREADING_FACTOR_12;
   } else if (nvram.ch > 0 && nvram.ch <= 14) {
     Serial.printf_P(PSTR("\r\nwifi channel=%d, proc=%d\r\n"), nvram.ch, nvram.proc);
     WRITE_PERI_REG(0x600011f4, 1 << 16 | nvram.ch);

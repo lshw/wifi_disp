@@ -36,13 +36,21 @@ String lora_set() {
          + select_option(0x80, nvram.bw, String(F("LR_BW_250k")))
          + select_option(0x90, nvram.bw, String(F("LR_BW_500k")))
          + F("</select>&nbsp;"
-             "lora纠错率:<select name=lora_codingrate>")
-         + select_option(0x02, nvram.bw, String(F("LR_CODINGRATE_1p25")))
-         + select_option(0x04, nvram.bw, String(F("LR_CODINGRATE_1p5")))
-         + select_option(0x06, nvram.bw, String(F("LR_CODINGRATE_1p75")))
-         + select_option(0x08, nvram.bw, String(F("LR_CODINGRATE_2")))
+             "lora纠错率:<select name=lora_cr>")
+         + select_option(0x02, nvram.cr, String(F("LR_CODINGRATE_1p25")))
+         + select_option(0x04, nvram.cr, String(F("LR_CODINGRATE_1p5")))
+         + select_option(0x06, nvram.cr, String(F("LR_CODINGRATE_1p75")))
+         + select_option(0x08, nvram.cr, String(F("LR_CODINGRATE_2")))
          + F("</select>&nbsp;"
-             "lora扩频因子(6-12):<input name=lora_factor value=") + String(nvram.factor) + ">";
+             "lora扩频因子:<select name=lora_sf>")
+         + select_option(0x60, nvram.sf, String(F("LR_SPREADING_FACTOR_6")))
+         + select_option(0x70, nvram.sf, String(F("LR_SPREADING_FACTOR_7")))
+         + select_option(0x80, nvram.sf, String(F("LR_SPREADING_FACTOR_8")))
+         + select_option(0x90, nvram.sf, String(F("LR_SPREADING_FACTOR_9")))
+         + select_option(0xa0, nvram.sf, String(F("LR_SPREADING_FACTOR_10")))
+         + select_option(0xb0, nvram.sf, String(F("LR_SPREADING_FACTOR_11")))
+         + select_option(0xc0, nvram.sf, String(F("LR_SPREADING_FACTOR_12")))
+         + F("</select>");
 }
 void httpd_send_200(String javascript) {
   httpd.sendHeader( "charset", "utf-8" );
@@ -278,19 +286,19 @@ void httpsave() {
       if (nvram.bw > LR_BW_500k) nvram.bw = LR_BW_500k;
       nvram.change = 1;
       save_nvram();
-    } else if (httpd.argName(i).compareTo(F("lora_codingrate")) == 0) {
-      nvram.codingrate = httpd.arg(i).toInt();
-      nvram.codingrate &= 0xe;
-      if (nvram.codingrate < LR_CODINGRATE_1p25) nvram.codingrate = LR_CODINGRATE_1p25;
-      if (nvram.codingrate > LR_CODINGRATE_2) nvram.codingrate = LR_CODINGRATE_2;
+    } else if (httpd.argName(i).compareTo(F("lora_cr")) == 0) {
+      nvram.cr = httpd.arg(i).toInt();
+      nvram.cr &= 0xe;
+      if (nvram.cr < LR_CODINGRATE_1p25) nvram.cr = LR_CODINGRATE_1p25;
+      if (nvram.cr > LR_CODINGRATE_2) nvram.cr = LR_CODINGRATE_2;
       nvram.change = 1;
       save_nvram();
-    } else if (httpd.argName(i).compareTo(F("lora_factor")) == 0) {
-      nvram.factor = httpd.arg(i).toInt();
-      if (nvram.factor < 6)
-        nvram.factor = 6;
-      if (nvram.factor > 12)
-        nvram.factor = 12;
+    } else if (httpd.argName(i).compareTo(F("lora_sf")) == 0) {
+      nvram.sf = httpd.arg(i).toInt() & 0xf0;
+      if (nvram.sf < LR_SPREADING_FACTOR_6)
+        nvram.sf = LR_SPREADING_FACTOR_6;
+      if (nvram.sf > LR_SPREADING_FACTOR_12)
+        nvram.sf = LR_SPREADING_FACTOR_12;
       nvram.change = 1;
       save_nvram();
     } else if (httpd.argName(i).compareTo("url1") == 0) {
