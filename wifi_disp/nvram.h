@@ -4,20 +4,23 @@
 #define NVRAM7_CHARGE 0b1
 #define NVRAM7_URL    0b10
 #define NVRAM7_UPDATE 0b1000
-
+#define HAVE_PROC2 0b10000 //1分钟1次测海拔
+#define HAVE_PROC3 0b100000 //按照设定间隔时间测量，一定的次数后，post到web服务器
 struct {
   uint8_t proc;
-  uint8_t nvram7;
   uint8_t change;
-  uint32_t boot_count;
   int8_t  have_dht;
   int8_t  have_lora; //失败一次就减1，减到-5,  设置ota模式， 会清0， 上同
+  uint32_t nvram7;
   uint8_t ch;
   uint8_t bw;
   uint8_t cr;
   uint8_t sf;
+  uint16_t proc3_sec; //多少秒测一次
+  uint16_t proc3_count; //测多少次上传一次
+  uint32_t boot_count;
   uint32_t crc32;
-} nvram;
+}  nvram;
 
 uint32_t calculateCRC32(const uint8_t *data, size_t length);
 
@@ -29,6 +32,8 @@ void load_nvram() {
     nvram.bw = LR_BW_125k;
     nvram.cr = LR_CODINGRATE_2;
     nvram.sf = LR_SPREADING_FACTOR_12;
+    nvram.proc3_sec = 1;
+    nvram.proc3_count = 1;
   } else if (nvram.ch > 0 && nvram.ch <= 14) {
     Serial.printf_P(PSTR("\r\nwifi channel=%d, proc=%d\r\n"), nvram.ch, nvram.proc);
     WRITE_PERI_REG(0x600011f4, 1 << 16 | nvram.ch);
