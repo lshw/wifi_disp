@@ -59,6 +59,13 @@ void httpd_send_200(String javascript) {
              "<title>" + hostname + " " + GIT_VER + "</title>"
              "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
              "<script>"
+             "function gotoif(url)"
+             "{"
+             "if (confirm('确定?')) {"
+             "location.replace(url);"
+             "}"
+             "}"
+
              "function modi(url,text,Defaulttext) {"
              "var data=prompt(text,Defaulttext);"
              "if (data==null) {return false;}"
