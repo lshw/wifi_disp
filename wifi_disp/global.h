@@ -29,13 +29,15 @@ uint16_t timer2 = 0; //秒
 uint8_t timer3 = 30; //最长30秒等待上线
 void timer1s();
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
-#define GENERAL_MODE 1
-#define PRESSURE_MODE 2
-#define OTA_MODE 3 //设置模式
-#define OFF_MODE 4 //关机
-#define LORA_RECEIVE_MODE 5 //lora接收测试
-#define LORA_SEND_MODE 6 //lora发送测试
-
+enum {
+  GENERAL_MODE,
+  PRESSURE_MODE,
+  OTA_MODE,//设置模式
+  PROC3_MODE, //P3模式
+  OFF_MODE,//关机
+  LORA_RECEIVE_MODE,//lora接收测试
+  LORA_SEND_MODE//lora发送测试
+};
 bool wifi_connected_is_ok();
 extern bool connected_is_ok;
 uint16_t http_get(uint8_t);

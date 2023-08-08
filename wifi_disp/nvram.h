@@ -18,6 +18,8 @@ struct {
   uint8_t sf;
   uint16_t proc3_sec; //多少秒测一次
   uint16_t proc3_count; //测多少次上传一次
+  uint16_t proc3_count_now;//当前次数
+  uint16_t baoliu;
   uint32_t boot_count;
   uint32_t crc32;
 }  nvram;

@@ -26,6 +26,13 @@ void init1() {
   ht16c21_setup(); //180ms
   ht16c21_cmd(0x88, 1); //闪烁
 }
+void delay_more() {
+  if (power_in) {
+    Serial.println(F("外插电,延迟1秒，方便切换"));
+    if (millis() < 900)
+      delay(1000 - millis());
+  }
+}
 void setup()
 {
   Serial.begin(115200);
@@ -45,11 +52,39 @@ void setup()
   switch (proc) { //尽快进行模式切换
     case OTA_MODE:
       wifi_station_connect();
-      nvram.proc = OFF_MODE;
+      nvram.proc = PROC3_MODE;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
       disp((char *)" OTA ");
       break;
+    case PROC3_MODE:
+      nvram.proc = OFF_MODE;
+      nvram.change = 1;
+      system_deep_sleep_set_option(4); //下次开机关闭wifi
+      if (nvram.nvram7 & HAVE_PROC3) {
+        snprintf(disp_buf, sizeof(disp_buf), PSTR("P3.%03d"), nvram.proc3_count_now);
+        disp(disp_buf);
+        //proc3();
+        delay(100);
+        delay_more(); //外插电，就多延迟，方便切换
+        disp("-----");
+        nvram.proc = PROC3_MODE;
+        if (nvram.proc3_count_now == 1) {
+          system_deep_sleep_set_option(2); //重启时不校准无线电
+        }
+        if (nvram.proc3_count_now == 0) {
+          nvram.proc = PRESSURE_MODE;
+          save_nvram();
+          break; //继续进行上传操作
+        } else {
+          nvram.proc3_count_now--;
+        }
+        save_nvram();
+        poweroff(60);
+        return;
+        break;
+      }
+      proc = OFF_MODE;
     case OFF_MODE:
       nvram.proc = LORA_SEND_MODE;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
@@ -73,12 +108,14 @@ void setup()
         break;
       }
     case PRESSURE_MODE:
+      get_batt();
       nvram.proc = OTA_MODE;
       system_deep_sleep_set_option(1); //重启时校准无线电
       nvram.change = 1;
       init1();
       disp((char *)"1 PE ");
-      delay(200);
+      delay(100);
+      delay_more(); //外插电，就多延迟，方便切换
       if (bmp.begin()) {
         snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%f"), bmp.readAltitude());
         disp(disp_buf);
