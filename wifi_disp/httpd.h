@@ -261,8 +261,28 @@ void httpsave() {
   SPIFFS.begin();
   bool reboot_now = false;
   for (uint8_t i = 0; i < httpd.args(); i++) {
+    if (httpd.argName(i).compareTo("have_proc3") == 0) {
+      //取反
+      nvram.nvram7 = (nvram.nvram7 & ~HAVE_PROC3) | (~nvram.nvram7 & HAVE_PROC3);
+      nvram.change = 1;
+      save_nvram();
+      continue;
+    }
+    if (httpd.argName(i).compareTo("proc3_sec") == 0) {
+      nvram.proc3_sec = httpd.arg(i).toInt();
+      nvram.change = 1;
+      save_nvram();
+      continue;
+    }
+    if (httpd.argName(i).compareTo("proc3_count") == 0) {
+      nvram.proc3_count = httpd.arg(i).toInt();
+      nvram.change = 1;
+      save_nvram();
+      continue;
+    }
     if (httpd.argName(i).compareTo("reboot") == 0) {
       reboot_now = true;
+      continue;
     }
     if (httpd.argName(i).compareTo("data") == 0) {
       data = httpd.arg(i);
