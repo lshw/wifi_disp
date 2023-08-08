@@ -59,7 +59,6 @@ void setup()
       break;
     case PROC3_MODE:
       nvram.proc = OFF_MODE;
-      nvram.change = 1;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       if (nvram.nvram7 & HAVE_PROC3) {
         snprintf(disp_buf, sizeof(disp_buf), PSTR("P3.%03d"), nvram.proc3_count_now);
@@ -101,7 +100,7 @@ void setup()
       }
     case LORA_RECEIVE_MODE:
       if (nvram.have_lora > -5) {
-        nvram.proc = 0;
+        nvram.proc = GENERAL_MODE;
         system_deep_sleep_set_option(2); //重启时不校准无线电
         init1();
         disp((char *)"L-" VER);
@@ -135,7 +134,7 @@ void setup()
     case GENERAL_MODE:
     default:
       wifi_station_connect();
-      proc = 0;//让后面2个lora在不存在的时候，修正为proc=0
+      proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
       nvram.proc = PRESSURE_MODE;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
@@ -204,7 +203,7 @@ void setup()
     disp(disp_buf); //电压过低
     if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != 0) {
       nvram.nvram7 |= NVRAM7_CHARGE; //充电
-      nvram.proc = 0;
+      nvram.proc = GENERAL_MODE;
       system_deep_sleep_set_option(2); //重启时不校准无线电
       nvram.change = 1; //电压过低
     }
@@ -217,7 +216,7 @@ void setup()
     return;
   }
   Serial.flush();
-  if (millis() > 10000) proc = 0; //程序升级后第一次启动
+  if (millis() > 10000) proc = GENERAL_MODE; //程序升级后第一次启动
   switch (proc) {
     case OFF_MODE: //OFF
       wdt_disable();
@@ -368,7 +367,7 @@ void loop()
     system_soft_wdt_feed ();
     return;
   }
-  if ((proc == OTA_MODE || proc <= 1) && last_check_connected < millis() &&  wifi_connected_is_ok()) {
+  if ((proc == OTA_MODE || proc == GENERAL_MODE) && last_check_connected < millis() &&  wifi_connected_is_ok()) {
     last_check_connected = millis() + 1000; //1秒检查一次connected;
     if ( millis() > ap_on_time && power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
     if ( millis() > ap_on_time) {
@@ -377,8 +376,8 @@ void loop()
       Serial.print(F("V,millis()="));
       Serial.println(millis());
       Serial.println(F("power down"));
-      if (nvram.proc != 0) {
-        nvram.proc = 0;
+      if (nvram.proc != GENERAL_MODE) {
+        nvram.proc = GENERAL_MODE;
         nvram.change = 1;
         system_deep_sleep_set_option(2); //重启时不校准无线电
         save_nvram();
@@ -438,8 +437,8 @@ void loop()
         Serial.print(millis());
         Serial.println(F("ms,not link to ap,reboot 3600s"));
         ht16c21_cmd(0x88, 3); //慢闪烁
-        if (nvram.proc != 0) {
-          nvram.proc = 0;
+        if (nvram.proc != GENERAL_MODE) {
+          nvram.proc = GENERAL_MODE;
           nvram.change = 1;
           system_deep_sleep_set_option(2); //重启时不校准无线电
         }
@@ -453,8 +452,8 @@ void loop()
     run_zmd = false;
     zmd();
   }
-  if (nvram.proc != 0 && millis() > 5000) { //5秒后， 如果重启， 就进入测温程序
-    nvram.proc = 0;
+  if (nvram.proc != GENERAL_MODE && millis() > 5000) { //5秒后， 如果重启， 就进入测温程序
+    nvram.proc = GENERAL_MODE;
     nvram.change = 1;
     system_deep_sleep_set_option(2); //重启时不校准无线电
   }
@@ -465,7 +464,7 @@ void loop()
 bool smart_config() {
   //插上电， 等20秒， 如果没有上网成功， 就会进入 CO xx计数， 100秒之内完成下面的操作
   //手机连上2.4G的wifi,然后微信打开网页：http://wx.ai-thinker.com/api/old/wifi/config
-  nvram.proc = 0;
+  nvram.proc = GENERAL_MODE;
   nvram.change = 1;
   system_deep_sleep_set_option(2); //重启时不校准无线电
   if (wifi_connected_is_ok()) return true;

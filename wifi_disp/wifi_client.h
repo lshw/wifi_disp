@@ -277,8 +277,8 @@ bool http_update()
   switch (ret) {
     case HTTP_UPDATE_FAILED:
       Serial.printf_P(PSTR("HTTP_UPDATE_FAILD Error (%d): %s\r\n"), ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-      if (nvram.proc != 0) {
-        nvram.proc = 0;
+      if (nvram.proc != GENERAL_MODE) {
+        nvram.proc = GENERAL_MODE;
         nvram.change = 1;
         save_nvram();
       }
@@ -334,7 +334,7 @@ void web_cmd_a(String str) {
       wifi_set_add(str.substring(i + 1, i0).c_str(), str.substring(i0 + 1, len).c_str());
     }
   } else if (cmd == "OFF") {
-    nvram.proc = 0;
+    nvram.proc = GENERAL_MODE;
     nvram.change = 1;
     save_nvram();
     memset(disp_buf, ' ', sizeof(disp_buf));

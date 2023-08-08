@@ -354,7 +354,7 @@ void httpsave() {
   httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/');</script></body></html>");
   yield();
   if (reboot_now) {
-    nvram.proc = 0;
+    nvram.proc = GENERAL_MODE;
     nvram.change = 1;
     save_nvram();
     ESP.restart();
@@ -369,8 +369,8 @@ void httpd_listen() {
   httpd.on("/generate_204", http204);//安卓上网检测
 
   httpd.on("/update.php", HTTP_POST, []() {
-    if (nvram.proc != 0) {
-      nvram.proc = 0;
+    if (nvram.proc != GENERAL_MODE) {
+      nvram.proc = GENERAL_MODE;
       nvram.change = 1;
       save_nvram();
     }

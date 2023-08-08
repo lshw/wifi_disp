@@ -58,7 +58,7 @@ float v;
 bool power_off = false;
 void poweroff(uint32_t sec) {
   if (nvram.proc != PRESSURE_MODE) {
-    nvram.proc = 0;
+    nvram.proc = GENERAL_MODE;
     nvram.change = 1;
   }
   get_batt();
@@ -160,8 +160,8 @@ void timer1s() {
     return;
   if (timer3 > 0) {
     if (timer3 == 1) {
-      if (nvram.proc != 0) {
-        nvram.proc = 0;
+      if (nvram.proc != GENERAL_MODE) {
+        nvram.proc = GENERAL_MODE;
         nvram.change = 1;
       }
     }
