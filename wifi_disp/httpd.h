@@ -85,6 +85,19 @@ void http204() {
   httpd.send(204, "", "");
   httpd.client().stop();
 }
+void http_proc3() {
+  String str = "";
+  if (nvram.nvram7 & HAVE_PROC3)
+    str = " checked";
+  body = "<h1>其他设置</h1>"
+         "<hr>"
+         "<a href=/><button>返回设置</button></a>"
+         "<hr>"
+         "P3 启用: <input type = checkbox" + str + " onclick=gotoif('/save.php?have_proc3=1')>&nbsp;"
+         "测试间隔: <span onclick=modi('/save.php?proc3_sec=','修改测试间隔','" + String(nvram.proc3_sec) + "')><font color = blue>" + String(nvram.proc3_sec) + "</font>秒</span>&nbsp;"
+         "测试次数:<span onclick=modi('/save.php?proc3_count=','修改测试次数','" + String(nvram.proc3_count) + "')><font color=blue>" + String(nvram.proc3_count) + "次</font></span><ht>";
+  httpd_send_200("");
+}
 void handleRoot() {
   String wifi_stat, wifi_scan, i2c_scan;
   String ssid;
@@ -154,44 +167,38 @@ void handleRoot() {
     wifi_stat += "湿度:<mark>" + String((int8_t)shidu) + "%</mark> &nbsp; ";
   if (wendu > -300.0)
     wifi_stat += "温度:<mark>" + String(wendu) + "</mark>&#8451<br>";
-  httpd.send(200, "text/html", "<html>"
-             "<head>"
-             "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
-             "<script>"
-             "function get_passwd(ssid) {"
-             "var passwd=prompt('输入 '+ssid+' 的密码:');"
-             "if(passwd==null) return false;"
-             "if(passwd) location.replace('add_ssid.php?data='+ssid+':'+passwd);"
-             "else return false;"
-             "return true;"
-             "}"
-             "function select_ssid(ssid){"
-             "if(confirm('连接到['+ssid+']?')) location.replace('add_ssid.php?data='+ssid);"
-             "}"
-             "</script>"
-             "</head>"
-             "<body>"
-             "SN:<mark>" + hostname + "</mark> &nbsp; "
-             "版本:<mark>" VER "</mark>"
-             "<hr>"
-             + wifi_stat + "<hr>" + wifi_scan +
-             "<hr><form action=/save.php method=post>"
-             "输入ssid:passwd(可以多行多个)"
-             "<input type=submit value=save><br>"
-             "<textarea  style='width:500px;height:80px;' name=data>" + get_ssid() + "</textarea><br>"
-             "可以设置自己的服务器地址(清空恢复)<br>"
-             "url0:<input maxlength=100  size=30 type=text value='" + get_url(0) + "' name=url><br>"
-             "url1:<input maxlength=100  size=30 type=text value='" + get_url(1) + "' name=url1><br>"
-             + lora_set()
-             + "<hr><input type=submit name=submit value=save>"
-             "&nbsp;<input type=submit name=reboot value='reboot'>"
-             "</form>"
-             "<hr>"
-             "<form method='POST' action='/update.php' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
-             "<hr><table width=100%><tr><td align=left width=50%>程序源码:<a href=https://github.com/lshw/wifi_disp/releases/tag/V"  GIT_VER " target=_blank>https://github.com/lshw/wifi_disp/release/tag/V" GIT_VER "</a><td><td align=right width=50%>程序编译时间: <mark>" __DATE__ " " __TIME__ "</mark></td</tr></table><br>编译参数:[" BUILD_SET "] GCC" + String(__GNUC__) + "." + String(__GNUC_MINOR__)
-             + "<hr></body>"
-             "</html>");
-  httpd.client().stop();
+  body = "SN:<mark>" + hostname + "</mark> &nbsp; "
+         "版本:<mark>" VER "</mark>"
+         "&nbsp;<a href=/proc3.php><button>其它设置</button></a>"
+         "<hr>"
+         + wifi_stat + "<hr>" + wifi_scan +
+         "<hr><form action=/save.php method=post>"
+         "输入ssid:passwd(可以多行多个)"
+         "<input type=submit value=save><br>"
+         "<textarea  style='width:500px;height:80px;' name=data>" + get_ssid() + "</textarea><br>"
+         "可以设置自己的服务器地址(清空恢复)<br>"
+         "url0:<input maxlength=100  size=30 type=text value='" + get_url(0) + "' name=url><br>"
+         "url1:<input maxlength=100  size=30 type=text value='" + get_url(1) + "' name=url1><br>"
+         + lora_set()
+         + "<hr><input type=submit name=submit value=save>"
+         "&nbsp;<input type=submit name=reboot value='reboot'>"
+         "</form>"
+         "<hr>"
+         "<form method='POST' action='/update.php' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
+         "<hr><table width=100%><tr><td align=left width=50%>程序源码:<a href=https://github.com/lshw/wifi_disp/releases/tag/V"  GIT_VER " target=_blank>https://github.com/lshw/wifi_disp/release/tag/V" GIT_VER "</a><td><td align=right width=50%>程序编译时间: <mark>" __DATE__ " " __TIME__ "</mark></td</tr></table><br>编译参数:[" BUILD_SET "] GCC" + String(__GNUC__) + "." + String(__GNUC_MINOR__)
+         + "<hr>";
+  httpd_send_200("<script>"
+                 "function get_passwd(ssid) {"
+                 "var passwd=prompt('输入 '+ssid+' 的密码:');"
+                 "if(passwd==null) return false;"
+                 "if(passwd) location.replace('add_ssid.php?data='+ssid+':'+passwd);"
+                 "else return false;"
+                 "return true;"
+                 "}"
+                 "function select_ssid(ssid){"
+                 "if(confirm('连接到['+ssid+']?')) location.replace('add_ssid.php?data='+ssid);"
+                 "}"
+                 "</script>");
 }
 void handleNotFound() {
   File fp;
@@ -336,6 +343,7 @@ void httpsave() {
 void httpd_listen() {
 
   httpd.on("/", handleRoot);
+  httpd.on("/proc3.php", http_proc3);
   httpd.on("/save.php", httpsave); //保存设置
   httpd.on("/add_ssid.php", http_add_ssid); //保存设置
   httpd.on("/generate_204", http204);//安卓上网检测
