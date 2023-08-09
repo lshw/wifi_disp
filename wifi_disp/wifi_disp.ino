@@ -37,15 +37,17 @@ void setup()
 {
   Serial.begin(115200);
   load_nvram(); //从esp8266的nvram载入数据
-  wifi_country_t mycountry =
-  {
-    .cc = "CN",
-    .schan = 1,
-    .nchan = 13,
-    .policy = WIFI_COUNTRY_POLICY_MANUAL,
-  };
-
-  wifi_set_country(&mycountry);
+  /*
+    wifi_country_t mycountry =
+    {
+      .cc = "CN",
+      .schan = 1,
+      .nchan = 13,
+      .policy = WIFI_COUNTRY_POLICY_MANUAL,
+    };
+    wifi_set_country(&mycountry);
+  */
+  WiFi.setAutoConnect(true);//自动链接上次
   nvram.boot_count++;
   nvram.change = 1;
   proc = nvram.proc; //保存当前模式
