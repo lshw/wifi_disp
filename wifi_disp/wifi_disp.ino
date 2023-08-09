@@ -196,7 +196,8 @@ void setup()
   }
   Serial.printf_P(PSTR("pcb ver = %d\r\n"), pcb_ver);
   get_batt();
-  _myTicker.attach(1, timer1s);
+  if (proc == OTA_MODE)
+    _myTicker.attach(1, timer1s);
   Serial.print(F("电池电压"));
   Serial.println(v);
   if (power_in) {
