@@ -306,14 +306,12 @@ void setup()
         Serial.print(F("lora version="));
         Serial.println(lora_version);
       }
-      timer1 = 10;
       break;
   }
 }
 
 void wput() {
   ht16c21_cmd(0x88, 1); //开始闪烁
-  if (timer1 > 0) {
     uint16_t httpCode = wget();
     if (httpCode >= 200 || httpCode < 400) {
       if (v < 3.6)
@@ -326,16 +324,13 @@ void wput() {
       Serial.print(F("ms,sleep="));
       Serial.println(next_disp);
       if (millis() < 500) delay(500 - millis());
-      save_nvram();
       poweroff(next_disp);
-      return;
     } else {
       Serial.print(millis());
       Serial.println(F("ms,web error,reboot 3600s"));
       ht16c21_cmd(0x88, 3); //慢闪烁
       poweroff(3600);
     }
-  }
 }
 
 bool httpd_up = false;

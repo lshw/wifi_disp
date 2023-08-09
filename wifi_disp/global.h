@@ -24,7 +24,6 @@ struct tm now;
 bool upgrading = false;
 int16_t update_timeok = 0; //0-马上wget ，-1 关闭，>0  xx分钟后wget
 uint8_t ota_status = 0; //0:wps, 1:ap
-uint16_t timer1 = 0; //秒 定时测温
 uint16_t timer2 = 0; //秒
 uint8_t timer3 = 30; //最长30秒等待上线
 void timer1s();
@@ -168,7 +167,6 @@ void timer1s() {
     }
     timer3--;
   }
-  if (timer1 > 0) timer1--;//定时器1 测温
   if (timer2 > 0) timer2--;//定时器2
   if (proc == OTA_MODE)  {
     if (ota_status == 0  && ap_on_time < millis())
