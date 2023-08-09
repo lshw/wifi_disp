@@ -312,25 +312,25 @@ void setup()
 
 void wput() {
   ht16c21_cmd(0x88, 1); //开始闪烁
-    uint16_t httpCode = wget();
-    if (httpCode >= 200 || httpCode < 400) {
-      if (v < 3.6)
-        ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
-      else
-        ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
-      Serial.print(F("uptime="));
-      Serial.print(millis());
-      if (next_disp < 60) next_disp = 1800;
-      Serial.print(F("ms,sleep="));
-      Serial.println(next_disp);
-      if (millis() < 500) delay(500 - millis());
-      poweroff(next_disp);
-    } else {
-      Serial.print(millis());
-      Serial.println(F("ms,web error,reboot 3600s"));
-      ht16c21_cmd(0x88, 3); //慢闪烁
-      poweroff(3600);
-    }
+  uint16_t httpCode = wget();
+  if (httpCode >= 200 || httpCode < 400) {
+    if (v < 3.6)
+      ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
+    else
+      ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
+    Serial.print(F("uptime="));
+    Serial.print(millis());
+    if (next_disp < 60) next_disp = 1800;
+    Serial.print(F("ms,sleep="));
+    Serial.println(next_disp);
+    if (millis() < 500) delay(500 - millis());
+    poweroff(next_disp);
+  } else {
+    Serial.print(millis());
+    Serial.println(F("ms,web error,reboot 3600s"));
+    ht16c21_cmd(0x88, 3); //慢闪烁
+    poweroff(3600);
+  }
 }
 
 bool httpd_up = false;
