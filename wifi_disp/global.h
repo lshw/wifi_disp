@@ -24,8 +24,6 @@ struct tm now;
 bool upgrading = false;
 int16_t update_timeok = 0; //0-马上wget ，-1 关闭，>0  xx分钟后wget
 uint8_t ota_status = 0; //0:wps, 1:ap
-uint16_t timer2 = 0; //秒
-uint8_t timer3 = 30; //最长30秒等待上线
 void timer1s();
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
 enum {
@@ -158,17 +156,6 @@ void update_disp() {
 void timer1s() {
   if (upgrading)
     return;
-  if (timer3 > 0) {
-    if (timer3 == 1) {
-      if (nvram.proc != GENERAL_MODE) {
-        nvram.proc = GENERAL_MODE;
-        nvram.change = 1;
-      }
-    }
-    timer3--;
-  }
-  if (timer2 > 0) timer2--;//定时器2
-  if (proc == OTA_MODE)  {
     if (ota_status == 0  && ap_on_time < millis())
       ap_on_time = millis() + 10000;
     if (!connected_is_ok && ap_on_time > millis()) {
@@ -185,7 +172,6 @@ void timer1s() {
       }
     } else
       run_zmd = true;
-  }
 }
 
 uint16_t wget() {

@@ -405,7 +405,7 @@ void loop()
           update_disp();
           wput();
         }
-      } else if (timer3 == 0) {
+      } else if (millis() > 30000) {
         if (power_in && smart_config()) {
           disp((char *)"6.6.6.6.6.");
           poweroff(1);
