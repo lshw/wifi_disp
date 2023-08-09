@@ -61,10 +61,15 @@ void setup()
       disp((char *)" OTA ");
       break;
     case PROC3_MODE:
-      nvram.proc = OFF_MODE;
-      system_deep_sleep_set_option(4); //下次开机关闭wifi
-      if (nvram.nvram7 & HAVE_PROC3)
+      if (nvram.nvram7 & HAVE_PROC3) {
+        nvram.proc = OFF_MODE;
+        nvram.change = 1;
+        init1();
+        disp((char *)"P3  ");
+        system_deep_sleep_set_option(4); //下次开机关闭wifi
         break;
+      }
+      proc = OFF_MODE;
     case OFF_MODE:
       nvram.proc = LORA_SEND_MODE;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
