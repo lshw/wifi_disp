@@ -345,12 +345,13 @@ void loop()
 {
   if (power_off) {
     system_soft_wdt_feed ();
+    yield();
     return;
   }
-  if ((proc == OTA_MODE || proc == GENERAL_MODE || proc == PROC3_MODE) && last_check_connected < millis() &&  wifi_connected_is_ok()) {
+  if (proc == OTA_MODE && last_check_connected < millis() &&  wifi_connected_is_ok()) {
     last_check_connected = millis() + 1000; //1秒检查一次connected;
     if ( millis() > ap_on_time && power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
-    if ( millis() > ap_on_time) {
+    if ( millis() > ap_on_time) { //ap开启时长
       Serial.print(F("batt:"));
       Serial.print(get_batt());
       Serial.print(F("V,millis()="));
@@ -376,7 +377,7 @@ void loop()
       }
       if (ap_client_linked)
         dnsServer.processNextRequest();
-      if (connected_is_ok && !upgrading) {
+      if (connected_is_ok && !upgrading) { //连上AP
         if (!httpd_up) {
           ht16c21_cmd(0x88, 0); //不闪烁
           update_disp();
@@ -384,6 +385,16 @@ void loop()
           httpd_up = true;
           httpd_listen();
         }
+      }
+      if (run_zmd && !upgrading) {
+        ht16c21_cmd(0x88, 0); //不闪烁
+        run_zmd = false;
+        zmd();
+      }
+      if (nvram.proc != GENERAL_MODE && millis() > 5000) { //OTA5秒后， 如果再重启， 就进入测温程序
+        nvram.proc = GENERAL_MODE;
+        nvram.change = 1;
+        system_deep_sleep_set_option(2); //重启时不校准无线电
       }
       break;
     case LORA_RECEIVE_MODE:
@@ -403,14 +414,21 @@ void loop()
     case PROC3_MODE:
       if (proc3_next_send > millis()) break;
       proc3_next_send = millis() + nvram.proc3_sec * 1000;
-    //proc3();
+      snprintf_P(disp_buf, sizeof(disp_buf), PSTR("P3.%03d"), (uint16_t) millis() / 1000);
+      disp(disp_buf);
+      if (nvram.proc != PROC3_MODE && millis() > 5000) { //PROC3 5秒后， 如果再重启， 还进入PROC3_MODE
+        nvram.proc = PROC3_MODE;
+        nvram.change = 1;
+        system_deep_sleep_set_option(2); //重启时不校准无线电
+      }
+      break;
     default:
       if (wifi_connected_is_ok()) {
         if (!httpd_up ) {
           update_disp();
           wput();
         }
-      } else if (millis() > 30000) {
+      } else if (millis() > 30000) { //30秒没有连上AP
         if (power_in && smart_config()) {
           disp((char *)"6.6.6.6.6.");
           poweroff(1);
@@ -430,19 +448,9 @@ void loop()
         httpd_loop();
       }
   }
-  yield();
-  if (run_zmd && !upgrading) {
-    ht16c21_cmd(0x88, 0); //不闪烁
-    run_zmd = false;
-    zmd();
-  }
-  if (nvram.proc != GENERAL_MODE && millis() > 5000) { //5秒后， 如果重启， 就进入测温程序
-    nvram.proc = GENERAL_MODE;
-    nvram.change = 1;
-    system_deep_sleep_set_option(2); //重启时不校准无线电
-  }
   if (nvram.change) save_nvram();
   system_soft_wdt_feed (); //各loop里要根据需要执行喂狗命令
+  yield();
 }
 
 bool smart_config() {
