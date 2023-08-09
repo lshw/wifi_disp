@@ -63,31 +63,8 @@ void setup()
     case PROC3_MODE:
       nvram.proc = OFF_MODE;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
-      if (nvram.nvram7 & HAVE_PROC3) {
-        init1();
-        snprintf(disp_buf, sizeof(disp_buf), PSTR("P3.%03d"), nvram.proc3_count_now);
-        disp(disp_buf);
-        //proc3();
-        delay(100);
-        delay_more(); //外插电，就多延迟，方便切换
-        disp("-----");
-        nvram.proc = PROC3_MODE;
-        nvram.change = 1;
-        if (nvram.proc3_count_now == 1) {
-          system_deep_sleep_set_option(2); //重启时不校准无线电
-        }
-        if (nvram.proc3_count_now == 0) {
-          save_nvram();
-          break; //继续进行上传操作
-        } else {
-          nvram.proc3_count_now--;
-        }
-        save_nvram();
-        poweroff(nvram.proc3_sec - (millis() / 1000));
-        return;
+      if (nvram.nvram7 & HAVE_PROC3)
         break;
-      }
-      proc = OFF_MODE;
     case OFF_MODE:
       nvram.proc = LORA_SEND_MODE;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
@@ -312,8 +289,13 @@ void setup()
           break;
         }
       }
+    case PROC3_MODE:
+      wifi_setup();
+      break;
     default:
       Serial.println(F("测温模式"));
+      nvram.proc = GENERAL_MODE;
+      nvram.change = 1;
       snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
       disp(disp_buf);
       wifi_setup();
@@ -358,13 +340,14 @@ void wput() {
 
 bool httpd_up = false;
 uint32_t last_check_connected;
+uint32_t proc3_next_send;
 void loop()
 {
   if (power_off) {
     system_soft_wdt_feed ();
     return;
   }
-  if ((proc == OTA_MODE || proc == GENERAL_MODE) && last_check_connected < millis() &&  wifi_connected_is_ok()) {
+  if ((proc == OTA_MODE || proc == GENERAL_MODE || proc == PROC3_MODE) && last_check_connected < millis() &&  wifi_connected_is_ok()) {
     last_check_connected = millis() + 1000; //1秒检查一次connected;
     if ( millis() > ap_on_time && power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
     if ( millis() > ap_on_time) {
@@ -418,6 +401,10 @@ void loop()
         delay(400);
         break;
       }
+    case PROC3_MODE:
+      if (proc3_next_send > millis()) break;
+      proc3_next_send = millis() + nvram.proc3_sec * 1000;
+    //proc3();
     default:
       if (wifi_connected_is_ok()) {
         if (!httpd_up ) {
