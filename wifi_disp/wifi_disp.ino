@@ -424,7 +424,6 @@ void loop()
           update_disp();
           wput();
         }
-        return;
       } else if (timer3 == 0) {
         if (power_in && smart_config()) {
           disp((char *)"6.6.6.6.6.");
@@ -440,7 +439,9 @@ void loop()
           system_deep_sleep_set_option(2); //重启时不校准无线电
         }
         poweroff(3600);
-        return;
+      }
+      if (ap_client_linked || connected_is_ok) {
+        httpd_loop();
       }
   }
   yield();
