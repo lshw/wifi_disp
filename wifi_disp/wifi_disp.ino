@@ -374,7 +374,6 @@ void loop()
       if (connected_is_ok && !upgrading) {
         if (!httpd_up) {
           ht16c21_cmd(0x88, 0); //不闪烁
-          wput();
           update_disp();
           zmd();
           httpd_up = true;
