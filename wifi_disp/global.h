@@ -7,6 +7,7 @@
 #include "Ticker.h"
 #ifdef CONFIG_IDF_TARGET_ESP32C3
 #include <WiFiMulti.h>
+#include <WiFiUdp.h>
 #define  LIGHT_SLEEP_T ESP_LIGHT_SLEEP
 #define wdt_disable() rtc_wdt_disable()
 #else
@@ -38,6 +39,7 @@ enum {
 bool wifi_connected_is_ok();
 extern bool connected_is_ok;
 uint16_t http_get(uint8_t);
+void httpd_listen();
 void charge_off();
 void charge_on();
 bool run_zmd = true;
@@ -53,6 +55,13 @@ uint32_t ap_on_time = 200000;
 float get_batt();
 float v;
 bool power_off = false;
+void udp_send(String msg, char * dst_host, uint16_t dst_port, uint16_t src_port) {
+  WiFiUDP udp;
+  udp.begin(src_port);
+  udp.beginPacket(dst_host, dst_port);
+  udp.println(msg);
+  udp.endPacket();
+}
 void poweroff(uint32_t sec) {
   if (nvram.proc != PRESSURE_MODE && nvram.proc != PROC3_MODE) {
     nvram.proc = GENERAL_MODE;
