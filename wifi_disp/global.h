@@ -57,10 +57,11 @@ float get_batt();
 float v;
 bool power_off = false;
 void poweroff(uint32_t sec) {
-  if (nvram.proc != PRESSURE_MODE) {
+  if (nvram.proc != PRESSURE_MODE && nvram.proc != PROC3_MODE) {
     nvram.proc = GENERAL_MODE;
     nvram.change = 1;
   }
+
   get_batt();
   Serial.printf_P(PSTR("开机时长:%ld ms\r\n"), (uint32_t)millis());
   if (power_in) Serial.println(F("有外接电源"));
@@ -74,7 +75,7 @@ void poweroff(uint32_t sec) {
     }
   }
   wifi_set_sleep_type(LIGHT_SLEEP_T);
-  if (power_in && (nvram.nvram7 & NVRAM7_CHARGE)) { //如果外面接了电， 就进入LIGHT_SLEEP模式 电流0.8ma， 保持充电
+  if (power_in && (nvram.nvram7 & NVRAM7_CHARGE) && nvram.proc != PROC3_MODE) { //如果外面接了电， 就进入LIGHT_SLEEP模式 电流0.8ma， 保持充电
     sec = sec / 2;
     Serial.print(F("休眠"));
     if (sec > 60) {
@@ -130,7 +131,7 @@ void poweroff(uint32_t sec) {
   charge_off();
   _myTicker.detach();
   wdt_disable();
-  if (nvram.proc ==  PRESSURE_MODE)
+  if (nvram.proc ==  PRESSURE_MODE || nvram.proc == PROC3_MODE)
     system_deep_sleep_set_option(4); //下次开机关闭wifi
   else
     system_deep_sleep_set_option(2); //下次启动不做无线电校准

@@ -53,6 +53,7 @@ void setup()
     case OTA_MODE:
       wifi_station_connect();
       nvram.proc = PROC3_MODE;
+      nvram.proc3_count_now = nvram.proc3_count;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
       disp((char *)" OTA ");
@@ -61,6 +62,7 @@ void setup()
       nvram.proc = OFF_MODE;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       if (nvram.nvram7 & HAVE_PROC3) {
+        init1();
         snprintf(disp_buf, sizeof(disp_buf), PSTR("P3.%03d"), nvram.proc3_count_now);
         disp(disp_buf);
         //proc3();
@@ -68,18 +70,18 @@ void setup()
         delay_more(); //外插电，就多延迟，方便切换
         disp("-----");
         nvram.proc = PROC3_MODE;
+        nvram.change = 1;
         if (nvram.proc3_count_now == 1) {
           system_deep_sleep_set_option(2); //重启时不校准无线电
         }
         if (nvram.proc3_count_now == 0) {
-          nvram.proc = PRESSURE_MODE;
           save_nvram();
           break; //继续进行上传操作
         } else {
           nvram.proc3_count_now--;
         }
         save_nvram();
-        poweroff(60);
+        poweroff(nvram.proc3_sec - (millis() / 1000));
         return;
         break;
       }
@@ -242,9 +244,6 @@ void setup()
       wdt_disable();
       if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != OFF_MODE) {
         nvram.nvram7 |= NVRAM7_CHARGE; //充电
-        nvram.proc = OFF_MODE;//ota以后，
-        system_deep_sleep_set_option(4); //重启时关闭无线电
-        nvram.change = 1;
         save_nvram();
       }
       disp((char *)" OTA ");
@@ -328,11 +327,6 @@ void setup()
 }
 
 void wput() {
-  if (proc < 2) {
-    nvram.proc = 0;
-    nvram.change = 1;
-    system_deep_sleep_set_option(2); //重启时不校准无线电
-  }
   ht16c21_cmd(0x88, 1); //开始闪烁
   if (timer1 > 0) {
     uint16_t httpCode = wget();
