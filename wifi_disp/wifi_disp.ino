@@ -47,12 +47,12 @@ void setup()
     };
     wifi_set_country(&mycountry);
   */
-  WiFi.setAutoConnect(true);//自动链接上次
   nvram.boot_count++;
   nvram.change = 1;
   proc = nvram.proc; //保存当前模式
   switch (proc) { //尽快进行模式切换
     case OTA_MODE:
+      WiFi.setAutoConnect(true);//自动链接上次
       wifi_station_connect();
       nvram.proc = PROC3_MODE;
       nvram.proc3_count_now = nvram.proc3_count;
@@ -62,11 +62,14 @@ void setup()
       break;
     case PROC3_MODE:
       if (nvram.nvram7 & HAVE_PROC3) {
+        WiFi.setAutoConnect(true);//自动链接上次
+        wifi_station_connect();
         nvram.proc = OFF_MODE;
+        system_deep_sleep_set_option(4); //下次开机关闭wifi
         nvram.change = 1;
         init1();
         disp((char *)"P3  ");
-        system_deep_sleep_set_option(4); //下次开机关闭wifi
+        wifi_setup();
         break;
       }
       proc = OFF_MODE;
@@ -119,6 +122,7 @@ void setup()
       }
     case GENERAL_MODE:
     default:
+      WiFi.setAutoConnect(true);//自动链接上次
       wifi_station_connect();
       proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
       nvram.proc = PRESSURE_MODE;
@@ -295,7 +299,16 @@ void setup()
         }
       }
     case PROC3_MODE:
-      wifi_setup();
+      uint32_t ms0;
+      ms0 = millis() + 10000;
+      while (ms0 > millis() || !WiFi.isConnected()) {
+        yield();
+      }
+      udp_send(String(millis()), (char *)"192.168.2.4", 8888, 8888);
+      nvram.proc = PROC3_MODE;
+      system_deep_sleep_set_option(2); //下次开机wifi不校准
+      nvram.change = 1;
+      poweroff(20);
       break;
     default:
       Serial.println(F("测温模式"));
@@ -340,7 +353,6 @@ void wput() {
 
 bool httpd_up = false;
 uint32_t last_check_connected;
-uint32_t proc3_next_send;
 void loop()
 {
   if (power_off) {
@@ -383,7 +395,6 @@ void loop()
           update_disp();
           zmd();
           httpd_up = true;
-          httpd_listen();
         }
       }
       if (run_zmd && !upgrading) {
@@ -411,17 +422,6 @@ void loop()
         delay(400);
         break;
       }
-    case PROC3_MODE:
-      if (proc3_next_send > millis()) break;
-      proc3_next_send = millis() + nvram.proc3_sec * 1000;
-      snprintf_P(disp_buf, sizeof(disp_buf), PSTR("P3.%03d"), (uint16_t) millis() / 1000);
-      disp(disp_buf);
-      if (nvram.proc != PROC3_MODE && millis() > 5000) { //PROC3 5秒后， 如果再重启， 还进入PROC3_MODE
-        nvram.proc = PROC3_MODE;
-        nvram.change = 1;
-        system_deep_sleep_set_option(2); //重启时不校准无线电
-      }
-      break;
     default:
       if (wifi_connected_is_ok()) {
         if (!httpd_up ) {
