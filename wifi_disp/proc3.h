@@ -27,6 +27,8 @@ void proc3_setup() {
             || udp.println(msg)
             || udp.println(msg)) {
           udp.endPacket();
+          udp.println(msg);
+          udp.endPacket();
           Serial.println(F("send ok"));
         }
       }
