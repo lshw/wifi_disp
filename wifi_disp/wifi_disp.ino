@@ -9,8 +9,10 @@ extern "C" {
 bool temp_ok = false; //测温ok
 uint32_t temp_start;
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
+void init1();
 uint32_t next_disp = 1800; //下次开机
 String hostname = HOSTNAME;
+bool httpd_up = false;
 
 #include "ota.h"
 #include "ds1820.h"
@@ -20,6 +22,7 @@ String hostname = HOSTNAME;
 #include "lora.h"
 #include "dht22.h"
 #include "sht4x.h"
+#include "setup.h"
 bool power_in = false;
 void init1() {
   save_nvram();
@@ -42,13 +45,7 @@ void setup()
   proc = nvram.proc; //保存当前模式
   switch (proc) { //尽快进行模式切换
     case OTA_MODE:
-      WiFi.setAutoConnect(true);//自动链接上次
-      wifi_station_connect();
-      nvram.proc = PROC3_MODE;
-      system_deep_sleep_set_option(4); //下次开机关闭wifi
-      init1();
-      disp((char *)" OTA ");
-      _myTicker.attach(1, timer1s);
+      setup_setup();
       break;
     case PROC3_MODE:
       if (nvram.nvram7 & HAVE_PROC3) {
@@ -289,7 +286,6 @@ void wput() {
   }
 }
 
-bool httpd_up = false;
 uint32_t last_check_connected;
 void loop()
 {
@@ -321,30 +317,7 @@ void loop()
   }
   switch (proc) {
     case OTA_MODE:
-      if (ap_client_linked || connected_is_ok) {
-        httpd_loop();
-        ArduinoOTA.handle();
-      }
-      if (ap_client_linked)
-        dnsServer.processNextRequest();
-      if (connected_is_ok && !upgrading) { //连上AP
-        if (!httpd_up) {
-          ht16c21_cmd(0x88, 0); //不闪烁
-          update_disp();
-          zmd();
-          httpd_up = true;
-        }
-      }
-      if (run_zmd && !upgrading) {
-        ht16c21_cmd(0x88, 0); //不闪烁
-        run_zmd = false;
-        zmd();
-      }
-      if (nvram.proc != GENERAL_MODE && millis() > 5000) { //OTA5秒后， 如果再重启， 就进入测温程序
-        nvram.proc = GENERAL_MODE;
-        nvram.change = 1;
-        system_deep_sleep_set_option(2); //重启时不校准无线电
-      }
+      setup_loop();
       break;
     case LORA_RECEIVE_MODE:
       if (ds_pin == 0 && nvram.have_lora > -5) {

@@ -49,6 +49,7 @@ extern String hostname;
 void httpd_listen();
 void charge_off();
 void charge_on();
+void lora_sleep();
 bool run_zmd = true;
 #define ZMD_BUF_SIZE 100
 char zmd_disp[ZMD_BUF_SIZE];
