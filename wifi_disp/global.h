@@ -101,7 +101,6 @@ void poweroff(uint32_t sec) {
     }
     Serial.println(F("\r\n充电中"));
     Serial.flush();
-    wdt_disable();
     uint8_t no_power_in = 0;
     for (uint32_t i = 0; i < sec; i++) {
       yield();
