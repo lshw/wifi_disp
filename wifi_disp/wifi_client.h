@@ -63,7 +63,6 @@ void AP() {
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(53, "*", WiFi.softAPIP());
   Serial.println(F("泛域名dns服务器启动"));
-  wifi_set_sleep_type(LIGHT_SLEEP_T);
   yield();
 }
 
@@ -85,7 +84,6 @@ void wifi_setup() {
     wifi_set_country(&mycountry);
   */
   WiFi.mode(WIFI_STA);
-  wifi_set_sleep_type(LIGHT_SLEEP_T);
   if (SPIFFS.begin()) {
     if (!SPIFFS.exists("/ssid.txt")) {
       fp = SPIFFS.open("/ssid.txt", "w");

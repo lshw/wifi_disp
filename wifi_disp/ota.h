@@ -49,7 +49,6 @@ void ota_setup() {
     }
   });
   ArduinoOTA.begin();
-  wifi_set_sleep_type(LIGHT_SLEEP_T);
   Serial.println(F("OTA Ready"));
 }
 
