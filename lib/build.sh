@@ -16,7 +16,7 @@ fi
 
 arduino=/opt/arduino-1.8.19
 astyle  --options=$arduino/lib/formatter.conf ../wifi_disp/*.h ../wifi_disp/*.ino
-
+rm -f ../wifi_disp/*.orig
 if ! [ -x ./uncrc32 ] ; then
 gcc -o uncrc32 uncrc32.c
 fi
