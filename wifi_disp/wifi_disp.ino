@@ -46,7 +46,7 @@ void setup()
     get_value();
   get_batt();
   check_batt_low();
-  if (millis() > 10000) { //升级程序后第一次启动
+  if (millis() > 5000) { //升级程序后第一次启动
     Serial.println("升级完成，重启");
     nvram.proc = GENERAL_MODE;
     nvram.nvram7 |= NVRAM7_CHARGE;
