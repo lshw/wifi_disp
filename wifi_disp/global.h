@@ -424,9 +424,8 @@ void  wifi_set_add(const char * wps_ssid, const char * wps_password) {
     SPIFFS.end();
   }
 }
-uint8_t pcb_ver = 2;
 void charge_on() {
-  switch (pcb_ver) {
+  switch (nvram.pcb_ver) {
     case 0: //pcb0
       pinMode(13, OUTPUT);
       digitalWrite(13, LOW);
@@ -445,7 +444,7 @@ void charge_on() {
   }
 }
 void charge_off() {
-  switch (pcb_ver) {
+  switch (nvram.pcb_ver) {
     case 0: //pcb0
       pinMode(13, OUTPUT);
       digitalWrite(13, HIGH);
@@ -484,7 +483,8 @@ void hello() {
 void get_value() {
   if (sht4x_load()) {
     pinMode(0, INPUT_PULLUP);
-    pcb_ver = 2;
+    nvram.pcb_ver = 2;
+    nvram.change = 1;
     ds_pin = 0;//DHT22使用V2.0的硬件
     for (uint8_t i = 0; i < 6; i++)
       Serial.printf_P(PSTR(" %02x"), temp_data[i]);
@@ -512,10 +512,11 @@ void get_value() {
       ds_pin = 0;//DHT22使用V2.0的硬件
     }
     if (ds_pin == 0)
-      pcb_ver = 1;
+      nvram.pcb_ver = 1;
     else
-      pcb_ver = 0;
+      nvram.pcb_ver = 0;
+    nvram.change = 1;
   }
-  Serial.printf_P(PSTR("pcb ver = %d\r\n"), pcb_ver);
+  Serial.printf_P(PSTR("pcb ver = %d\r\n"), nvram.pcb_ver);
 }
 #endif
