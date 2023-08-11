@@ -28,12 +28,13 @@ struct {
 uint32_t calculateCRC32(const uint8_t *data, size_t length);
 
 void load_nvram() {
+  File fp;
   ESP.rtcUserMemoryRead(0, (uint32_t*) &nvram, sizeof(nvram));
   if (nvram.crc32 != calculateCRC32((uint8_t*) &nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
     if (SPIFFS.begin()) {
-      if (SPIFFS.exists("/ssid.txt")) {
-        fp = SPIFFS.open("/ssid.txt", "r");
-        fp.read((char *) &nvram, sizeof(nvram));
+      if (SPIFFS.exists("/nvram.bin")) {
+        fp = SPIFFS.open("/nvram.bin", "r");
+        fp.read((uint8_t *) &nvram, sizeof(nvram));
         fp.close();
       }
     }
@@ -45,7 +46,7 @@ void load_nvram() {
     nvram.cr = LR_CODINGRATE_2;
     nvram.sf = LR_SPREADING_FACTOR_12;
     nvram.proc3_sec = 20;
-    nvram.proc3_host = "192.168.2.4";
+    strcpy(nvram.proc3_host, "192.168.2.4");
     nvram.proc3_port = 8888;
     nvram.pcb_ver = -1;
   } else if (nvram.ch > 0 && nvram.ch <= 14) {

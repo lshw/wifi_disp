@@ -263,8 +263,7 @@ float get_batt() {
   if (ds_pin == 0) {
     Serial.begin(115200);
   }
-  Serial.printf_P(PSTR("电池电压%f"), v);
-  Serial.println(v);
+  Serial.printf_P(PSTR("电池电压%.2f\r\n"), v);
   return v;
 }
 
