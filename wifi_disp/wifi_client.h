@@ -161,8 +161,6 @@ bool WiFi_isConnected() {
   }
   if (connected_is_ok == true) {
     Serial.println(WiFi.localIP());
-    if (proc == SETUP_MODE)
-      httpd_listen();
     ht16c21_cmd(0x88, 0); //停止闪烁
     if (nvram.ch != wifi_get_channel() ) {
       nvram.ch =  wifi_get_channel();
