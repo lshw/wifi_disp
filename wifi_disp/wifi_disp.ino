@@ -314,7 +314,11 @@ bool smart_config() {
       return true;
     }
     Serial.write('.');
+    system_soft_wdt_feed ();
+    yield();
     delay(1000);
+    system_soft_wdt_feed ();
+    yield();
     snprintf_P(disp_buf, sizeof(disp_buf), PSTR("CON%02d"), i);
     disp(disp_buf);
   }
