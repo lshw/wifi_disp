@@ -26,7 +26,7 @@ struct {
 }  nvram;
 
 uint32_t calculateCRC32(const uint8_t *data, size_t length);
-
+void save_nvram();
 void load_nvram() {
   File fp;
   ESP.rtcUserMemoryRead(0, (uint32_t*) &nvram, sizeof(nvram));
@@ -36,6 +36,12 @@ void load_nvram() {
         fp = SPIFFS.open("/nvram.bin", "r");
         fp.read((uint8_t *) &nvram, sizeof(nvram));
         fp.close();
+        nvram.boot_count = 0;
+        nvram.have_lora = 0;
+        nvram.have_dht = 0;
+        nvram.pcb_ver = -1;
+        nvram.change = 1;
+        save_nvram();
       }
     }
   }
