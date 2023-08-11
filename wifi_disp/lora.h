@@ -6,6 +6,9 @@ uint8_t rxBuf[256];
 uint32_t send_delay = 0;
 uint16_t lora_count = 0;
 extern char disp_buf[22];
+void lora_sleep() {
+  lora.sleep();
+}
 void lora_send_loop() {
   if (millis() - send_delay < 200) return;
   system_soft_wdt_feed ();
