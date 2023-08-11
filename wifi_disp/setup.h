@@ -14,9 +14,7 @@ void setup_setup() {
       lora_sleep();
   }
   wifi_setup();
-  uint32_t ms = millis() + 10000;
-  while (millis() < ms && !WiFi.isConnected())
-    yield();
+  wait_connected(10000); //等待连接
   if (wifi_station_get_connect_status() != STATION_GOT_IP) {
     ap_on_time = millis() + 30000;  //WPS 20秒
     if (WiFi.beginWPSConfig()) {

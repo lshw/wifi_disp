@@ -179,23 +179,14 @@ void setup()
           lora.sleep();
       }
       Serial.println();
-      while (millis() < 5000 && !WiFi.isConnected()) {
-        system_soft_wdt_feed ();
-        yield();
-        delay(350);
-        Serial.write('.');
-      }
+      wait_connected(5000);
       nvram.proc = GENERAL_MODE;
       system_deep_sleep_set_option(2); //下次开机wifi不校准
       nvram.change = 1;
       save_nvram();
-      while (millis() < 30 && !WiFi.isConnected()) {
-        system_soft_wdt_feed ();
-        yield();
-        delay(350);
-        Serial.write('.');
-      }
-      if (wifi_connected_is_ok()) {
+      wait_connected(30000);
+      Serial.println();
+      if (WiFi_isConnected()) {
         wput();
       } else { //30秒没有连上AP
         if (power_in && smart_config()) {
@@ -249,7 +240,7 @@ void loop()
     delay(1000);
     return;
   }
-  if (proc == SETUP_MODE && last_check_connected < millis() &&  wifi_connected_is_ok()) {
+  if (proc == SETUP_MODE && last_check_connected < millis() &&  WiFi_isConnected()) {
     last_check_connected = millis() + 1000; //1秒检查一次connected;
     if ( millis() > ap_on_time && power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
     if ( millis() > ap_on_time) { //ap开启时长
@@ -300,7 +291,7 @@ bool smart_config() {
   nvram.proc = GENERAL_MODE;
   nvram.change = 1;
   system_deep_sleep_set_option(2); //重启时不校准无线电
-  if (wifi_connected_is_ok()) return true;
+  if (WiFi_isConnected()) return true;
   WiFi.mode(WIFI_STA);
   WiFi.beginSmartConfig();
   Serial.println(F("SmartConfig start"));

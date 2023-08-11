@@ -7,11 +7,10 @@ void proc3_setup() {
   wifi_setup();
   disp((char *)"P3  ");
   get_value();
-  while (millis() < 10000 && !WiFi.isConnected()) {
-    system_soft_wdt_feed ();
-    yield();
-  }
-  if (WiFi.isConnected())
+  Serial.println();
+  wait_connected(10000);
+  Serial.println();
+  if (WiFi_isConnected())
     udp_send(String(millis()), (char *)"192.168.2.4", 8888, 8888);
   nvram.proc = PROC3_MODE;
   system_deep_sleep_set_option(2); //下次开机wifi不校准

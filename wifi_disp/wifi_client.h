@@ -141,10 +141,10 @@ void wifi_setup() {
   WiFi.setAutoReconnect(true);//断线自动重连
   WiFiMulti.run();
 
-  wifi_connected_is_ok();
+  WiFi_isConnected();
 }
 bool connected_is_ok = false;
-bool wifi_connected_is_ok() {
+bool WiFi_isConnected() {
   if (connected_is_ok)
     return connected_is_ok;
   if (proc == SETUP_MODE && ap_client_linked  && millis() > 15000) return false; //ota有wifi客户连上来，或者超过10秒没有连上上游AP， 就不再尝试链接AP了
