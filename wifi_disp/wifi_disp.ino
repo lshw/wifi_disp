@@ -56,6 +56,7 @@ void setup()
       nvram.change = 1;
       save_nvram();
       system_deep_sleep_set_option(4); //下次开机关闭wifi
+      set_hostname();
       hello();
       setup_setup();
       _myTicker.attach(1, timer1s);
@@ -67,6 +68,7 @@ void setup()
       save_nvram();
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
+      set_hostname();
       hello();
       disp((char *)" OFF ");
       delay(2000);
