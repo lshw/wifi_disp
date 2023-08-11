@@ -17,8 +17,6 @@ struct {
   uint8_t cr;
   uint8_t sf;
   uint16_t proc3_sec; //多少秒测一次
-  uint16_t proc3_count; //测多少次上传一次
-  uint16_t proc3_count_now;//当前次数
   uint16_t baoliu;
   uint32_t boot_count;
   uint32_t crc32;
@@ -34,8 +32,7 @@ void load_nvram() {
     nvram.bw = LR_BW_125k;
     nvram.cr = LR_CODINGRATE_2;
     nvram.sf = LR_SPREADING_FACTOR_12;
-    nvram.proc3_sec = 1;
-    nvram.proc3_count = 1;
+    nvram.proc3_sec = 20;
   } else if (nvram.ch > 0 && nvram.ch <= 14) {
     Serial.printf_P(PSTR("\r\nwifi channel=%d, proc=%d\r\n"), nvram.ch, nvram.proc);
     WRITE_PERI_REG(0x600011f4, 1 << 16 | nvram.ch);
