@@ -23,6 +23,7 @@ bool httpd_up = false;
 #include "dht22.h"
 #include "sht4x.h"
 #include "setup.h"
+#include "proc3.h"
 bool power_in = false;
 void init1() {
   save_nvram();
@@ -54,30 +55,6 @@ void setup()
     case OTA_MODE:
       setup_setup();
       break;
-    case PROC3_MODE:
-      if (nvram.nvram7 & HAVE_PROC3) {
-        WiFi.setAutoConnect(true);//自动链接上次
-        wifi_station_connect();
-        nvram.proc = OFF_MODE;
-        nvram.change = 1;
-        system_deep_sleep_set_option(4); //下次开机关闭wifi
-        init1();
-        wifi_setup();
-        disp((char *)"P3  ");
-        get_value();
-        uint32_t ms0;
-        ms0 = millis() + 10000;
-        while (ms0 > millis() && !WiFi.isConnected()) {
-          yield();
-        }
-        udp_send(String(millis()), (char *)"192.168.2.4", 8888, 8888);
-        nvram.proc = PROC3_MODE;
-        system_deep_sleep_set_option(2); //下次开机wifi不校准
-        nvram.change = 1;
-        poweroff(nvram.proc3_sec);
-        break;
-      }
-      proc = OFF_MODE;
     case OFF_MODE:
       wdt_disable();
       nvram.proc = LORA_SEND_MODE;
@@ -106,6 +83,8 @@ void setup()
         wdt_disable();
         Serial.println(F("lora  接收模式"));
         nvram.proc = GENERAL_MODE;
+        nvram.change = 1;
+        save_nvram();
         system_deep_sleep_set_option(2); //重启时不校准无线电
         init1();
         disp((char *)"L-" VER);
