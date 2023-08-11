@@ -51,7 +51,7 @@ void setup()
   check_batt_low();
   proc = nvram.proc; //保存当前模式
   switch (proc) { //尽快进行模式切换
-    case OTA_MODE:
+    case SETUP_MODE:
       nvram.proc = PROC3_MODE;
       nvram.change = 1;
       save_nvram();
@@ -126,7 +126,7 @@ void setup()
       }
     case PRESSURE_MODE:
       wdt_disable();
-      nvram.proc = OTA_MODE;
+      nvram.proc = SETUP_MODE;
       nvram.change = 1;
       save_nvram();
       system_deep_sleep_set_option(1); //重启时校准无线电
@@ -242,7 +242,7 @@ void loop()
     delay(1000);
     return;
   }
-  if (proc == OTA_MODE && last_check_connected < millis() &&  wifi_connected_is_ok()) {
+  if (proc == SETUP_MODE && last_check_connected < millis() &&  wifi_connected_is_ok()) {
     last_check_connected = millis() + 1000; //1秒检查一次connected;
     if ( millis() > ap_on_time && power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
     if ( millis() > ap_on_time) { //ap开启时长
@@ -264,7 +264,7 @@ void loop()
     }
   }
   switch (proc) {
-    case OTA_MODE:
+    case SETUP_MODE:
       setup_loop();
       break;
     case LORA_RECEIVE_MODE:
