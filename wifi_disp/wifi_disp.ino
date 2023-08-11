@@ -58,38 +58,81 @@ void setup()
         WiFi.setAutoConnect(true);//自动链接上次
         wifi_station_connect();
         nvram.proc = OFF_MODE;
-        system_deep_sleep_set_option(4); //下次开机关闭wifi
         nvram.change = 1;
+        system_deep_sleep_set_option(4); //下次开机关闭wifi
         init1();
-        disp((char *)"P3  ");
         wifi_setup();
+        disp((char *)"P3  ");
+        get_value();
+        uint32_t ms0;
+        ms0 = millis() + 10000;
+        while (ms0 > millis() && !WiFi.isConnected()) {
+          yield();
+        }
+        udp_send(String(millis()), (char *)"192.168.2.4", 8888, 8888);
+        nvram.proc = PROC3_MODE;
+        system_deep_sleep_set_option(2); //下次开机wifi不校准
+        nvram.change = 1;
+        poweroff(nvram.proc3_sec);
         break;
       }
       proc = OFF_MODE;
     case OFF_MODE:
+      wdt_disable();
       nvram.proc = LORA_SEND_MODE;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
       disp((char *)" OFF ");
-      break;
-    case LORA_SEND_MODE:
-      if (nvram.have_lora > -5) {
-        nvram.proc = LORA_RECEIVE_MODE;
-        system_deep_sleep_set_option(4); //下次开机关闭wifi
-        init1();
-        disp((char *)"S-" VER);
-        break;
+      delay(2000);
+      disp((char *)"-" VER "-");
+      delay(2000);
+      ht16c21_cmd(0x84, 0x02); //关闭ht16c21
+      if (ds_pin == 0) { //v2.0
+        if (nvram.have_lora > -5 & lora_init())
+          lora.sleep();
+        Serial.begin(115200);
       }
+      if (nvram.have_lora < 0) {
+        nvram.have_lora = 0;
+        nvram.change = 1;
+      }
+      save_nvram();
+      poweroff(0);
+      return;
+      break;
     case LORA_RECEIVE_MODE:
       if (nvram.have_lora > -5) {
+        wdt_disable();
+        Serial.println(F("lora  接收模式"));
         nvram.proc = GENERAL_MODE;
         system_deep_sleep_set_option(2); //重启时不校准无线电
         init1();
         disp((char *)"L-" VER);
-        break;
+        if (lora_init()) {
+          disp((char *)"L-" VER);
+          wifi_station_disconnect();
+          wifi_set_opmode(NULL_MODE);
+          delay(1000);
+          return;
+        }
+      }
+    case LORA_SEND_MODE:
+      if (nvram.have_lora > -5) {
+        wdt_disable();
+        Serial.println(F("lora  发送模式"));
+        nvram.proc = LORA_RECEIVE_MODE;
+        system_deep_sleep_set_option(4); //下次开机关闭wifi
+        init1();
+        disp((char *)"S-" VER);
+        if (lora_init()) {
+          disp((char *)"S-" VER);
+          wifi_station_disconnect();
+          wifi_set_opmode(NULL_MODE);
+          delay(1000);
+          return;
+        }
       }
     case PRESSURE_MODE:
-      get_batt();
       nvram.proc = OTA_MODE;
       system_deep_sleep_set_option(1); //重启时校准无线电
       nvram.change = 1;
@@ -115,6 +158,7 @@ void setup()
       }
     case GENERAL_MODE:
     default:
+      hello();
       WiFi.setAutoConnect(true);//自动链接上次
       wifi_station_connect();
       proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
@@ -124,87 +168,14 @@ void setup()
       get_value();
       set_hostname();
       wifi_setup();
-      delay(1500);
-      if (wifi_station_get_connect_status() != STATION_GOT_IP) {
-        ap_on_time = millis() + 30000;  //WPS 20秒
-        if (WiFi.beginWPSConfig()) {
-          delay(1000);
-          uint8_t ap_id = wifi_station_get_current_ap_id();
-          char wps_ssid[33], wps_password[65];
-          memset(wps_ssid, 0, sizeof(wps_ssid));
-          memset(wps_password, 0, sizeof(wps_password));
-          struct station_config config[5];
-          wifi_station_get_ap_info(config);
-          strncpy(wps_ssid, (char *)config[ap_id].ssid, 32);
-          strncpy(wps_password, (char *)config[ap_id].password, 64);
-          config[ap_id].bssid_set = 1; //同名ap，mac地址不同
-          wifi_station_set_config(&config[ap_id]); //保存成功的ssid,用于下次通讯
-          wifi_set_add(wps_ssid, wps_password);
-        }
-      }
-      if (wifi_station_get_connect_status() != STATION_GOT_IP) {
-        AP();
-        ota_status = 1;
-        get_batt();
-        if (power_in)
-          ap_on_time = millis() + 1000000; //插AP模式1000秒
-        else
-          ap_on_time = millis() + 200000; //不插电AP模式200秒
-      }
-      httpd_listen();
-      ota_setup();
-      break;
-    case LORA_RECEIVE_MODE:
-      if (ds_pin == 0 && nvram.have_lora > -5) {
-        Serial.println(F("lora  接收模式"));
-        wdt_disable();
-        if (lora_init()) {
-          disp((char *)"L-" VER);
-          wifi_station_disconnect();
-          wifi_set_opmode(NULL_MODE);
-          delay(1000);
-          return;
-          break;
-        }
-      }
-    case LORA_SEND_MODE:
-      if (ds_pin == 0 && nvram.have_lora > -5) {
-        Serial.println(F("lora  发送模式"));
-        wdt_disable();
-        if (lora_init()) {
-          disp((char *)"S-" VER);
-          wifi_station_disconnect();
-          wifi_set_opmode(NULL_MODE);
-          delay(1000);
-          return;
-          break;
-        }
-      }
-    case PROC3_MODE:
-      uint32_t ms0;
-      ms0 = millis() + 10000;
-      while (ms0 > millis() || !WiFi.isConnected()) {
-        yield();
-      }
-      udp_send(String(millis()), (char *)"192.168.2.4", 8888, 8888);
-      nvram.proc = PROC3_MODE;
-      system_deep_sleep_set_option(2); //下次开机wifi不校准
-      nvram.change = 1;
-      poweroff(20);
-      break;
-    default:
       Serial.println(F("测温模式"));
       nvram.proc = GENERAL_MODE;
       nvram.change = 1;
       snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
       disp(disp_buf);
-      wifi_setup();
       if (ds_pin == 0 && nvram.have_lora > -5) {
         if (lora_init())
           lora.sleep();
-        Serial.begin(115200);
-        Serial.print(F("lora version="));
-        Serial.println(lora_version);
       }
       break;
   }
