@@ -33,10 +33,10 @@ arduinoset=$home/.arduino15
 mkdir -p /tmp/${me}_build /tmp/${me}_cache
 
 #debug输出设置
-#debug=None____
-#debug=WIFI
-debug=SSLTLS_MEMHTTP_CLIENTHTTP_SERVERCOREWIFIHTTP_UPDATEUPDATEROTAOOMMDNSHWDT
-fqbn="esp8266:esp8266:generic:xtal=160,vt=flash,exception=disabled,stacksmash=disabled,ssl=all,mmu=3232,non32xfer=fast,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=80,FlashMode=qio,eesz=4M2M,led=2,sdk=nonosdk305,ip=hb2f,dbg=Serial,lvl=$debug,wipe=none,baud=921600"
+debug=",dbg=Disabled,lvl=None____"
+#debug=",dbg=Serial,lvl=WIFI"
+#debug=",dbg=Serial,lvl=SSLTLS_MEMHTTP_CLIENTHTTP_SERVERCOREWIFIHTTP_UPDATEUPDATEROTAOOMMDNSHWDT"
+fqbn="esp8266:esp8266:generic:xtal=160,vt=flash,exception=disabled,stacksmash=disabled,ssl=all,mmu=3232,non32xfer=fast,ResetMethod=nodemcu,CrystalFreq=26,FlashFreq=80,FlashMode=qio,eesz=4M2M,led=2,sdk=nonosdk305,ip=hb2f$debug,wipe=none,baud=921600"
 
 #传递宏定义 GIT_VER 到源码中，源码git版本
 CXXFLAGS="-DGIT_VER=\"$ver\" -DBUILD_SET=\"$fqbn\""
