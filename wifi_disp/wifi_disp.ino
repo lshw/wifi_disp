@@ -53,7 +53,13 @@ void setup()
   proc = nvram.proc; //保存当前模式
   switch (proc) { //尽快进行模式切换
     case OTA_MODE:
+      nvram.proc = PROC3_MODE;
+      nvram.change = 1;
+      save_nvram();
+      system_deep_sleep_set_option(4); //下次开机关闭wifi
+      hello();
       setup_setup();
+      _myTicker.attach(1, timer1s);
       break;
     case OFF_MODE:
       wdt_disable();
