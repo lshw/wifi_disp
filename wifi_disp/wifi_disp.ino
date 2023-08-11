@@ -90,7 +90,6 @@ void setup()
       break;
     case LORA_RECEIVE_MODE:
       if (nvram.have_lora > -5) {
-        wdt_disable();
         Serial.println(F("lora  接收模式"));
         nvram.proc = GENERAL_MODE;
         nvram.change = 1;
@@ -109,7 +108,6 @@ void setup()
       }
     case LORA_SEND_MODE:
       if (nvram.have_lora > -5) {
-        wdt_disable();
         Serial.println(F("lora  发送模式"));
         nvram.proc = LORA_RECEIVE_MODE;
         nvram.change = 1;
@@ -127,6 +125,7 @@ void setup()
         }
       }
     case PRESSURE_MODE:
+      wdt_disable();
       nvram.proc = OTA_MODE;
       nvram.change = 1;
       save_nvram();
@@ -154,6 +153,7 @@ void setup()
       }
     case GENERAL_MODE:
     default:
+      wdt_disable();
       set_hostname();
       WiFi.setAutoConnect(true);//自动链接上次
       wifi_station_connect();
