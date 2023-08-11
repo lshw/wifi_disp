@@ -154,6 +154,9 @@ void setup()
       }
     case GENERAL_MODE:
     default:
+      set_hostname();
+      WiFi.setAutoConnect(true);//自动链接上次
+      wifi_station_connect();
       hello();
       proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
       nvram.proc = PRESSURE_MODE;
@@ -164,23 +167,45 @@ void setup()
       Serial.println(F("测温模式"));
       snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
       disp(disp_buf);
-      WiFi.setAutoConnect(true);//自动链接上次
-      wifi_station_connect();
       wifi_setup();
+      get_value();
       if (ds_pin == 0 && nvram.have_lora > -5) {
         if (lora_init())
           lora.sleep();
       }
-      ms = millis() + 10000;
-      while (millis() < ms && !WiFi.isConnected()) {
+      Serial.println();
+      while (millis() < 5000 && !WiFi.isConnected()) {
         yield();
         delay(350);
+        Serial.write('.');
       }
-      get_value();
-      set_hostname();
       nvram.proc = GENERAL_MODE;
       system_deep_sleep_set_option(2); //下次开机wifi不校准
       nvram.change = 1;
+      save_nvram();
+      while (millis() < 30 && !WiFi.isConnected()) {
+        yield();
+        delay(350);
+        Serial.write('.');
+      }
+      if (wifi_connected_is_ok()) {
+        wput();
+      } else { //30秒没有连上AP
+        if (power_in && smart_config()) {
+          disp((char *)"6.6.6.6.6.");
+          poweroff(1);
+        }
+        //10秒超时1小时重试。
+        Serial.print(millis());
+        Serial.println(F("ms,not link to ap,reboot 3600s"));
+        ht16c21_cmd(0x88, 3); //慢闪烁
+        if (nvram.proc != GENERAL_MODE) {
+          nvram.proc = GENERAL_MODE;
+          nvram.change = 1;
+          system_deep_sleep_set_option(2); //重启时不校准无线电
+        }
+        poweroff(3600);
+      }
       break;
   }
 }
@@ -214,6 +239,7 @@ void loop()
   if (power_off) {
     system_soft_wdt_feed ();
     yield();
+    delay(1000);
     return;
   }
   if (proc == OTA_MODE && last_check_connected < millis() &&  wifi_connected_is_ok()) {
@@ -254,31 +280,6 @@ void loop()
           lora_send_loop();
         delay(400);
         break;
-      }
-    default:
-      if (wifi_connected_is_ok()) {
-        if (!httpd_up ) {
-          update_disp();
-          wput();
-        }
-      } else if (millis() > 30000) { //30秒没有连上AP
-        if (power_in && smart_config()) {
-          disp((char *)"6.6.6.6.6.");
-          poweroff(1);
-        }
-        //10秒超时1小时重试。
-        Serial.print(millis());
-        Serial.println(F("ms,not link to ap,reboot 3600s"));
-        ht16c21_cmd(0x88, 3); //慢闪烁
-        if (nvram.proc != GENERAL_MODE) {
-          nvram.proc = GENERAL_MODE;
-          nvram.change = 1;
-          system_deep_sleep_set_option(2); //重启时不校准无线电
-        }
-        poweroff(3600);
-      }
-      if (ap_client_linked || connected_is_ok) {
-        httpd_loop();
       }
   }
   if (nvram.change) save_nvram();
