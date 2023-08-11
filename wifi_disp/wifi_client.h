@@ -147,7 +147,7 @@ bool connected_is_ok = false;
 bool wifi_connected_is_ok() {
   if (connected_is_ok)
     return connected_is_ok;
-  if (proc == OTA_MODE && ap_client_linked  && millis() > 15000) return false; //ota有wifi客户连上来，或者超过10秒没有连上上游AP， 就不再尝试链接AP了
+  if (proc == SETUP_MODE && ap_client_linked  && millis() > 15000) return false; //ota有wifi客户连上来，或者超过10秒没有连上上游AP， 就不再尝试链接AP了
   if (wifi_station_get_connect_status() == STATION_GOT_IP) {
     Serial.println(WiFi.localIP());
     httpd_listen();
@@ -166,7 +166,7 @@ bool wifi_connected_is_ok() {
 
     return true;
   }
-  if (proc != OTA_MODE)
+  if (proc != SETUP_MODE)
     ht16c21_cmd(0x88, 1); //开始闪烁
   return false;
 }

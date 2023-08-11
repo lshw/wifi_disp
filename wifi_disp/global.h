@@ -30,7 +30,7 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 enum {
   GENERAL_MODE,
   PRESSURE_MODE,
-  OTA_MODE,//设置模式
+  SETUP_MODE,//设置模式
   PROC3_MODE, //P3模式
   OFF_MODE,//关机
   LORA_RECEIVE_MODE,//lora接收测试
@@ -158,11 +158,11 @@ void poweroff(uint32_t sec) {
 void update_disp() {
   uint8_t zmdsize = strlen(zmd_disp);
   if (connected_is_ok) {
-    if (proc == OTA_MODE) {
+    if (proc == SETUP_MODE) {
       snprintf_P(zmd_disp, sizeof(zmd_disp), PSTR(" OTA %s -%s-  "), WiFi.localIP().toString().c_str(), VER);
     }
   } else {
-    if (proc == OTA_MODE)
+    if (proc == SETUP_MODE)
       snprintf_P(zmd_disp, sizeof(zmd_disp), PSTR(" AP -%s- "), VER);
     else
       snprintf_P(zmd_disp, sizeof(zmd_disp), PSTR(" %3.2f -%s-  "), v, VER);
