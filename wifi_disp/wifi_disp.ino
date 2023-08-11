@@ -66,6 +66,16 @@ void setup()
       setup_setup();
       _myTicker.attach(1, timer1s);
       break;
+    case PROC3_MODE:
+      if (nvram.nvram7 & HAVE_PROC3) {
+        nvram.proc = OFF_MODE;
+        nvram.change = 1;
+        save_nvram();
+        system_deep_sleep_set_option(4); //下次开机关闭wifi
+        proc3_setup();
+        break;
+      }
+      proc = OFF_MODE;
     case OFF_MODE:
       wdt_disable();
       nvram.proc = LORA_SEND_MODE;
