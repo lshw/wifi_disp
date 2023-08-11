@@ -137,31 +137,37 @@ void wifi_setup() {
   }
   WiFi.setAutoConnect(true);//自动链接上次
   WiFi.setAutoReconnect(true);//断线自动重连
-  WiFiMulti.run();
-
-  WiFi_isConnected();
 }
 bool connected_is_ok = false;
+bool fast_wifi = true;
 bool WiFi_isConnected() {
   if (connected_is_ok)
     return connected_is_ok;
-  if (proc == SETUP_MODE && ap_client_linked  && millis() > 15000) return false; //ota有wifi客户连上来，或者超过10秒没有连上上游AP， 就不再尝试链接AP了
-  if (wifi_station_get_connect_status() == STATION_GOT_IP) {
-    Serial.println(WiFi.localIP());
-    httpd_listen();
-    connected_is_ok = true;
-    ht16c21_cmd(0x88, 0); //停止闪烁
-    if (nvram.ch != wifi_get_channel() ) {
-      nvram.ch =  wifi_get_channel();
-      nvram.change = 1;
-    }
-
+  if (proc == SETUP_MODE && ap_client_linked) return false; //ota有wifi客户连上来,就不再尝试链接AP了
+  if (fast_wifi && millis() > 3000) {
+    fast_wifi = false; //3秒钟没有登陆， 就要用常规登陆了
+    wifi_setup();
+  }
+  if (fast_wifi) {
+    if (WiFi.localIP())
+      connected_is_ok = true;
+  } else if (WiFiMulti.run(5000) == WL_CONNECTED) {
     uint8_t ap_id = wifi_station_get_current_ap_id();
     struct station_config config[5];
     wifi_station_get_ap_info(config);
     config[ap_id].bssid_set = 1; //同名ap，mac地址不同
     wifi_station_set_config(&config[ap_id]); //保存成功的ssid,用于下次通讯
-
+    connected_is_ok = true;
+  }
+  if (connected_is_ok == true) {
+    Serial.println(WiFi.localIP());
+    if (proc == SETUP_MODE)
+      httpd_listen();
+    ht16c21_cmd(0x88, 0); //停止闪烁
+    if (nvram.ch != wifi_get_channel() ) {
+      nvram.ch =  wifi_get_channel();
+      nvram.change = 1;
+    }
     return true;
   }
   if (proc != SETUP_MODE)

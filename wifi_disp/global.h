@@ -543,6 +543,7 @@ void wait_connected(uint16_t ms) {
     system_soft_wdt_feed ();
     yield();
     Serial.write('.');
+    delay(100);
   }
 }
 #endif

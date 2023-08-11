@@ -13,7 +13,6 @@ void setup_setup() {
     if (nvram.have_lora > -5 && lora_init())
       lora_sleep();
   }
-  wifi_setup();
   wait_connected(10000); //等待连接
   if (wifi_station_get_connect_status() != STATION_GOT_IP) {
     ap_on_time = millis() + 30000;  //WPS 20秒

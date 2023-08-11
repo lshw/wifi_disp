@@ -58,6 +58,7 @@ void setup()
   wdt_disable();
   switch (proc) { //尽快进行模式切换
     case SETUP_MODE:
+      WiFi.mode(WIFI_STA);
       nvram.proc = PROC3_MODE;
       nvram.change = 1;
       save_nvram();
@@ -69,6 +70,7 @@ void setup()
       break;
     case PROC3_MODE:
       if (nvram.nvram7 & HAVE_PROC3) {
+        WiFi.mode(WIFI_STA);
         nvram.proc = OFF_MODE;
         nvram.change = 1;
         save_nvram();
@@ -181,7 +183,7 @@ void setup()
       Serial.println(F("测温模式"));
       snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
       disp(disp_buf);
-      wifi_setup();
+      WiFi_isConnected();
       get_value();
       if (ds_pin == 0 && nvram.have_lora > -5) {
         if (lora_init())
