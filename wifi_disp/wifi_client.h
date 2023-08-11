@@ -137,8 +137,8 @@ void wifi_setup() {
     fp.close();
     SPIFFS.end();
   }
-  WiFi.setAutoConnect(true);//自动链接上次
   WiFi.setAutoReconnect(true);//断线自动重连
+  WiFiMulti.run(2000);
 }
 bool connected_is_ok = false;
 bool fast_wifi = true;
@@ -148,12 +148,13 @@ bool WiFi_isConnected() {
   if (proc == SETUP_MODE && ap_client_linked) return false; //ota有wifi客户连上来,就不再尝试链接AP了
   if (fast_wifi && millis() > 3000) {
     fast_wifi = false; //3秒钟没有登陆， 就要用常规登陆了
+    Serial.println();
     wifi_setup();
   }
   if (fast_wifi) {
     if (WiFi.localIP())
       connected_is_ok = true;
-  } else if (WiFiMulti.run(5000) == WL_CONNECTED) {
+  } else if (WiFi.localIP()) {
     uint8_t ap_id = wifi_station_get_current_ap_id();
     struct station_config config[5];
     wifi_station_get_ap_info(config);
@@ -161,6 +162,7 @@ bool WiFi_isConnected() {
     wifi_station_set_config(&config[ap_id]); //保存成功的ssid,用于下次通讯
     connected_is_ok = true;
   }
+  system_soft_wdt_feed ();
   if (connected_is_ok == true) {
     Serial.println(WiFi.localIP());
     ht16c21_cmd(0x88, 0); //停止闪烁
