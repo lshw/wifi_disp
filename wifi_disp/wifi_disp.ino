@@ -38,15 +38,15 @@ void delay_more() {
 }
 void setup()
 {
-  uint32_t ms;
-  if (millis() > 10000)
-    proc = GENERAL_MODE; //程序升级后第一次启动
   Serial.begin(115200);
   load_nvram(); //从esp8266的nvram载入数据
   nvram.boot_count++;
   nvram.change = 1;
   if (nvram.pcb_ver == -1)
     get_value();
+  if (millis() > 10000) { //升级程序后第一次启动
+    poweroff(1);
+  }
   get_batt();
   check_batt_low();
   proc = nvram.proc; //保存当前模式
