@@ -38,10 +38,16 @@ void delay_more() {
 }
 void setup()
 {
+  if (millis() > 10000)
+    proc = GENERAL_MODE; //程序升级后第一次启动
   Serial.begin(115200);
   load_nvram(); //从esp8266的nvram载入数据
   nvram.boot_count++;
   nvram.change = 1;
+  if (nvram.pcb_ver == -1)
+    get_value();
+  get_batt();
+  check_batt_low();
   proc = nvram.proc; //保存当前模式
   switch (proc) { //尽快进行模式切换
     case OTA_MODE:
@@ -115,67 +121,8 @@ void setup()
       nvram.proc = PRESSURE_MODE;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
-      break;
-  }
-  set_hostname();
-  hello();
-  get_value();
-  get_batt();
-  if (power_in) {
-    Serial.println(F("有外接电源"));
-  }
-  if (v < 3.50 && !power_in) {
-    snprintf_P(disp_buf, sizeof(disp_buf), PSTR("OFF%f"), v);
-    disp(disp_buf); //电压过低
-    if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != 0) {
-      nvram.nvram7 |= NVRAM7_CHARGE; //充电
-      nvram.proc = GENERAL_MODE;
-      system_deep_sleep_set_option(2); //重启时不校准无线电
-      nvram.change = 1; //电压过低
-    }
-    ht16c21_cmd(0x88, 0); //闪烁
-    if (v > 3.45)
-      poweroff(7200);//3.45V-3.5V 2小时
-    else
-      poweroff(3600 * 48); // 低于3.45V 2天
-    save_nvram();
-    return;
-  }
-  Serial.flush();
-  if (millis() > 10000) proc = GENERAL_MODE; //程序升级后第一次启动
-  switch (proc) {
-    case OFF_MODE: //OFF
-      wdt_disable();
-      disp((char *)" OFF ");
-      delay(2000);
-      disp((char *)"-" VER "-");
-      delay(2000);
-      ht16c21_cmd(0x84, 0x02); //关闭ht16c21
-      if (ds_pin == 0) { //v2.0
-        if (nvram.have_lora > -5 & lora_init())
-          lora.sleep();
-        Serial.begin(115200);
-      }
-      if (nvram.have_lora < 0) {
-        nvram.have_lora = 0;
-        nvram.change = 1;
-      }
-      save_nvram();
-      poweroff(0);
-      return;
-      break;
-    case OTA_MODE:
-      wdt_disable();
-      if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != OFF_MODE) {
-        nvram.nvram7 |= NVRAM7_CHARGE; //充电
-        save_nvram();
-      }
-      disp((char *)" OTA ");
-      if (ds_pin == 0) { //v2.0
-        if (nvram.have_lora > -5 && lora_init())
-          lora.sleep();
-        Serial.begin(115200);
-      }
+      get_value();
+      set_hostname();
       wifi_setup();
       delay(1500);
       if (wifi_station_get_connect_status() != STATION_GOT_IP) {
