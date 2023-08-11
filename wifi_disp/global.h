@@ -520,4 +520,25 @@ void get_value() {
   }
   Serial.printf_P(PSTR("pcb ver = %d\r\n"), nvram.pcb_ver);
 }
+void check_batt_low() {
+  if (power_in) {
+    Serial.println(F("有外接电源"));
+  }
+  if (v < 3.50 && !power_in) {
+    snprintf_P(disp_buf, sizeof(disp_buf), PSTR("OFF%f"), v);
+    disp(disp_buf); //电压过低
+    if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != 0) {
+      nvram.nvram7 |= NVRAM7_CHARGE; //充电
+      nvram.proc = GENERAL_MODE;
+      system_deep_sleep_set_option(2); //重启时不校准无线电
+      nvram.change = 1; //电压过低
+    }
+    ht16c21_cmd(0x88, 0); //闪烁
+    if (v > 3.45)
+      poweroff(7200);//3.45V-3.5V 2小时
+    else
+      poweroff(3600 * 48); // 低于3.45V 2天
+    return;
+  }
+}
 #endif
