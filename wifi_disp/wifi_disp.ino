@@ -180,6 +180,7 @@ void setup()
       }
       Serial.println();
       while (millis() < 5000 && !WiFi.isConnected()) {
+        system_soft_wdt_feed ();
         yield();
         delay(350);
         Serial.write('.');
@@ -189,6 +190,7 @@ void setup()
       nvram.change = 1;
       save_nvram();
       while (millis() < 30 && !WiFi.isConnected()) {
+        system_soft_wdt_feed ();
         yield();
         delay(350);
         Serial.write('.');

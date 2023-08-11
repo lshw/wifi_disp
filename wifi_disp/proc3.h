@@ -7,9 +7,8 @@ void proc3_setup() {
   wifi_setup();
   disp((char *)"P3  ");
   get_value();
-  uint32_t ms0;
-  ms0 = millis() + 10000;
-  while (ms0 > millis() && !WiFi.isConnected()) {
+  while (millis() < 10000 && !WiFi.isConnected()) {
+    system_soft_wdt_feed ();
     yield();
   }
   if (WiFi.isConnected())
