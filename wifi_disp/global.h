@@ -63,13 +63,6 @@ uint32_t ap_on_time = 200000;
 float get_batt();
 float v;
 bool power_off = false;
-void udp_send(String msg, char * dst_host, uint16_t dst_port, uint16_t src_port) {
-  WiFiUDP udp;
-  udp.begin(src_port);
-  udp.beginPacket(dst_host, dst_port);
-  udp.println(msg);
-  udp.endPacket();
-}
 void poweroff(uint32_t sec) {
   if (nvram.proc != PRESSURE_MODE && nvram.proc != PROC3_MODE) {
     nvram.proc = GENERAL_MODE;
@@ -543,6 +536,14 @@ void wait_connected(uint16_t ms) {
     yield();
     Serial.write('.');
     delay(100);
+  }
+}
+void fix_proc3_set() {
+  if (nvram.proc3_host[0] == 0 || nvram.proc3_port < 1024) {
+    strncpy(nvram.proc3_host, (char *)"192.168.2.4", sizeof(nvram.proc3_host) - 1);
+    nvram.proc3_port = 8888;
+    nvram.change = 1;
+    save_nvram();
   }
 }
 #endif
