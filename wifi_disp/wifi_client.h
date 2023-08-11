@@ -138,7 +138,9 @@ void wifi_setup() {
     SPIFFS.end();
   }
   WiFi.setAutoReconnect(true);//断线自动重连
-  WiFiMulti.run(2000);
+  system_soft_wdt_feed ();
+  WiFiMulti.run(10000);
+  system_soft_wdt_feed ();
 }
 bool connected_is_ok = false;
 bool fast_wifi = true;
