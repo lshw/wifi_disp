@@ -9,7 +9,6 @@
 #include "wifi_client.h"
 #include <Wire.h>
 extern void disp(char *);
-extern String hostname;
 extern uint8_t lora_version;
 void poweroff(uint32_t);
 float get_batt();

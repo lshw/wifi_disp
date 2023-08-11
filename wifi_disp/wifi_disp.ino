@@ -37,16 +37,6 @@ void setup()
 {
   Serial.begin(115200);
   load_nvram(); //从esp8266的nvram载入数据
-  /*
-    wifi_country_t mycountry =
-    {
-      .cc = "CN",
-      .schan = 1,
-      .nchan = 13,
-      .policy = WIFI_COUNTRY_POLICY_MANUAL,
-    };
-    wifi_set_country(&mycountry);
-  */
   nvram.boot_count++;
   nvram.change = 1;
   proc = nvram.proc; //保存当前模式
@@ -55,10 +45,10 @@ void setup()
       WiFi.setAutoConnect(true);//自动链接上次
       wifi_station_connect();
       nvram.proc = PROC3_MODE;
-      nvram.proc3_count_now = nvram.proc3_count;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
       disp((char *)" OTA ");
+      _myTicker.attach(1, timer1s);
       break;
     case PROC3_MODE:
       if (nvram.nvram7 & HAVE_PROC3) {
@@ -130,64 +120,12 @@ void setup()
       init1();
       break;
   }
-
-#ifdef GIT_VER
-  Serial.println(F("Git Ver=" GIT_VER));
-#endif
-  Serial.print(F("SDK Ver="));
-  Serial.println(ESP.getSdkVersion());
-  Serial.printf_P(PSTR("GCC%d.%d\r\n"
-                       "Software Ver=" VER "\r\n"
-                       "Buildtime=%d-%02d-%02d " __TIME__ "\r\n"
-                       "build_set:[" BUILD_SET "]\r\n"), __GNUC__, __GNUC_MINOR__,
-                  __YEAR__, __MONTH__, __DAY__);
-  hostname += String(ESP.getChipId(), HEX);
-  WiFi.hostname(hostname);
-  Serial.println(F("Hostname: ") + hostname);
-  Serial.flush();
-  Serial.println(F("load SHT40"));
-  if (sht4x_load()) {
-    pinMode(0, INPUT_PULLUP);
-    pcb_ver = 2;
-    ds_pin = 0;//DHT22使用V2.0的硬件
-    for (uint8_t i = 0; i < 6; i++)
-      Serial.printf_P(PSTR(" %02x"), temp_data[i]);
-    Serial.println();
-    sht4x_temp();
-    sht4x_rh();
-    Serial.printf_P(PSTR("温度:%3.1f,湿度:%3.1f%%\r\n"), wendu, shidu);
-  } else {
-    if (nvram.have_dht > 0 ) {
-      if (!dht() &&  !dht()) {
-        nvram.have_dht = 0;
-        nvram.change = 1;
-      }
-    }
-    if (nvram.have_dht <= 0) {
-      if (!ds_init()  && !ds_init()) {
-        nvram.have_dht = 1;
-        nvram.change = 1;
-      }
-    }
-    if (nvram.have_dht <= 0)
-      get_temp();
-    else {
-      pinMode(0, INPUT_PULLUP);
-      ds_pin = 0;//DHT22使用V2.0的硬件
-    }
-    if (ds_pin == 0)
-      pcb_ver = 1;
-    else
-      pcb_ver = 0;
-  }
-  Serial.printf_P(PSTR("pcb ver = %d\r\n"), pcb_ver);
+  set_hostname();
+  hello();
+  get_value();
   get_batt();
-  if (proc == OTA_MODE)
-    _myTicker.attach(1, timer1s);
-  Serial.print(F("电池电压"));
-  Serial.println(v);
   if (power_in) {
-    Serial.println(F("外接电源"));
+    Serial.println(F("有外接电源"));
   }
   if (v < 3.50 && !power_in) {
     snprintf_P(disp_buf, sizeof(disp_buf), PSTR("OFF%f"), v);
