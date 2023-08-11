@@ -16,6 +16,8 @@ struct {
   uint8_t bw;
   uint8_t cr;
   uint8_t sf;
+  uint16_t proc3_port;
+  char proc3_host[34];
   uint16_t proc3_sec; //多少秒测一次
   int8_t pcb_ver;
   uint8_t baoliu;
@@ -28,12 +30,23 @@ uint32_t calculateCRC32(const uint8_t *data, size_t length);
 void load_nvram() {
   ESP.rtcUserMemoryRead(0, (uint32_t*) &nvram, sizeof(nvram));
   if (nvram.crc32 != calculateCRC32((uint8_t*) &nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
+    if (SPIFFS.begin()) {
+      if (SPIFFS.exists("/ssid.txt")) {
+        fp = SPIFFS.open("/ssid.txt", "r");
+        fp.read((char *) &nvram, sizeof(nvram));
+        fp.close();
+      }
+    }
+  }
+  if (nvram.crc32 != calculateCRC32((uint8_t*) &nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
     memset(&nvram, 0, sizeof(nvram));
     nvram.ch = 6;
     nvram.bw = LR_BW_125k;
     nvram.cr = LR_CODINGRATE_2;
     nvram.sf = LR_SPREADING_FACTOR_12;
     nvram.proc3_sec = 20;
+    nvram.proc3_host = "192.168.2.4";
+    nvram.proc3_port = 8888;
     nvram.pcb_ver = -1;
   } else if (nvram.ch > 0 && nvram.ch <= 14) {
     Serial.printf_P(PSTR("\r\nwifi channel=%d, proc=%d\r\n"), nvram.ch, nvram.proc);
