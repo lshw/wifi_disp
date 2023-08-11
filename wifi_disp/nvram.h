@@ -17,7 +17,7 @@ struct {
   uint8_t cr;
   uint8_t sf;
   uint16_t proc3_sec; //多少秒测一次
-  uint8_t pcb_ver;
+  int8_t pcb_ver;
   uint8_t baoliu;
   uint32_t boot_count;
   uint32_t crc32;

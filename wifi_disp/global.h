@@ -523,8 +523,7 @@ void get_value() {
 void check_batt_low() {
   if (power_in) {
     Serial.println(F("有外接电源"));
-  }
-  if (v < 3.50 && !power_in) {
+  } else if (v < 3.50) {
     snprintf_P(disp_buf, sizeof(disp_buf), PSTR("OFF%f"), v);
     disp(disp_buf); //电压过低
     if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != 0) {
