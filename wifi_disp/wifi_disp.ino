@@ -26,7 +26,6 @@ bool httpd_up = false;
 #include "proc3.h"
 bool power_in = false;
 void init1() {
-  save_nvram();
   ht16c21_setup(); //180ms
   ht16c21_cmd(0x88, 1); //闪烁
 }
@@ -64,8 +63,11 @@ void setup()
     case OFF_MODE:
       wdt_disable();
       nvram.proc = LORA_SEND_MODE;
+      nvram.change = 1;
+      save_nvram();
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
+      hello();
       disp((char *)" OFF ");
       delay(2000);
       disp((char *)"-" VER "-");
@@ -98,6 +100,7 @@ void setup()
           disp((char *)"L-" VER);
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
+          WiFi.mode(WIFI_OFF);
           delay(1000);
           return;
         }
@@ -107,6 +110,8 @@ void setup()
         wdt_disable();
         Serial.println(F("lora  发送模式"));
         nvram.proc = LORA_RECEIVE_MODE;
+        nvram.change = 1;
+        save_nvram();
         system_deep_sleep_set_option(4); //下次开机关闭wifi
         init1();
         disp((char *)"S-" VER);
@@ -114,14 +119,16 @@ void setup()
           disp((char *)"S-" VER);
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
+          WiFi.mode(WIFI_OFF);
           delay(1000);
           return;
         }
       }
     case PRESSURE_MODE:
       nvram.proc = OTA_MODE;
-      system_deep_sleep_set_option(1); //重启时校准无线电
       nvram.change = 1;
+      save_nvram();
+      system_deep_sleep_set_option(1); //重启时校准无线电
       init1();
       disp((char *)"1 PE ");
       delay(100);
@@ -138,8 +145,9 @@ void setup()
       } else {
         nvram.proc = GENERAL_MODE;
         proc = GENERAL_MODE;
-        system_deep_sleep_set_option(2); //重启不校准无线电
         nvram.change = 1;
+        save_nvram();
+        system_deep_sleep_set_option(2); //重启不校准无线电
         init1();
       }
     case GENERAL_MODE:
@@ -147,6 +155,8 @@ void setup()
       hello();
       proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
       nvram.proc = PRESSURE_MODE;
+      nvram.change = 1;
+      save_nvram();
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
       Serial.println(F("测温模式"));
