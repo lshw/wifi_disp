@@ -93,7 +93,7 @@ void http_proc3() {
          "<a href=/><button>返回设置</button></a>"
          "<hr>"
          "P3 启用: <input type = checkbox" + str + " onclick=gotoif('/save.php?have_proc3=1')>&nbsp;"
-         "测试间隔: <span onclick=modi('/save.php?proc3_sec=','修改测试间隔','" + String(nvram.proc3_sec) + "')><font color = blue>" + String(nvram.proc3_sec) + "</font>秒</span><hr>";
+         "测试间隔(10-250): <span onclick=modi('/save.php?proc3_sec=','修改测试间隔','" + String(nvram.proc3_sec) + "')><font color = blue>" + String(nvram.proc3_sec) + "</font>秒</span><hr>";
   httpd_send_200("");
 }
 void handleRoot() {
@@ -268,6 +268,8 @@ void httpsave() {
     }
     if (httpd.argName(i).compareTo("proc3_sec") == 0) {
       nvram.proc3_sec = httpd.arg(i).toInt();
+     if(nvram.proc3_sec < 10)
+      nvram.proc3 = 10;
       nvram.change = 1;
       save_nvram();
       continue;
