@@ -97,7 +97,7 @@ void wifi_setup() {
     if (fp) {
       uint16_t Fsize = fp.size();
       Serial.print(Fsize);
-      Serial.println(F("字节"));
+      Serial.println(F("字节\r\n_____"));
       for (i = 0; i < Fsize; i++) {
         ch = fp.read();
         switch (ch) {
@@ -107,6 +107,7 @@ void wifi_setup() {
               Serial.print(F("Ssid:")); Serial.println(ssid);
               Serial.print(F("Passwd:")); Serial.println(passwd);
               WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
+              Serial.println(F("-----"));
             }
             is_ssid = true;
             ssid = "";
@@ -128,6 +129,7 @@ void wifi_setup() {
         Serial.print(F("Ssid:")); Serial.println(ssid);
         Serial.print(F("Passwd:")); Serial.println(passwd);
         WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
+        Serial.println(F("-----"));
       }
     }
     if (count == 0)
