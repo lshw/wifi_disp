@@ -28,13 +28,13 @@ uint8_t ota_status = 0; //0:wps, 1:ap
 void timer1s();
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
 enum {
-  GENERAL_MODE,
-  PRESSURE_MODE,
-  SETUP_MODE,//设置模式
-  PROC3_MODE, //P3模式
-  OFF_MODE,//关机
-  LORA_RECEIVE_MODE,//lora接收测试
-  LORA_SEND_MODE//lora发送测试
+  GENERAL_MODE, //0
+  PRESSURE_MODE, //1
+  SETUP_MODE,//2设置模式
+  PROC3_MODE, //3P3模式
+  OFF_MODE,//4关机
+  LORA_RECEIVE_MODE,//5lora接收测试
+  LORA_SEND_MODE//6lora发送测试
 };
 bool WiFi_isConnected();
 extern bool connected_is_ok;

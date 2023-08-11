@@ -57,6 +57,32 @@ void setup()
   proc = nvram.proc; //保存当前模式
   wdt_disable();
   switch (proc) { //尽快进行模式切换
+    case PRESSURE_MODE:
+      nvram.proc = SETUP_MODE;
+      nvram.change = 1;
+      save_nvram();
+      system_deep_sleep_set_option(1); //重启时校准无线电
+      init1();
+      disp((char *)"1 PE ");
+      delay(100);
+      delay_more(); //外插电，就多延迟，方便切换
+      if (bmp.begin()) {
+        snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%f"), bmp.readAltitude());
+        disp(disp_buf);
+        nvram.proc = PRESSURE_MODE;
+        nvram.change = 1;
+        save_nvram();
+        poweroff(60);
+        return;
+        break;
+      } else {
+        nvram.proc = GENERAL_MODE;
+        nvram.change = 1;
+        save_nvram();
+        system_deep_sleep_set_option(2); //重启不校准无线电
+        poweroff(2);
+      }
+      break;
     case SETUP_MODE:
       WiFi.mode(WIFI_STA);
       nvram.proc = PROC3_MODE;
@@ -105,6 +131,23 @@ void setup()
       poweroff(0);
       return;
       break;
+    case LORA_SEND_MODE:
+      if (nvram.have_lora > -5) {
+        Serial.println(F("lora  发送模式"));
+        nvram.proc = LORA_RECEIVE_MODE;
+        nvram.change = 1;
+        save_nvram();
+        system_deep_sleep_set_option(4); //下次开机关闭wifi
+        if (lora_init()) {
+          init1();
+          disp((char *)"S-" VER);
+          wifi_station_disconnect();
+          wifi_set_opmode(NULL_MODE);
+          WiFi.mode(WIFI_OFF);
+          delay(1000);
+          return;
+        }
+      }
     case LORA_RECEIVE_MODE:
       if (nvram.have_lora > -5) {
         Serial.println(F("lora  接收模式"));
@@ -122,50 +165,6 @@ void setup()
           delay(1000);
           return;
         }
-      }
-    case LORA_SEND_MODE:
-      if (nvram.have_lora > -5) {
-        Serial.println(F("lora  发送模式"));
-        nvram.proc = LORA_RECEIVE_MODE;
-        nvram.change = 1;
-        save_nvram();
-        system_deep_sleep_set_option(4); //下次开机关闭wifi
-        init1();
-        disp((char *)"S-" VER);
-        if (lora_init()) {
-          disp((char *)"S-" VER);
-          wifi_station_disconnect();
-          wifi_set_opmode(NULL_MODE);
-          WiFi.mode(WIFI_OFF);
-          delay(1000);
-          return;
-        }
-      }
-    case PRESSURE_MODE:
-      nvram.proc = SETUP_MODE;
-      nvram.change = 1;
-      save_nvram();
-      system_deep_sleep_set_option(1); //重启时校准无线电
-      init1();
-      disp((char *)"1 PE ");
-      delay(100);
-      delay_more(); //外插电，就多延迟，方便切换
-      if (bmp.begin()) {
-        snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%f"), bmp.readAltitude());
-        disp(disp_buf);
-        nvram.proc = PRESSURE_MODE;
-        nvram.change = 1;
-        save_nvram();
-        poweroff(60);
-        return;
-        break;
-      } else {
-        nvram.proc = GENERAL_MODE;
-        proc = GENERAL_MODE;
-        nvram.change = 1;
-        save_nvram();
-        system_deep_sleep_set_option(2); //重启不校准无线电
-        init1();
       }
     case GENERAL_MODE:
     default:
