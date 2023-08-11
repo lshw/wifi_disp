@@ -88,8 +88,7 @@ void poweroff(uint32_t sec) {
       nvram.change = 1;
     }
   }
-  wifi_set_sleep_type(LIGHT_SLEEP_T);
-  if (power_in && (nvram.nvram7 & NVRAM7_CHARGE) && nvram.proc != PROC3_MODE) { //如果外面接了电， 就进入LIGHT_SLEEP模式 电流0.8ma， 保持充电
+  if (power_in && (nvram.nvram7 & NVRAM7_CHARGE) && nvram.proc != PROC3_MODE) { //如果外面接了电， 保持充电
     sec = sec / 2;
     Serial.print(F("休眠"));
     if (sec > 60) {
@@ -107,7 +106,7 @@ void poweroff(uint32_t sec) {
     for (uint32_t i = 0; i < sec; i++) {
       yield();
       system_soft_wdt_feed ();
-      delay(1000); //空闲时进入LIGHT_SLEEP_T模式
+      delay(1000);
       power_in = i % 2;
       get_batt();
       charge_on();
