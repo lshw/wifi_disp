@@ -1,25 +1,22 @@
 #ifndef __SETUP_H__
 #define __SETUP_H__
 void setup_setup() {
-  hello();
   WiFi.setAutoConnect(true);//自动链接上次
   wifi_station_connect();
-  nvram.proc = PROC3_MODE;
-  system_deep_sleep_set_option(4); //下次开机关闭wifi
   init1();
   disp((char *)" OTA ");
-  _myTicker.attach(1, timer1s);
   get_value();
   nvram.nvram7 |= NVRAM7_CHARGE; //充电
   nvram.change = 1;
   save_nvram();
-  disp((char *)" OTA ");
   if (ds_pin == 0) { //v2.0
     if (nvram.have_lora > -5 && lora_init())
       lora_sleep();
   }
   wifi_setup();
-  delay(1500);
+  uint32_t ms = millis() + 10000;
+  while (millis() < ms && !WiFi.isConnected())
+    yield();
   if (wifi_station_get_connect_status() != STATION_GOT_IP) {
     ap_on_time = millis() + 30000;  //WPS 20秒
     if (WiFi.beginWPSConfig()) {
