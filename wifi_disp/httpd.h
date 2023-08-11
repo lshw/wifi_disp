@@ -86,6 +86,7 @@ void http204() {
 }
 void http_proc3() {
   String str = "";
+  fix_proc3_set();
   if (nvram.nvram7 & HAVE_PROC3)
     str = " checked";
   body = "<h1>其他设置</h1>"
