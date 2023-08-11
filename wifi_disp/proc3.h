@@ -32,6 +32,8 @@ void proc3_setup() {
         }
       }
       Serial.printf_P(PSTR("to %s:%d [%s]\r\n"), nvram.proc3_host, nvram.proc3_port, msg.c_str());
+      snprintf(disp_buf, sizeof(disp_buf), "%f", (float)bmp.readPressure() / 1000);
+      disp(disp_buf);
       Serial.flush();
     }
   }
