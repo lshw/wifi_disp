@@ -39,6 +39,13 @@ enum {
 bool wifi_connected_is_ok();
 extern bool connected_is_ok;
 uint16_t http_get(uint8_t);
+bool ds_init();
+bool dht();
+bool sht4x_load();
+float sht4x_rh();
+float sht4x_temp();
+extern uint8_t temp_data[6];
+extern String hostname;
 void httpd_listen();
 void charge_off();
 void charge_on();
@@ -257,6 +264,8 @@ float get_batt() {
   if (ds_pin == 0) {
     Serial.begin(115200);
   }
+  Serial.printf_P(PSTR("电池电压%f"), v);
+  Serial.println(v);
   return v;
 }
 
@@ -453,5 +462,60 @@ void charge_off() {
       digitalWrite(15, LOW);
       break;
   }
+}
+void set_hostname() {
+  hostname += String(ESP.getChipId(), HEX);
+  WiFi.hostname(hostname);
+}
+void hello() {
+#ifdef GIT_VER
+  Serial.println(F("Git Ver=" GIT_VER));
+#endif
+  Serial.print(F("SDK Ver="));
+  Serial.println(ESP.getSdkVersion());
+  Serial.printf_P(PSTR("GCC%d.%d\r\n"
+                       "Software Ver=" VER "\r\n"
+                       "Buildtime=%d-%02d-%02d " __TIME__ "\r\n"
+                       "build_set:[" BUILD_SET "]\r\n"), __GNUC__, __GNUC_MINOR__,
+                  __YEAR__, __MONTH__, __DAY__);
+  Serial.println(F("Hostname: ") + hostname);
+  Serial.flush();
+}
+void get_value() {
+  if (sht4x_load()) {
+    pinMode(0, INPUT_PULLUP);
+    pcb_ver = 2;
+    ds_pin = 0;//DHT22使用V2.0的硬件
+    for (uint8_t i = 0; i < 6; i++)
+      Serial.printf_P(PSTR(" %02x"), temp_data[i]);
+    Serial.println();
+    sht4x_temp();
+    sht4x_rh();
+    Serial.printf_P(PSTR("温度:%3.1f,湿度:%3.1f%%\r\n"), wendu, shidu);
+  } else {
+    if (nvram.have_dht > 0 ) {
+      if (!dht() &&  !dht()) {
+        nvram.have_dht = 0;
+        nvram.change = 1;
+      }
+    }
+    if (nvram.have_dht <= 0) {
+      if (!ds_init()  && !ds_init()) {
+        nvram.have_dht = 1;
+        nvram.change = 1;
+      }
+    }
+    if (nvram.have_dht <= 0)
+      get_temp();
+    else {
+      pinMode(0, INPUT_PULLUP);
+      ds_pin = 0;//DHT22使用V2.0的硬件
+    }
+    if (ds_pin == 0)
+      pcb_ver = 1;
+    else
+      pcb_ver = 0;
+  }
+  Serial.printf_P(PSTR("pcb ver = %d\r\n"), pcb_ver);
 }
 #endif

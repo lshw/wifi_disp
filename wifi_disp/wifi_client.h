@@ -74,6 +74,16 @@ void wifi_setup() {
   char ch;
   uint8_t count = 0;
   boolean is_ssid = true;
+  /*
+    wifi_country_t mycountry =
+    {
+     .cc = "CN",
+     .schan = 1,
+     .nchan = 14, //13
+     .policy = WIFI_COUNTRY_POLICY_MANUAL,
+    };
+    wifi_set_country(&mycountry);
+  */
   WiFi.mode(WIFI_STA);
   wifi_set_sleep_type(LIGHT_SLEEP_T);
   if (SPIFFS.begin()) {
