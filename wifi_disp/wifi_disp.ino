@@ -55,6 +55,7 @@ void setup()
     poweroff(2);
   }
   proc = nvram.proc; //保存当前模式
+  wdt_disable();
   switch (proc) { //尽快进行模式切换
     case SETUP_MODE:
       nvram.proc = PROC3_MODE;
@@ -77,7 +78,6 @@ void setup()
       }
       proc = OFF_MODE;
     case OFF_MODE:
-      wdt_disable();
       nvram.proc = LORA_SEND_MODE;
       nvram.change = 1;
       save_nvram();
@@ -140,7 +140,6 @@ void setup()
         }
       }
     case PRESSURE_MODE:
-      wdt_disable();
       nvram.proc = SETUP_MODE;
       nvram.change = 1;
       save_nvram();
@@ -168,7 +167,7 @@ void setup()
       }
     case GENERAL_MODE:
     default:
-      wdt_disable();
+      WiFi.mode(WIFI_STA);
       set_hostname();
       WiFi.setAutoConnect(true);//自动链接上次
       wifi_station_connect();
