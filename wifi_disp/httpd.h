@@ -92,8 +92,10 @@ void http_proc3() {
          "<hr>"
          "<a href=/><button>返回设置</button></a>"
          "<hr>"
-         "P3 启用: <input type = checkbox" + str + " onclick=gotoif('/save.php?have_proc3=1')>&nbsp;"
-         "测试间隔(10-250): <span onclick=modi('/save.php?proc3_sec=','修改测试间隔','" + String(nvram.proc3_sec) + "')><font color = blue>" + String(nvram.proc3_sec) + "</font>秒</span><hr>";
+         "PROC_3 启用: <input type = checkbox" + str + " onclick=gotoif('/save.php?have_proc3=1')>&nbsp;"
+         "测试间隔(10-250): <span onclick=modi('/save.php?proc3_sec=','修改测试间隔','" + String(nvram.proc3_sec) + "')><font color = blue>" + String(nvram.proc3_sec) + "</font>秒</span>"
+         "&nbsp;&nbsp;udp服务器: <span onclick=modi('/save.php?proc3_host=','修改服务器,最长32字符','" + String(nvram.proc3_host) + "')><font color = blue>" + String(nvram.proc3_host) + "</font></span>"
+         "&nbsp;&nbsp;udp端口: <span onclick=modi('/save.php?proc3_port=','修改服务器端口,1025-65535','" + String(nvram.proc3_port) + "')><font color = blue>" + String(nvram.proc3_port) + "</font></span><hr>";
   httpd_send_200("");
 }
 void handleRoot() {
@@ -256,6 +258,7 @@ void http_add_ssid() {
 void httpsave() {
   File fp;
   String url, data;
+  bool nvram_update = false;
   SPIFFS.begin();
   bool reboot_now = false;
   for (uint8_t i = 0; i < httpd.args(); i++) {
@@ -264,14 +267,35 @@ void httpsave() {
       nvram.nvram7 = (nvram.nvram7 & ~HAVE_PROC3) | (~nvram.nvram7 & HAVE_PROC3);
       nvram.change = 1;
       save_nvram();
+      nvram_update = true;
       continue;
     }
     if (httpd.argName(i).compareTo("proc3_sec") == 0) {
       nvram.proc3_sec = httpd.arg(i).toInt();
-     if(nvram.proc3_sec < 10)
-      nvram.proc3 = 10;
+      if (nvram.proc3_sec < 10)
+        nvram.proc3_sec = 10;
       nvram.change = 1;
       save_nvram();
+      nvram_update = true;
+      continue;
+    }
+    if (httpd.argName(i).compareTo("proc3_port") == 0) {
+      nvram.proc3_port = httpd.arg(i).toInt();
+      if (nvram.proc3_port < 1025)
+        nvram.proc3_port = 1025;
+      nvram.change = 1;
+      save_nvram();
+      nvram_update = true;
+      continue;
+    }
+    if (httpd.argName(i).compareTo("proc3_host") == 0) {
+      data = httpd.arg(i);
+      data.trim();
+      memset(nvram.proc3_host, 0, sizeof(nvram.proc3_host));
+      strncpy(nvram.proc3_host, data.substring(0, sizeof(nvram.proc3_host) - 1).c_str(), sizeof(nvram.proc3_host) - 1);
+      nvram.change = 1;
+      save_nvram();
+      nvram_update = true;
       continue;
     }
     if (httpd.argName(i).compareTo("reboot") == 0) {
@@ -314,6 +338,7 @@ void httpsave() {
       if (nvram.bw > LR_BW_500k) nvram.bw = LR_BW_500k;
       nvram.change = 1;
       save_nvram();
+      nvram_update = true;
     } else if (httpd.argName(i).compareTo(F("lora_cr")) == 0) {
       nvram.cr = httpd.arg(i).toInt();
       nvram.cr &= 0xe;
@@ -321,6 +346,7 @@ void httpsave() {
       if (nvram.cr > LR_CODINGRATE_2) nvram.cr = LR_CODINGRATE_2;
       nvram.change = 1;
       save_nvram();
+      nvram_update = true;
     } else if (httpd.argName(i).compareTo(F("lora_sf")) == 0) {
       nvram.sf = httpd.arg(i).toInt() & 0xf0;
       if (nvram.sf < LR_SPREADING_FACTOR_6)
@@ -329,6 +355,7 @@ void httpsave() {
         nvram.sf = LR_SPREADING_FACTOR_12;
       nvram.change = 1;
       save_nvram();
+      nvram_update = true;
     } else if (httpd.argName(i).compareTo("url1") == 0) {
       url = httpd.arg(i);
       url.trim();
@@ -344,6 +371,11 @@ void httpsave() {
     }
   }
   url = "";
+  if (nvram_update) {
+    fp = SPIFFS.open("/nvram.bin", "w");
+    fp.write((char *) &nvram, sizeof(nvram));
+    fp.close();
+  }
   SPIFFS.end();
   httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/');</script></body></html>");
   yield();
