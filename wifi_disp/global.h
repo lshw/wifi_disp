@@ -36,7 +36,7 @@ enum {
   LORA_RECEIVE_MODE,//lora接收测试
   LORA_SEND_MODE//lora发送测试
 };
-bool wifi_connected_is_ok();
+bool WiFi_isConnected();
 extern bool connected_is_ok;
 uint16_t http_get(uint8_t);
 bool ds_init();
@@ -538,6 +538,13 @@ void check_batt_low() {
     else
       poweroff(3600 * 48); // 低于3.45V 2天
     return;
+  }
+}
+void wait_connected(uint16_t ms) {
+  while (millis() < ms && !WiFi_isConnected()) {
+    system_soft_wdt_feed ();
+    yield();
+    Serial.write('.');
   }
 }
 #endif
