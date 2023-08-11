@@ -38,6 +38,7 @@ void delay_more() {
 }
 void setup()
 {
+  uint32_t ms;
   if (millis() > 10000)
     proc = GENERAL_MODE; //程序升级后第一次启动
   Serial.begin(115200);
@@ -159,24 +160,30 @@ void setup()
     case GENERAL_MODE:
     default:
       hello();
-      WiFi.setAutoConnect(true);//自动链接上次
-      wifi_station_connect();
       proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
       nvram.proc = PRESSURE_MODE;
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
-      get_value();
-      set_hostname();
-      wifi_setup();
       Serial.println(F("测温模式"));
-      nvram.proc = GENERAL_MODE;
-      nvram.change = 1;
       snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
       disp(disp_buf);
+      WiFi.setAutoConnect(true);//自动链接上次
+      wifi_station_connect();
+      wifi_setup();
       if (ds_pin == 0 && nvram.have_lora > -5) {
         if (lora_init())
           lora.sleep();
       }
+      ms = millis() + 10000;
+      while (millis() < ms && !WiFi.isConnected()) {
+        yield();
+        delay(350);
+      }
+      get_value();
+      set_hostname();
+      nvram.proc = GENERAL_MODE;
+      system_deep_sleep_set_option(2); //下次开机wifi不校准
+      nvram.change = 1;
       break;
   }
 }
