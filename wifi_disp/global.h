@@ -143,7 +143,8 @@ void poweroff(uint32_t sec) {
   digitalWrite(LED_BUILTIN, LOW);
   if (sec0 == 0) ht16c21_cmd(0x84, 0x2); //lcd off
   save_nvram();
-  ESP.deepSleepInstant(sec0, RF_NO_CAL);
+  ESP.deepSleep(sec0);
+  //  ESP.deepSleepInstant(sec0, RF_NO_CAL);
   power_off = true;
 }
 void update_disp() {
