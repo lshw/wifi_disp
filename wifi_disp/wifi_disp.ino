@@ -85,7 +85,10 @@ void setup()
       break;
     case SETUP_MODE:
       WiFi.mode(WIFI_STA);
-      nvram.proc = PROC3_MODE;
+      if (power_in)
+        nvram.proc = PROC3_MODE; //只有插着电，才可以切换到PROC3
+      else
+        nvram.proc = OFF_MODE;
       nvram.change = 1;
       save_nvram();
       system_deep_sleep_set_option(4); //下次开机关闭wifi
@@ -97,9 +100,11 @@ void setup()
     case PROC3_MODE:
       if (nvram.nvram7 & HAVE_PROC3) {
         WiFi.mode(WIFI_STA);
-        nvram.proc = OFF_MODE;
-        nvram.change = 1;
-        save_nvram();
+        if (power_in) { //只有插着电， 才可以换运行模式
+          nvram.proc = OFF_MODE;
+          nvram.change = 1;
+          save_nvram();
+        }
         system_deep_sleep_set_option(4); //下次开机关闭wifi
         proc3_setup();
         break;
