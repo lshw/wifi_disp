@@ -86,6 +86,18 @@ void setup()
         poweroff(2);
       }
       break;
+    case PROC3_MODE:
+      WiFi.setAutoConnect(true);//自动链接上次
+      wifi_station_connect();
+      WiFi.mode(WIFI_STA);
+      if (power_in) { //只有插着电， 才可以换运行模式
+        nvram.proc = SETUP_MODE;
+        nvram.change = 1;
+        save_nvram();
+        system_deep_sleep_set_option(1); //下次开机wifi校准
+      }
+      proc3_setup();
+      break;
     case SETUP_MODE:
       WiFi.setAutoConnect(true);//自动链接上次
       wifi_station_connect();
@@ -98,18 +110,6 @@ void setup()
       hello();
       setup_setup();
       _myTicker.attach(1, timer1s);
-      break;
-    case PROC3_MODE:
-      WiFi.setAutoConnect(true);//自动链接上次
-      wifi_station_connect();
-      WiFi.mode(WIFI_STA);
-      if (power_in) { //只有插着电， 才可以换运行模式
-        nvram.proc = SETUP_MODE;
-        nvram.change = 1;
-        save_nvram();
-        system_deep_sleep_set_option(1); //下次开机wifi校准
-      }
-      proc3_setup();
       break;
     case OFF_MODE:
       nvram.proc = LORA_SEND_MODE;
