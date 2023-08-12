@@ -87,14 +87,11 @@ void http204() {
 void http_proc3() {
   String str = "";
   fix_proc3_set();
-  if (nvram.nvram7 & HAVE_PROC3)
-    str = " checked";
   body = "<h1>其他设置</h1>"
          "<hr>"
          "<a href=/><button>返回设置</button></a>"
          "<hr>"
-         "PROC_3 启用: <input type = checkbox" + str + " onclick=gotoif('/save.php?have_proc3=1')>&nbsp;"
-         "测试间隔(10-250): <span onclick=modi('/save.php?proc3_sec=','修改测试间隔','" + String(nvram.proc3_sec) + "')><font color = blue>" + String(nvram.proc3_sec) + "</font>秒</span>"
+         "PROC_3 测试间隔(10-250): <span onclick=modi('/save.php?proc3_sec=','修改测试间隔','" + String(nvram.proc3_sec) + "')><font color = blue>" + String(nvram.proc3_sec) + "</font>秒</span>"
          "&nbsp;&nbsp;udp服务器: <span onclick=modi('/save.php?proc3_host=','修改服务器,最长32字符','" + String(nvram.proc3_host) + "')><font color = blue>" + String(nvram.proc3_host) + "</font></span>"
          "&nbsp;&nbsp;udp端口: <span onclick=modi('/save.php?proc3_port=','修改服务器端口,1025-65535','" + String(nvram.proc3_port) + "')><font color = blue>" + String(nvram.proc3_port) + "</font></span><hr>";
   httpd_send_200("");
@@ -263,14 +260,6 @@ void httpsave() {
   SPIFFS.begin();
   bool reboot_now = false;
   for (uint8_t i = 0; i < httpd.args(); i++) {
-    if (httpd.argName(i).compareTo("have_proc3") == 0) {
-      //取反
-      nvram.nvram7 = (nvram.nvram7 & ~HAVE_PROC3) | (~nvram.nvram7 & HAVE_PROC3);
-      nvram.change = 1;
-      save_nvram();
-      nvram_update = true;
-      continue;
-    }
     if (httpd.argName(i).compareTo("proc3_sec") == 0) {
       nvram.proc3_sec = httpd.arg(i).toInt();
       if (nvram.proc3_sec < 10)
