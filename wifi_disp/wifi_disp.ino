@@ -63,7 +63,7 @@ void setup()
       save_nvram();
       system_deep_sleep_set_option(1); //重启时校准无线电
       init1();
-      disp((char *)"1 PE ");
+      disp((char *)" P2 ");
       delay(100);
       delay_more(); //外插电，就多延迟，方便切换
       if (bmp.begin()) {
@@ -84,6 +84,8 @@ void setup()
       }
       break;
     case SETUP_MODE:
+      WiFi.setAutoConnect(true);//自动链接上次
+      wifi_station_connect();
       WiFi.mode(WIFI_STA);
       if (power_in)
         nvram.proc = PROC3_MODE; //只有插着电，才可以切换到PROC3
@@ -98,18 +100,17 @@ void setup()
       _myTicker.attach(1, timer1s);
       break;
     case PROC3_MODE:
-      if (nvram.nvram7 & HAVE_PROC3) {
-        WiFi.mode(WIFI_STA);
-        if (power_in) { //只有插着电， 才可以换运行模式
-          nvram.proc = OFF_MODE;
-          nvram.change = 1;
-          save_nvram();
-        }
+      WiFi.setAutoConnect(true);//自动链接上次
+      wifi_station_connect();
+      WiFi.mode(WIFI_STA);
+      if (power_in) { //只有插着电， 才可以换运行模式
+        nvram.proc = OFF_MODE;
+        nvram.change = 1;
+        save_nvram();
         system_deep_sleep_set_option(4); //下次开机关闭wifi
-        proc3_setup();
-        break;
       }
-      proc = OFF_MODE;
+      proc3_setup();
+      break;
     case OFF_MODE:
       nvram.proc = LORA_SEND_MODE;
       nvram.change = 1;

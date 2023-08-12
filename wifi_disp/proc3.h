@@ -2,10 +2,8 @@
 #define __PROC3_H__
 void proc3_setup() {
   WiFiUDP udp;
-  WiFi.setAutoConnect(true);//自动链接上次
-  wifi_station_connect();
   init1();
-  disp((char *)"P3  ");
+  disp((char *)" P3 ");
   if (bmp.begin()) {
     set_hostname();
     hello();

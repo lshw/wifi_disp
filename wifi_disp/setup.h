@@ -1,10 +1,8 @@
 #ifndef __SETUP_H__
 #define __SETUP_H__
 void setup_setup() {
-  WiFi.setAutoConnect(true);//自动链接上次
-  wifi_station_connect();
   init1();
-  disp((char *)" OTA ");
+  disp((char *)"SETUP");
   get_value();
   nvram.nvram7 |= NVRAM7_CHARGE; //充电
   nvram.change = 1;
