@@ -1,7 +1,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#define VER "1.72"
+#define VER "1.73"
 #define HOSTNAME "disp_"
 #define CRC_MAGIC 3
 /* ESP32_C3 MAGIC 4 */
