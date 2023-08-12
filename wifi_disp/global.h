@@ -29,9 +29,9 @@ void timer1s();
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
 enum {
   GENERAL_MODE, //0
-  PRESSURE_MODE, //1
-  SETUP_MODE,//2设置模式
-  PROC3_MODE, //3P3模式
+  PROC2_MODE, //1 P2模式
+  PROC3_MODE, //2 P3模式
+  SETUP_MODE,//3设置模式
   OFF_MODE,//4关机
   LORA_RECEIVE_MODE,//5lora接收测试
   LORA_SEND_MODE//6lora发送测试
@@ -64,7 +64,7 @@ float get_batt();
 float v;
 bool power_off = false;
 void poweroff(uint32_t sec) {
-  if (nvram.proc != PRESSURE_MODE && nvram.proc != PROC3_MODE) {
+  if (nvram.proc != PROC2_MODE && nvram.proc != PROC3_MODE) {
     nvram.proc = GENERAL_MODE;
     nvram.change = 1;
   }
@@ -136,7 +136,7 @@ void poweroff(uint32_t sec) {
   charge_off();
   _myTicker.detach();
   wdt_disable();
-  if (nvram.proc ==  PRESSURE_MODE || nvram.proc == PROC3_MODE)
+  if (nvram.proc ==  PROC3_MODE || nvram.proc == PROC3_MODE)
     system_deep_sleep_set_option(4); //下次开机关闭wifi
   else
     system_deep_sleep_set_option(2); //下次启动不做无线电校准
