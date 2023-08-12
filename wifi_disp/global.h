@@ -149,15 +149,10 @@ void poweroff(uint32_t sec) {
 }
 void update_disp() {
   uint8_t zmdsize = strlen(zmd_disp);
-  if (connected_is_ok) {
-    if (proc == SETUP_MODE) {
-      snprintf_P(zmd_disp, sizeof(zmd_disp), PSTR(" OTA %s -%s-  "), WiFi.localIP().toString().c_str(), VER);
-    }
+  if (WiFi.localIP()) {
+    snprintf_P(zmd_disp, sizeof(zmd_disp), PSTR(" %s "), WiFi.localIP().toString().c_str(), VER);
   } else {
-    if (proc == SETUP_MODE)
-      snprintf_P(zmd_disp, sizeof(zmd_disp), PSTR(" AP -%s- "), VER);
-    else
-      snprintf_P(zmd_disp, sizeof(zmd_disp), PSTR(" %3.2f -%s-  "), v, VER);
+    snprintf_P(zmd_disp, sizeof(zmd_disp), PSTR(" AP -%s- "), VER);
   }
   if (zmdsize != strlen(zmd_disp)) zmd_offset = 0; //长度有变化， 就从头开始显示
 }
@@ -166,7 +161,7 @@ void timer1s() {
   system_soft_wdt_feed ();
   if (upgrading)
     return;
-  if(proc != SETUP_MODE)
+  if (proc != SETUP_MODE)
     return;
   if (ota_status == 0  && ap_on_time < millis())
     ap_on_time = millis() + 10000;
@@ -353,11 +348,6 @@ void zmd() {  //1s 一次Ticker
     disp_buf[i] = zmd_disp[(zmd_offset + i) % zmd_size];
     if (disp_buf[i] != '.') i0++;
     if (i0 >= 5) break;
-  }
-  if (disp_buf[1] == '.') { //第一个字母后面是点，就把第一个字母，显示为空格
-    for (i = 0; i < sizeof(disp_buf) - 1; i++)
-      disp_buf[i] = disp_buf[i + 1];
-    disp_buf[0] = ' ';
   }
   disp(disp_buf);
   zmd_offset = (zmd_offset + 1) % zmd_size;
