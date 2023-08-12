@@ -547,4 +547,10 @@ void fix_proc3_set() {
     save_nvram();
   }
 }
+void shan() {
+  if(v < 3.55)
+      ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
+  else
+      ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
+}
 #endif
