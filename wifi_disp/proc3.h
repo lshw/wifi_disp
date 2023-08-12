@@ -18,7 +18,7 @@ void proc3_setup() {
     Serial.flush();
     if (WiFi_isConnected()) {
       delay(100);
-      String msg = String(nvram.boot_count) + ',' + String(millis()) + ',' + String(v,2) + ',' + String((bmp.readTemperature() + wendu) / 2) + ',' + String(shidu) + ',' + String(bmp.readPressure());
+      String msg = String(nvram.boot_count) + ',' + String(millis()) + ',' + String(v, 2) + ',' + String((bmp.readTemperature() + wendu) / 2) + ',' + String(shidu) + ',' + String(bmp.readPressure());
       udp.begin(nvram.proc3_port);
       if (udp.beginPacket(nvram.proc3_host, nvram.proc3_port)
           || udp.beginPacket(nvram.proc3_host, nvram.proc3_port)
