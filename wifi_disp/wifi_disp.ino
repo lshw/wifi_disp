@@ -27,7 +27,7 @@ bool httpd_up = false;
 bool power_in = false;
 void init1() {
   ht16c21_setup(); //180ms
-  ht16c21_cmd(0x88, 1); //闪烁
+  ht16c21_cmd(0x88, 1); //闪烁2hz
 }
 void delay_more() {
   if (power_in) {
@@ -72,6 +72,7 @@ void setup()
       if (bmp.begin()) {
         snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%f"), bmp.readAltitude());
         disp(disp_buf);
+        shan();
         nvram.proc = PROC2_MODE;
         nvram.change = 1;
         save_nvram();
@@ -197,6 +198,7 @@ void setup()
       }
       Serial.println();
       wait_connected(5000);
+      shan();
       nvram.proc = GENERAL_MODE;
       system_deep_sleep_set_option(2); //下次开机wifi不校准
       nvram.change = 1;
@@ -226,13 +228,8 @@ void setup()
 }
 
 void wput() {
-  ht16c21_cmd(0x88, 1); //开始闪烁
   uint16_t httpCode = wget();
   if (httpCode >= 200 || httpCode < 400) {
-    if (v < 3.6)
-      ht16c21_cmd(0x88, 2); //0-不闪 1-2hz 2-1hz 3-0.5hz
-    else
-      ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
     Serial.print(F("uptime="));
     Serial.print(millis());
     if (next_disp < 60) next_disp = 1800;

@@ -10,6 +10,7 @@ void proc3_setup() {
     get_value();
     wait_connected(10000);
     fix_proc3_set();
+    shan();
     nvram.proc = PROC3_MODE;
     system_deep_sleep_set_option(2); //下次开机wifi不校准
     nvram.change = 1;
