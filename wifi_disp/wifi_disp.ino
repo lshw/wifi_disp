@@ -58,7 +58,10 @@ void setup()
   wdt_disable();
   switch (proc) { //尽快进行模式切换
     case PROC2_MODE:
-      nvram.proc = SETUP_MODE;
+      if (power_in)
+        nvram.proc = PROC3_MODE; //只有插着电，才可以切换到PROC3
+      else
+        nvram.proc = SETUP_MODE;
       nvram.change = 1;
       save_nvram();
       system_deep_sleep_set_option(1); //重启时校准无线电
@@ -87,10 +90,7 @@ void setup()
       WiFi.setAutoConnect(true);//自动链接上次
       wifi_station_connect();
       WiFi.mode(WIFI_STA);
-      if (power_in)
-        nvram.proc = PROC3_MODE; //只有插着电，才可以切换到PROC3
-      else
-        nvram.proc = OFF_MODE;
+      nvram.proc = OFF_MODE;
       nvram.change = 1;
       save_nvram();
       system_deep_sleep_set_option(4); //下次开机关闭wifi
@@ -104,10 +104,10 @@ void setup()
       wifi_station_connect();
       WiFi.mode(WIFI_STA);
       if (power_in) { //只有插着电， 才可以换运行模式
-        nvram.proc = OFF_MODE;
+        nvram.proc = SETUP_MODE;
         nvram.change = 1;
         save_nvram();
-        system_deep_sleep_set_option(4); //下次开机关闭wifi
+        system_deep_sleep_set_option(1); //下次开机wifi校准
       }
       proc3_setup();
       break;
