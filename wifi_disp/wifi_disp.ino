@@ -57,7 +57,7 @@ void setup()
   proc = nvram.proc; //保存当前模式
   wdt_disable();
   switch (proc) { //尽快进行模式切换
-    case PRESSURE_MODE:
+    case PROC2_MODE:
       nvram.proc = SETUP_MODE;
       nvram.change = 1;
       save_nvram();
@@ -69,7 +69,7 @@ void setup()
       if (bmp.begin()) {
         snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%f"), bmp.readAltitude());
         disp(disp_buf);
-        nvram.proc = PRESSURE_MODE;
+        nvram.proc = PROC2_MODE;
         nvram.change = 1;
         save_nvram();
         poweroff(60);
@@ -181,7 +181,7 @@ void setup()
       wifi_station_connect();
       hello();
       proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
-      nvram.proc = PRESSURE_MODE;
+      nvram.proc = PROC2_MODE;
       nvram.change = 1;
       save_nvram();
       system_deep_sleep_set_option(4); //下次开机关闭wifi
