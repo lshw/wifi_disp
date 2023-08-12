@@ -40,6 +40,7 @@ void setup_setup() {
   }
   httpd_listen();
   ota_setup();
+  charge_on();
 }
 
 void setup_loop() {
