@@ -81,7 +81,7 @@ void poweroff(uint32_t sec) {
       nvram.change = 1;
     }
   }
-  if (power_in && (nvram.nvram7 & NVRAM7_CHARGE) && nvram.proc != PROC3_MODE) { //如果外面接了电， 保持充电
+  if (power_in && (nvram.nvram7 & NVRAM7_CHARGE)) { //如果外面接了电， 保持充电
     sec = sec / 2;
     Serial.print(F("休眠"));
     if (sec > 60) {
