@@ -151,6 +151,7 @@ void setup()
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
           WiFi.mode(WIFI_OFF);
+          _myTicker.attach(1, timer1s);
           delay(1000);
           return;
         }
@@ -169,6 +170,7 @@ void setup()
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
           WiFi.mode(WIFI_OFF);
+          _myTicker.attach(1, timer1s);
           delay(1000);
           return;
         }

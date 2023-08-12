@@ -163,7 +163,10 @@ void update_disp() {
 }
 
 void timer1s() {
+  system_soft_wdt_feed ();
   if (upgrading)
+    return;
+  if(proc != SETUP_MODE)
     return;
   if (ota_status == 0  && ap_on_time < millis())
     ap_on_time = millis() + 10000;
@@ -175,7 +178,6 @@ void timer1s() {
     }
     Serial.begin(115200);
     disp(disp_buf);
-    system_soft_wdt_feed ();
     if (power_in == 1) {// 充电控制
       charge_on();
     }
