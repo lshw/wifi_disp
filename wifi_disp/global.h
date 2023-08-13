@@ -25,7 +25,6 @@ struct tm now;
 bool upgrading = false;
 int16_t update_timeok = 0; //0-马上wget ，-1 关闭，>0  xx分钟后wget
 uint8_t ota_status = 0; //0:wps, 1:ap
-void timer1s();
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
 enum {
   NONE_MODE,
@@ -164,7 +163,6 @@ void update_disp() {
 }
 
 void timer1s() {
-  Serial.write('_');
   system_soft_wdt_feed ();
   if (upgrading)
     return;
@@ -178,6 +176,8 @@ void timer1s() {
     return;
   }
   if (wifi_setup_time > 0) {
+    if (!power_in && wifi_setup_time > 200)
+      wifi_setup_time = 200;
     switch (setup_mode) {
       case WPS_MODE:
         snprintf_P(disp_buf, sizeof(disp_buf), PSTR("PS %02d"), wifi_setup_time % 100);
@@ -578,10 +578,12 @@ void save_ssid() {
 bool wifi_config() {
   setup_mode = WPS_MODE;
   wifi_setup_time = 20;
-  Serial.println("WPS Config");
   if (WiFi.beginWPSConfig()) {
-    save_ssid();
-    return true;
+    if (WiFi.localIP()) {
+      save_ssid();
+      setup_mode = NONE_MODE;
+      return true;
+    }
   }
   setup_mode = SMARTCONFIG_MODE;
   if (power_in)
@@ -592,8 +594,10 @@ bool wifi_config() {
   while (wifi_setup_time > 0) {
     if (WiFi.smartConfigDone()) {
       save_ssid();
+      setup_mode = NONE_MODE;
       return true;
     }
+    delay(100);
   }
   setup_mode = NONE_MODE;
   return false;
