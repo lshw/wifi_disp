@@ -82,6 +82,7 @@ void wifi_setup() {
     AP();
   else
     WiFi.mode(WIFI_STA);
+  WiFi.setAutoConnect(true);//自动链接上次
   if (SPIFFS.begin()) {
     if (!SPIFFS.exists("/ssid.txt")) {
       fp = SPIFFS.open("/ssid.txt", "w");
@@ -146,14 +147,15 @@ bool WiFi_isConnected() {
   if (connected_is_ok)
     return connected_is_ok;
   if (proc == SETUP_MODE && ap_client_linked) return false; //ota有wifi客户连上来,就不再尝试链接AP了
-  if (fast_wifi && millis() > 3000) {
-    fast_wifi = false; //3秒钟没有登陆， 就要用常规登陆了
-    Serial.println();
+  if (fast_wifi && millis() > 5000) {
+    fast_wifi = false; //5秒钟没有登陆， 就要用常规登陆了
     wifi_setup();
   }
   if (fast_wifi) {
-    if (WiFi.localIP())
+    if (WiFi.localIP()) {
       connected_is_ok = true;
+      Serial.printf_P(PSTR("用上次wifi设置登陆ap成功, millis()=%ld\r\n"), millis());
+    }
   } else if (WiFi.localIP()) {
     uint8_t ap_id = wifi_station_get_current_ap_id();
     struct station_config config[5];
@@ -161,6 +163,7 @@ bool WiFi_isConnected() {
     config[ap_id].bssid_set = 1; //同名ap，mac地址不同
     wifi_station_set_config(&config[ap_id]); //保存成功的ssid,用于下次通讯
     connected_is_ok = true;
+    Serial.printf_P(PSTR("用SSID设置登陆ap成功,millis()=%ld\r\n"), millis());
   }
   system_soft_wdt_feed ();
   if (connected_is_ok == true) {

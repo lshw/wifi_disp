@@ -85,9 +85,8 @@ void setup()
       }
       break;
     case PROC3_MODE:
-      WiFi.setAutoConnect(true);//自动链接上次
+      wifi_set_opmode(STATION_MODE);
       wifi_station_connect();
-      WiFi.mode(WIFI_STA);
       if (power_in) { //只有插着电， 才可以换运行模式
         nvram.proc = SETUP_MODE;
         nvram.change = 1;
@@ -97,9 +96,8 @@ void setup()
       proc3_setup();
       break;
     case SETUP_MODE:
-      WiFi.setAutoConnect(true);//自动链接上次
+      wifi_set_opmode(STATIONAP_MODE);
       wifi_station_connect();
-      WiFi.mode(WIFI_STA);
       nvram.proc = OFF_MODE;
       nvram.change = 1;
       save_nvram();
@@ -171,10 +169,9 @@ void setup()
       }
     case GENERAL_MODE:
     default:
-      WiFi.mode(WIFI_STA);
-      set_hostname();
-      WiFi.setAutoConnect(true);//自动链接上次
+      wifi_set_opmode(STATION_MODE);
       wifi_station_connect();
+      set_hostname();
       hello();
       proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
       nvram.proc = PROC2_MODE;
