@@ -151,7 +151,7 @@ bool WiFi_isConnected() {
   if (fast_wifi) {
     if (WiFi.localIP()) {
       connected_is_ok = true;
-      Serial.printf_P(PSTR("用上次wifi设置登陆ap成功, millis()=%ld\r\n"), millis());
+      Serial.printf_P(PSTR("\r\n用上次wifi设置登陆ap成功, millis()=%ld\r\n"), millis());
     }
   } else if (WiFi.localIP()) {
     uint8_t ap_id = wifi_station_get_current_ap_id();
@@ -160,7 +160,7 @@ bool WiFi_isConnected() {
     config[ap_id].bssid_set = 1; //同名ap，mac地址不同
     wifi_station_set_config(&config[ap_id]); //保存成功的ssid,用于下次通讯
     connected_is_ok = true;
-    Serial.printf_P(PSTR("用SSID设置登陆ap成功,millis()=%ld\r\n"), millis());
+    Serial.printf_P(PSTR("\r\n用SSID设置登陆ap成功,millis()=%ld\r\n"), millis());
   }
   if (connected_is_ok == true) {
     Serial.println(WiFi.localIP());
@@ -192,7 +192,6 @@ uint16_t http_get(uint8_t no) {
            + "&charge=" + String(nvram.nvram7 & NVRAM7_CHARGE)
            + "&ms=" + String(millis());
   if (wendu > -300.0) {
-    Serial.printf("wendu=%.1f\r\n", wendu);
     url0 += "&temp=" + String(wendu);
   }
   if (shidu >= 0.0 && shidu <= 100.0)

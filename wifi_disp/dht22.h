@@ -12,7 +12,7 @@ bool dht() {
   if ( millis()  < dht_next) {
     dht_next = dht_next - millis();
     if (dht_next > 500) dht_next = 500;
-    Serial.printf("delay(%d)\r\n", dht_next);
+    Serial.printf_P(PSTR("delay(%d)\r\n"), dht_next);
     delay(dht_next);
   }
   dht_next = millis() + 500;
@@ -51,14 +51,14 @@ bool dht() {
   for (int j = 0; j < 40; j++) {
     temp_data[j / 8] = (temp_data[j / 8] << 1) | (dat[j] > 40 ? 1 : 0);    // specs: 22-30us -> 0, 70us -> 1
   }
-  Serial.printf("start=%d, %02x%02x %02x%02x %02x\r\n", p1,
-                temp_data[0],
-                temp_data[1],
-                temp_data[2],
-                temp_data[3],
-                temp_data[4]);
+  Serial.printf_P(PSTR("start=%d, %02x%02x %02x%02x %02x\r\n"), p1,
+                  temp_data[0],
+                  temp_data[1],
+                  temp_data[2],
+                  temp_data[3],
+                  temp_data[4]);
   for (int j = 0; j < 40; j++) {
-    Serial.printf(" %02d", dat[j]);
+    Serial.printf_P(PSTR(" %02d"), dat[j]);
     if (j % 8 == 7)
       Serial.println();
   }
@@ -70,7 +70,7 @@ bool dht() {
     shidu = 0.1 * (temp_data[0] << 8 | temp_data[1]);
     if ((temp_data[2] & 0x80 ) != 0)
       wendu = -wendu;
-    Serial.printf("温度=%.1f, 湿度=%.1f%%\r\n", wendu, shidu);
+    Serial.printf_P(PSTR("温度=%.1f, 湿度=%.1f%%\r\n"), wendu, shidu);
     return true;
   } else {
     wendu = -999.0;
