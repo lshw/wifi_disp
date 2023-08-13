@@ -560,4 +560,43 @@ void shan() {
   else
     ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
 }
+
+void save_ssid() {
+  char wps_ssid[33], wps_password[65];
+  delay(1000);
+  uint8_t ap_id = wifi_station_get_current_ap_id();
+  memset(wps_ssid, 0, sizeof(wps_ssid));
+  memset(wps_password, 0, sizeof(wps_password));
+  struct station_config config[5];
+  wifi_station_get_ap_info(config);
+  strncpy(wps_ssid, (char *)config[ap_id].ssid, 32);
+  strncpy(wps_password, (char *)config[ap_id].password, 64);
+  config[ap_id].bssid_set = 1; //同名ap，mac地址不同
+  wifi_station_set_config(&config[ap_id]); //保存成功的ssid,用于下次通讯
+  wifi_set_add(wps_ssid, wps_password);
+}
+bool wifi_config() {
+  setup_mode = WPS_MODE;
+  wifi_setup_time = 20;
+  Serial.println("WPS Config");
+  if (WiFi.beginWPSConfig()) {
+    save_ssid();
+    return true;
+  }
+  setup_mode = SMARTCONFIG_MODE;
+  if (power_in)
+    wifi_setup_time = 3600;
+  else
+    wifi_setup_time = 200;
+  WiFi.beginSmartConfig();
+  while (wifi_setup_time > 0) {
+    if (WiFi.smartConfigDone()) {
+      save_ssid();
+      return true;
+    }
+  }
+  setup_mode = NONE_MODE;
+  return false;
+}
+
 #endif
