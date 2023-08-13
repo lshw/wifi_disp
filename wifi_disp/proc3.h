@@ -20,7 +20,7 @@ void proc3_setup() {
   Serial.flush();
   if (WiFi_isConnected()) {
     delay(100);
-    if (!get_temp())
+    if (wendu < -40 && !get_temp())
       wendu = -300.0;
     if (bmp.begin()) {
       if (wendu > -300.0)
