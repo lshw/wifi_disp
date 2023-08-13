@@ -241,7 +241,6 @@ void wput() {
 void loop()
 {
   if (power_off) {
-    system_soft_wdt_feed ();
     yield();
     delay(1000);
     return;
@@ -266,6 +265,5 @@ void loop()
       }
   }
   if (nvram.change) save_nvram();
-  system_soft_wdt_feed (); //各loop里要根据需要执行喂狗命令
   yield();
 }

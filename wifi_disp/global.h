@@ -99,7 +99,6 @@ void poweroff(uint32_t sec) {
     uint8_t no_power_in = 0;
     for (uint32_t i = 0; i < sec; i++) {
       yield();
-      system_soft_wdt_feed ();
       delay(1000);
       power_in = i % 2;
       get_batt();
@@ -537,7 +536,6 @@ void check_batt_low() {
 }
 void wait_connected(uint16_t ms) {
   while (millis() < ms && !WiFi_isConnected()) {
-    system_soft_wdt_feed ();
     yield();
     Serial.write('.');
     delay(100);
