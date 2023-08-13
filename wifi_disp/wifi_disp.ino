@@ -273,5 +273,7 @@ void loop()
       }
   }
   if (nvram.change) save_nvram();
+  get_batt();
+  delay(350);
   yield();
 }
