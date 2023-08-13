@@ -197,6 +197,11 @@ uint16_t http_get(uint8_t no) {
   }
   if (shidu >= 0.0 && shidu <= 100.0)
     url0 += "&shidu=" + String(shidu);
+  if (bmp.begin()) {
+    url0 += "&haiba=" + String(bmp.readAltitude())
+            + "&wendu1=" + String(bmp.readTemperature())
+            + "&qiya=" + String(bmp.readPressure());
+  }
   if (dsn[1][0] != 0) {
     url0 += "&temps=";
     for (uint8_t i = 0; i < 32; i++) {
