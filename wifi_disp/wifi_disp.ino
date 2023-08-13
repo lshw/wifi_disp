@@ -51,6 +51,7 @@ void setup()
     save_nvram();
     poweroff(2);
   }
+  add_limit_millis();
   proc = nvram.proc; //保存当前模式
   _myTicker.attach(1, timer1s);
   switch (proc) { //尽快进行模式切换
@@ -245,12 +246,18 @@ void loop()
     delay(1000);
     return;
   }
+  if (run_millis_limit <  millis()) {
+    Serial.print(F("超时关机，millis()="));
+    Serial.println(millis());
+    poweroff(3600);
+  }
   switch (proc) {
     case SETUP_MODE:
       setup_loop();
       break;
     case LORA_RECEIVE_MODE:
       if (ds_pin == 0 && nvram.have_lora > -5) {
+        add_limit_millis();
         if (lora_init())
           lora_receive_loop();
         else delay(100);
@@ -258,6 +265,7 @@ void loop()
       }
     case LORA_SEND_MODE:
       if (ds_pin == 0 && nvram.have_lora > -5) {
+        add_limit_millis();
         if (lora_init())
           lora_send_loop();
         delay(400);

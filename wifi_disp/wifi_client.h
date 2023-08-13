@@ -36,6 +36,7 @@ void hexprint(uint8_t dat) {
   Serial.print(dat, HEX);
 }
 void onClientConnected(const WiFiEventSoftAPModeStationConnected& evt) {
+  add_limit_millis();
   ap_client_linked = true;
   Serial.begin(115200);
   Serial.print(F("\r\nclient linked:"));
@@ -264,6 +265,7 @@ uint16_t http_get(uint8_t no) {
 
 void update_progress(int cur, int total) {
   char disp_buf[6];
+  add_limit_millis();
   Serial.printf_P(PSTR("HTTP update process at %d of %d bytes...\r\n"), cur, total);
   snprintf_P(disp_buf, sizeof(disp_buf), PSTR("HUP%2d"), cur * 99 / total);
   ht16c21_cmd(0x88, 0); //停闪烁

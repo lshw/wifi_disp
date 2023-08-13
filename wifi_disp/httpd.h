@@ -87,6 +87,7 @@ void http204() {
 void http_proc3() {
   String str = "";
   fix_proc3_set();
+  add_limit_millis();
   body = "<h1>其他设置</h1>"
          "<hr>"
          "<a href=/><button>返回设置</button></a>"
@@ -99,6 +100,7 @@ void http_proc3() {
 void handleRoot() {
   String wifi_stat, wifi_scan, i2c_scan;
   String ssid;
+  add_limit_millis();
   for (uint8_t i = 0; i < httpd.args(); i++) {
     if (httpd.argName(i).compareTo("i2c_scan") == 0) {
       Wire.begin();
@@ -202,6 +204,7 @@ void handleNotFound() {
   File fp;
   int ch;
   String message;
+  add_limit_millis();
   SPIFFS.begin();
   if (SPIFFS.exists(httpd.uri().c_str())) {
     fp = SPIFFS.open(httpd.uri().c_str(), "r");
@@ -259,6 +262,7 @@ void httpsave() {
   bool nvram_update = false;
   SPIFFS.begin();
   bool reboot_now = false;
+  add_limit_millis();
   for (uint8_t i = 0; i < httpd.args(); i++) {
     if (httpd.argName(i).compareTo("proc3_sec") == 0) {
       nvram.proc3_sec = httpd.arg(i).toInt();

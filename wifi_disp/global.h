@@ -157,8 +157,11 @@ void update_disp() {
   }
   if (zmdsize != strlen(zmd_disp)) zmd_offset = 0; //长度有变化， 就从头开始显示
 }
-
+uint32_t run_millis_limit = 200000;
 void timer1s() {
+  if (run_millis_limit < millis()) {
+    return; //不喂狗
+  }
   system_soft_wdt_feed ();
   if (upgrading)
     return;
@@ -598,4 +601,10 @@ bool wifi_config() {
   return false;
 }
 
+void add_limit_millis() {
+  if (power_in)
+    run_millis_limit = millis() + 3600000; //插着电， 续命3600s
+  else
+    run_millis_limit = millis() + 200000; //没插电， 续命200s
+}
 #endif
