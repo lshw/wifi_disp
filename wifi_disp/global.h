@@ -30,8 +30,7 @@ uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进�
 enum {
   NONE_MODE,
   WPS_MODE,
-  SMARTCONFIG_MODE,
-  AP_MODE
+  SMARTCONFIG_MODE
 };
 uint8_t setup_mode = NONE_MODE;
 uint16_t wifi_setup_time = 0;
@@ -180,9 +179,6 @@ void timer1s() {
   }
   if (wifi_setup_time > 0) {
     switch (setup_mode) {
-      case AP_MODE:
-        snprintf_P(disp_buf, sizeof(disp_buf), PSTR("AP%03d"), wifi_setup_time);
-        break;
       case WPS_MODE:
         snprintf_P(disp_buf, sizeof(disp_buf), PSTR("PS %02d"), wifi_setup_time % 100);
         break;
