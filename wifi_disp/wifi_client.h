@@ -79,7 +79,10 @@ void wifi_setup() {
     };
     wifi_set_country(&mycountry);
   */
-  WiFi.mode(WIFI_STA);
+  if (proc == SETUP_MODE)
+    AP();
+  else
+    WiFi.mode(WIFI_STA);
   if (SPIFFS.begin()) {
     if (!SPIFFS.exists("/ssid.txt")) {
       fp = SPIFFS.open("/ssid.txt", "w");
