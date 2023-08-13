@@ -22,7 +22,7 @@ void setup_setup() {
 
 void setup_loop() {
   if (ap_client_linked || connected_is_ok) {
-    httpd_loop();
+    httpd.handleClient();
     ArduinoOTA.handle();
   }
   if (ap_client_linked)
