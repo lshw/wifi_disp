@@ -462,7 +462,6 @@ void httpd_listen() {
 
   Serial.printf_P(PSTR("HTTP服务器启动! 用浏览器打开 http://%s.local\r\n"), hostname.c_str());
 }
-#define httpd_loop() httpd.handleClient()
 
 void ota_loop() {
 
