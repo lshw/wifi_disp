@@ -28,7 +28,7 @@ void setup_loop() {
   }
   if (ap_client_linked)
     dnsServer.processNextRequest();
-  if (connected_is_ok && !upgrading) { //连上AP
+  if (!upgrading && WiFi_isConnected()) { //连上AP
     if (!httpd_up) {
       ht16c21_cmd(0x88, 0); //不闪烁
       update_disp();
