@@ -14,7 +14,6 @@
 #endif
 #include "ds1820.h"
 extern bool power_in;
-bool wifi_connected = false;
 extern float shidu, wendu;
 void AP();
 bool http_update();
