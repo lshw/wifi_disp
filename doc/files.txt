@@ -1,0 +1,14 @@
+.
+├── changelog.txt           源码修改过程
+├── lib
+│   ├── espota.py           串口升级软件
+│   ├── esptool.py          串口升级软件
+│   ├── update.sh           升级脚本
+│   ├── proc3_socat.sh      在服务器用socat接收程序3发送的udp数据的脚本
+│   ├── wifi_disp.bin       固件包
+│   ├── wifi_disp_dbg.bin   固件包，串口带调试信息输出
+│   └── wifi_disp.php       服务器端php接收数据的例子
+├── readme.pdf              说明文件
+└── readme.txt
+
+2 directories, 9 files
