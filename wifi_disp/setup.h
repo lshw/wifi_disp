@@ -12,8 +12,9 @@ void setup_setup() {
       lora_sleep();
   }
   wait_connected(10000); //等待连接
-  if (wifi_station_get_connect_status() != STATION_GOT_IP) {
-    ap_on_time = millis() + 30000;  //WPS 20秒
+  if (!WiFi.localIP()) {
+    setup_mode = WPS_MODE;
+    wifi_setup_time = 20;
     if (WiFi.beginWPSConfig()) {
       delay(1000);
       uint8_t ap_id = wifi_station_get_current_ap_id();
@@ -29,14 +30,15 @@ void setup_setup() {
       wifi_set_add(wps_ssid, wps_password);
     }
   }
-  if (wifi_station_get_connect_status() != STATION_GOT_IP) {
+  if (!WiFi.isConnected()) {
+    setup_mode = AP_MODE;
+    if (power_in)
+      wifi_setup_time = 5000;
+    else
+      wifi_setup_time = 200;
     AP();
     ota_status = 1;
     get_batt();
-    if (power_in)
-      ap_on_time = millis() + 1000000; //插AP模式1000秒
-    else
-      ap_on_time = millis() + 200000; //不插电AP模式200秒
   }
   httpd_listen();
   ota_setup();

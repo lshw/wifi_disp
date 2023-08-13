@@ -28,6 +28,14 @@ uint8_t ota_status = 0; //0:wps, 1:ap
 void timer1s();
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
 enum {
+  NONE_MODE,
+  WPS_MODE,
+  SMARTCONFIG_MODE,
+  AP_MODE
+};
+uint8_t setup_mode = NONE_MODE;
+uint16_t wifi_setup_time = 0;
+enum {
   GENERAL_MODE, //0
   PROC2_MODE, //1 P2模式
   PROC3_MODE, //2 P3模式
@@ -59,7 +67,6 @@ extern uint8_t ds_pin ;
 extern bool power_in ;
 extern bool ap_client_linked ;
 extern float wendu, shidu;
-uint32_t ap_on_time = 200000;
 float get_batt();
 float v;
 bool power_off = false;
@@ -158,26 +165,38 @@ void update_disp() {
 }
 
 void timer1s() {
+  Serial.write('_');
   system_soft_wdt_feed ();
   if (upgrading)
     return;
-  if (proc != SETUP_MODE)
+  if (setup_mode == NONE_MODE) {
+    if (proc == SETUP_MODE)
+      run_zmd = true;
     return;
-  if (ota_status == 0  && ap_on_time < millis())
-    ap_on_time = millis() + 10000;
-  if (!connected_is_ok && ap_on_time > millis()) {
-    snprintf_P(disp_buf, sizeof(disp_buf), PSTR("AP%3d"), (ap_on_time - millis()) / 1000);
-    if (ota_status == 0) {
-      disp_buf[0] = 'P';
-      disp_buf[1] = 'S';
+  }
+  if (WiFi.localIP()) {
+    setup_mode = NONE_MODE;
+    return;
+  }
+  if (wifi_setup_time > 0) {
+    switch (setup_mode) {
+      case AP_MODE:
+        snprintf_P(disp_buf, sizeof(disp_buf), PSTR("AP%03d"), wifi_setup_time);
+        break;
+      case WPS_MODE:
+        snprintf_P(disp_buf, sizeof(disp_buf), PSTR("PS %02d"), wifi_setup_time % 100);
+        break;
+      case SMARTCONFIG_MODE:
+        snprintf_P(disp_buf, sizeof(disp_buf), PSTR("CO %02d"), wifi_setup_time % 100);
+        break;
+      default:
+        return;
     }
     Serial.begin(115200);
     disp(disp_buf);
-    if (power_in == 1) {// 充电控制
-      charge_on();
-    }
-  } else
-    run_zmd = true;
+    wifi_setup_time --;
+  }
+  return;
 }
 
 uint16_t wget() {

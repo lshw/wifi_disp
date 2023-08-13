@@ -55,7 +55,7 @@ void setup()
     poweroff(2);
   }
   proc = nvram.proc; //保存当前模式
-  wdt_disable();
+  _myTicker.attach(1, timer1s);
   switch (proc) { //尽快进行模式切换
     case PROC2_MODE:
       if (power_in)
@@ -110,7 +110,6 @@ void setup()
       set_hostname();
       hello();
       setup_setup();
-      _myTicker.attach(1, timer1s);
       break;
     case OFF_MODE:
       nvram.proc = LORA_SEND_MODE;
@@ -152,7 +151,6 @@ void setup()
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
           WiFi.mode(WIFI_OFF);
-          _myTicker.attach(1, timer1s);
           delay(1000);
           return;
         }
@@ -171,7 +169,6 @@ void setup()
           wifi_station_disconnect();
           wifi_set_opmode(NULL_MODE);
           WiFi.mode(WIFI_OFF);
-          _myTicker.attach(1, timer1s);
           delay(1000);
           return;
         }
@@ -258,8 +255,7 @@ void loop()
   }
   if (proc == SETUP_MODE && last_check_connected < millis() &&  WiFi_isConnected()) {
     last_check_connected = millis() + 1000; //1秒检查一次connected;
-    if ( millis() > ap_on_time && power_in && millis() < 1800000 ) ap_on_time = millis() + 200000; //有外接电源的情况下，最长半小时
-    if ( millis() > ap_on_time) { //ap开启时长
+    if ( setup_mode != NONE_MODE && wifi_setup_time == 0 && !power_in) { //ap开启时长
       Serial.print(F("batt:"));
       Serial.print(get_batt());
       Serial.print(F("V,millis()="));

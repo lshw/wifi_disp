@@ -45,10 +45,6 @@ void onClientConnected(const WiFiEventSoftAPModeStationConnected& evt) {
   Serial.println();
   Serial.flush();
   ht16c21_cmd(0x88, 0); //停止闪烁
-  if (power_in)
-    ap_on_time = millis() + 1000000; //插AP模式1000秒
-  else
-    ap_on_time = millis() + 200000; //不插电AP模式200秒
 }
 
 WiFiEventHandler ConnectedHandler;
