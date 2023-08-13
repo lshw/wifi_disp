@@ -244,7 +244,6 @@ void wput() {
   }
 }
 
-uint32_t last_check_connected;
 void loop()
 {
   if (power_off) {
@@ -252,26 +251,6 @@ void loop()
     yield();
     delay(1000);
     return;
-  }
-  if (proc == SETUP_MODE && last_check_connected < millis() &&  WiFi_isConnected()) {
-    last_check_connected = millis() + 1000; //1秒检查一次connected;
-    if ( setup_mode != NONE_MODE && wifi_setup_time == 0 && !power_in) { //ap开启时长
-      Serial.print(F("batt:"));
-      Serial.print(get_batt());
-      Serial.print(F("V,millis()="));
-      Serial.println(millis());
-      Serial.println(F("power down"));
-      if (nvram.proc != GENERAL_MODE) {
-        nvram.proc = GENERAL_MODE;
-        nvram.change = 1;
-        system_deep_sleep_set_option(2); //重启时不校准无线电
-        save_nvram();
-      }
-      disp((char *)"00000");
-      ht16c21_cmd(0x84, 0);
-      httpd.close();
-      poweroff(3600);
-    }
   }
   switch (proc) {
     case SETUP_MODE:
