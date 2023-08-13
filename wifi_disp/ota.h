@@ -29,6 +29,7 @@ void ota_setup() {
     upgrading = false;
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    add_limit_millis();
     Serial.printf_P(PSTR("Progress: %u%%\r"), (progress / (total / 100)));
     snprintf_P(disp_buf, sizeof(disp_buf), PSTR("OTA.%2d"), progress * 99 / total );
     ht16c21_cmd(0x88, 0); //停闪烁
