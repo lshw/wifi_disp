@@ -10,7 +10,6 @@ void lora_sleep() {
 }
 void lora_send_loop() {
   if (millis() < send_delay) return;
-  system_soft_wdt_feed ();
   send_delay = millis() + 200;
   lora_count++;
   snprintf_P(disp_buf, sizeof(disp_buf), PSTR("S%4d"), lora_count % 10000);
@@ -37,7 +36,6 @@ void lora_receive_loop() {
     Serial.print(F("with RSSI "));
     Serial.print(rssi);
     Serial.println(F("dBm"));
-    system_soft_wdt_feed ();
   }
   yield();
 }

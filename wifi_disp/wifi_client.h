@@ -136,10 +136,7 @@ void wifi_setup() {
     fp.close();
     SPIFFS.end();
   }
-  WiFi.setAutoReconnect(true);//断线自动重连
-  system_soft_wdt_feed ();
   WiFiMulti.run(10000);
-  system_soft_wdt_feed ();
 }
 bool connected_is_ok = false;
 bool fast_wifi = true;
@@ -165,7 +162,6 @@ bool WiFi_isConnected() {
     connected_is_ok = true;
     Serial.printf_P(PSTR("用SSID设置登陆ap成功,millis()=%ld\r\n"), millis());
   }
-  system_soft_wdt_feed ();
   if (connected_is_ok == true) {
     Serial.println(WiFi.localIP());
     ht16c21_cmd(0x88, 0); //停止闪烁
