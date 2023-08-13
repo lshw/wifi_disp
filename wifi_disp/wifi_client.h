@@ -144,7 +144,7 @@ bool WiFi_isConnected() {
   if (connected_is_ok)
     return connected_is_ok;
   if (proc == SETUP_MODE && ap_client_linked) return false; //ota有wifi客户连上来,就不再尝试链接AP了
-  if (fast_wifi && millis() > 5000) {
+  if (fast_wifi && millis() > 6000) {
     fast_wifi = false; //5秒钟没有登陆， 就要用常规登陆了
     wifi_setup();
   }
