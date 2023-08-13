@@ -206,9 +206,9 @@ void setup()
       if (WiFi_isConnected()) {
         wput();
       } else { //30秒没有连上AP
-        if (power_in && smart_config()) {
-          disp((char *)"6.6.6.6.6.");
-          poweroff(1);
+        if (power_in) {
+          wifi_config();
+          return;
         }
         //10秒超时1小时重试。
         Serial.print(millis());
@@ -294,35 +294,4 @@ void loop()
   if (nvram.change) save_nvram();
   system_soft_wdt_feed (); //各loop里要根据需要执行喂狗命令
   yield();
-}
-
-bool smart_config() {
-  //插上电， 等20秒， 如果没有上网成功， 就会进入 CO xx计数， 100秒之内完成下面的操作
-  //手机连上2.4G的wifi,然后微信打开网页：http://wx.ai-thinker.com/api/old/wifi/config
-  nvram.proc = GENERAL_MODE;
-  nvram.change = 1;
-  system_deep_sleep_set_option(2); //重启时不校准无线电
-  if (WiFi_isConnected()) return true;
-  WiFi.mode(WIFI_STA);
-  WiFi.beginSmartConfig();
-  Serial.println(F("SmartConfig start"));
-  for (uint8_t i = 0; i < 100; i++) {
-    if (WiFi.smartConfigDone()) {
-      wifi_set_clean();
-      wifi_set_add(WiFi.SSID().c_str(), WiFi.psk().c_str());
-      Serial.println(F("OK"));
-      return true;
-    }
-    Serial.write('.');
-    system_soft_wdt_feed ();
-    yield();
-    delay(1000);
-    system_soft_wdt_feed ();
-    yield();
-    snprintf_P(disp_buf, sizeof(disp_buf), PSTR("CON%02d"), i);
-    disp(disp_buf);
-  }
-  snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
-  disp(disp_buf);
-  return false;
 }
