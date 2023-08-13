@@ -1,7 +1,6 @@
 #include <SPI.h>
 #include "sx1278.h"
 LoRa lora;
-uint8_t len;
 uint8_t rxBuf[256];
 uint32_t send_delay = 0;
 uint16_t lora_count = 0;
@@ -10,9 +9,9 @@ void lora_sleep() {
   lora.sleep();
 }
 void lora_send_loop() {
-  if (millis() - send_delay < 200) return;
+  if (millis() < send_delay) return;
   system_soft_wdt_feed ();
-  send_delay = millis();
+  send_delay = millis() + 200;
   lora_count++;
   snprintf_P(disp_buf, sizeof(disp_buf), PSTR("S%4d"), lora_count % 10000);
   disp(disp_buf);
@@ -22,6 +21,7 @@ void lora_send_loop() {
 }
 uint8_t lora_rxtx = 0; //1:rx 2:tx
 void lora_receive_loop() {
+  uint8_t len;
   if (lora_rxtx != 1) {
     lora.rxInit();
     lora_rxtx = 1;

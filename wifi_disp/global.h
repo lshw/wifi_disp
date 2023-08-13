@@ -21,10 +21,7 @@ Adafruit_BMP085 bmp;
 bool get_temp();
 Ticker _myTicker;
 DNSServer dnsServer;
-struct tm now;
 bool upgrading = false;
-int16_t update_timeok = 0; //0-马上wget ，-1 关闭，>0  xx分钟后wget
-uint8_t ota_status = 0; //0:wps, 1:ap
 uint8_t proc; //用lcd ram 0 传递过来的变量， 用于通过重启，进行功能切换
 enum {
   NONE_MODE,

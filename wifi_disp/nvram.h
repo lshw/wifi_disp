@@ -3,8 +3,6 @@
 #include "sx1278_reg.h"
 #define NVRAM7_CHARGE 0b1
 #define NVRAM7_URL    0b10
-#define NVRAM7_UPDATE 0b1000
-#define HAVE_PROC2 0b10000 //1分钟1次测海拔
 struct {
   uint8_t proc;
   uint8_t change;

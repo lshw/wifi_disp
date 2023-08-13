@@ -6,13 +6,10 @@ extern "C" {
 #endif
 #include "config.h"
 #include "global.h"
-bool temp_ok = false; //测温ok
-uint32_t temp_start;
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 void init1();
 uint32_t next_disp = 1800; //下次开机
 String hostname = HOSTNAME;
-bool httpd_up = false;
 
 #include "ota.h"
 #include "ds1820.h"

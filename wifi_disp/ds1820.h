@@ -61,7 +61,6 @@ bool ds_init() {
   oneWire.reset();
   oneWire.skip(); //广播
   oneWire.write(0x44, 1);
-  temp_start = millis();
   if (dsn[1][0] != 0) { //有多个探头时，外接探头是信号线供电， 测温期间，要对12进行上拉。
     pinMode(ds_pin, OUTPUT);
     digitalWrite(ds_pin, HIGH);
@@ -138,7 +137,6 @@ bool get_temp() {
     oneWire.reset();
     oneWire.skip(); //广播
     oneWire.write(0x44, 1);//再读一次
-    temp_start = millis();
     if (dsn[1][0] != 0) { //有多个探头时，外接探头是信号线供电， 测温期间，要对12进行上拉。
       pinMode(ds_pin, OUTPUT);
       digitalWrite(ds_pin, HIGH);

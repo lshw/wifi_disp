@@ -20,6 +20,7 @@ void setup_setup() {
   charge_on();
 }
 
+bool httpd_up = false;
 void setup_loop() {
   if (ap_client_linked || connected_is_ok) {
     httpd.handleClient();
