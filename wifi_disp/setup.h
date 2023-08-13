@@ -13,32 +13,7 @@ void setup_setup() {
   }
   wait_connected(10000); //等待连接
   if (!WiFi.localIP()) {
-    setup_mode = WPS_MODE;
-    wifi_setup_time = 20;
-    if (WiFi.beginWPSConfig()) {
-      delay(1000);
-      uint8_t ap_id = wifi_station_get_current_ap_id();
-      char wps_ssid[33], wps_password[65];
-      memset(wps_ssid, 0, sizeof(wps_ssid));
-      memset(wps_password, 0, sizeof(wps_password));
-      struct station_config config[5];
-      wifi_station_get_ap_info(config);
-      strncpy(wps_ssid, (char *)config[ap_id].ssid, 32);
-      strncpy(wps_password, (char *)config[ap_id].password, 64);
-      config[ap_id].bssid_set = 1; //同名ap，mac地址不同
-      wifi_station_set_config(&config[ap_id]); //保存成功的ssid,用于下次通讯
-      wifi_set_add(wps_ssid, wps_password);
-    }
-  }
-  if (!WiFi.isConnected()) {
-    setup_mode = AP_MODE;
-    if (power_in)
-      wifi_setup_time = 5000;
-    else
-      wifi_setup_time = 200;
-    AP();
-    ota_status = 1;
-    get_batt();
+    wifi_config();
   }
   httpd_listen();
   ota_setup();
