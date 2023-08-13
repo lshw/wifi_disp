@@ -62,6 +62,7 @@ $arduino/arduino-builder \
 if [ $? != 0 ] ; then
   exit
 fi
+rm -f /tmp/${me}_build/wifi_disp.ino.bin
 $arduino/arduino-builder \
 -compile \
 -logger=machine \
