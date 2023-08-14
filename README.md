@@ -25,9 +25,8 @@ lora_mini是一个兼容arduino的uno，带lora功能的一个小板子，可以
 相关的项目链接:  
 微信小程序[惠多气象]:https://github.com/scfido/weather_thermometer  
 手机APP:https://github.com/liuxiaoyang98/wifi_disp_app  
-
-V1无lora功能:https://item.taobao.com/item.htm?id=583649099297    
-V2有lora功能:https://item.taobao.com/item.htm?id=601842691823  
+ 
+淘宝连接:https://item.taobao.com/item.htm?id=601842691823  
 
 看看能打到第几关:  
 
@@ -35,7 +34,7 @@ V2有lora功能:https://item.taobao.com/item.htm?id=601842691823
 
 ~~第二级，可以自动开通ddns.cfido.com,自己玩一些ddns的东西。~~
 
-第三级，可以自己开发Web服务端，让它周期显示一些自己感兴趣的内容,5位数字
+第三级，可以自己开发Web服务端，让它周期显示一些自己感兴趣的内容,5位数字,比如汇率等
 
 第四级，扩展的TTL串口和I2C，可以自己扩展一些外设
 
@@ -47,6 +46,7 @@ V2有lora功能:https://item.taobao.com/item.htm?id=601842691823
 编译方法：  
 先安装arduino开发环境， 然后增加esp8266支持, 具体就是开发环境下点设置， 增加开发板管理器的url:https://arduino.esp8266.com/stable/package_esp8266com_index.json   
 然后在开发板管理器里就可以搜到并安装esp8266的支持了，目前的源码需要选择3.0.2的esp8266支持环境  
-在开发板里选ESPDuino(ESP13 Module)  
+在开发板里选Generic ESP8266 Modules 
+Flash Size 选4M (fs:2M, 程序1M) 
 MMU选16KB cache 48KB IRAM  
 就可以编译了。 
