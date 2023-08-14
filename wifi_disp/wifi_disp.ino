@@ -273,6 +273,13 @@ void loop()
   }
   if (nvram.change) save_nvram();
   get_batt();
-  delay(350);
   yield();
+  if (proc == SETUP_MODE && nvram.pcb_ver == 1) {
+    Serial.end();
+    charge_on();
+    delay(350);
+    charge_off();
+    Serial.begin(115200);
+  } else
+    delay(350);
 }

@@ -222,6 +222,8 @@ float get_batt0() {//锂电池电压
   return v;
 }
 float get_batt() {
+  if (nvram.pcb_ver == 1)
+    Serial.end(); //pcb1 用TX做充电控制腿
   charge_off();
   delay(1);
   if (get_batt0() < 1.0) //电压低于1.0v但是还能运行，使用的是外接电源
@@ -265,8 +267,8 @@ float get_batt() {
       nvram.change = 1;
     }
   }
-  if (ds_pin == 0) {
-    Serial.begin(115200);
+  if (nvram.pcb_ver == 1) {
+    Serial.begin(115200); //pcb1 用TX做充电控制腿
   }
   Serial.printf_P(PSTR("电池电压%.2f\r\n"), v);
   return v;

@@ -17,7 +17,6 @@ void setup_setup() {
   }
   httpd_listen();
   ota_setup();
-  charge_on();
 }
 
 bool httpd_up = false;
