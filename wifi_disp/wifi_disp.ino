@@ -53,7 +53,6 @@ void setup()
   }
   add_limit_millis();
   proc = nvram.proc; //保存当前模式
-  _myTicker.attach(1, timer1s);
   switch (proc) { //尽快进行模式切换
     case PROC2_MODE:
       if (power_in)
@@ -94,6 +93,7 @@ void setup()
         save_nvram();
         system_deep_sleep_set_option(1); //下次开机wifi校准
       }
+      _myTicker.attach(1, timer1s);
       proc3_setup();
       break;
     case SETUP_MODE:
@@ -103,6 +103,7 @@ void setup()
       nvram.change = 1;
       save_nvram();
       system_deep_sleep_set_option(4); //下次开机关闭wifi
+      _myTicker.attach(1, timer1s);
       set_hostname();
       hello();
       setup_setup();
@@ -179,6 +180,7 @@ void setup()
       nvram.change = 1;
       save_nvram();
       system_deep_sleep_set_option(4); //下次开机关闭wifi
+      _myTicker.attach(1, timer1s);
       init1();
       Serial.println(F("测温模式"));
       snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
@@ -240,6 +242,7 @@ void wput() {
 
 void loop()
 {
+  system_soft_wdt_feed ();
   if (power_off) {
     yield();
     delay(1000);
