@@ -114,7 +114,7 @@ void poweroff(uint32_t sec) {
       }
     }
   }
-  if (ds_pin == 0) {
+  if (nvram.pcb_ver == 1) {
     Serial.begin(115200);
     Serial.println();
   }
@@ -187,7 +187,6 @@ void timer1s() {
       default:
         return;
     }
-    Serial.begin(115200);
     disp(disp_buf);
     wifi_setup_time --;
   }
@@ -215,9 +214,9 @@ float get_batt0() {//锂电池电压
         + analogRead(A0)
         + analogRead(A0);
 
-  if (ds_pin != 0) //V1.0硬件分压电阻 499k 97.6k
+  if (nvram.pcb_ver == 0) //V1.0(pvb_ver=0)硬件分压电阻 499k 97.6k
     v = (float) dat / 8 * (499 + 97.6) / 97.6 / 1023 ;
-  else    //V2.0硬件 分压电阻 470k/100k
+  else    //V2.0,V3.0硬件 分压电阻 470k/100k
     v = (float) dat / 8 * (470.0 + 100.0) / 100.0 / 1023 ;
   return v;
 }

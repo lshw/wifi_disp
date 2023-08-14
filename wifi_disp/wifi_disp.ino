@@ -120,7 +120,7 @@ void setup()
       disp((char *)"-" VER "-");
       delay(2000);
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
-      if (ds_pin == 0) { //v2.0
+      if (nvram.pcb_ver > 0) { //v2.0
         if (nvram.have_lora > -5 & lora_init())
           lora.sleep();
         Serial.begin(115200);
@@ -185,7 +185,7 @@ void setup()
       disp(disp_buf);
       WiFi_isConnected();
       get_value();
-      if (ds_pin == 0 && nvram.have_lora > -5) {
+      if (nvram.pcb_ver > 0 && nvram.have_lora > -5) {
         if (lora_init())
           lora.sleep();
       }
@@ -255,7 +255,7 @@ void loop()
       setup_loop();
       break;
     case LORA_RECEIVE_MODE:
-      if (ds_pin == 0 && nvram.have_lora > -5) {
+      if (nvram.pcb_ver > 0 && nvram.have_lora > -5) {
         add_limit_millis();
         if (lora_init())
           lora_receive_loop();
@@ -263,7 +263,7 @@ void loop()
         break;
       }
     case LORA_SEND_MODE:
-      if (ds_pin == 0 && nvram.have_lora > -5) {
+      if (nvram.pcb_ver > 0 && nvram.have_lora > -5) {
         add_limit_millis();
         if (lora_init())
           lora_send_loop();
