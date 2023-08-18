@@ -240,7 +240,7 @@ uint16_t http_get(uint8_t no) {
         }
 
         memset(disp_buf, 0, sizeof(disp_buf));
-        payload.toCharArray(disp_buf, 15); //.1.2.3.4.5,1800
+        payload.toCharArray(disp_buf, sizeof(disp_buf) - 1); //.1.2.3.4.5,1800
         uint8_t    i1 = payload.indexOf(',');
         Serial.println(disp_buf);
         next_disp = atoi(&disp_buf[i1 + 1]);
