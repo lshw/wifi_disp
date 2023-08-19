@@ -190,8 +190,12 @@ uint16_t http_get(uint8_t no) {
            + "&batt=" + String(v)
            + "&rssi=" + String(WiFi.RSSI())
            + "&power=" + String(power_in)
+           + "&pcb_ver=" + String(nvram.pcb_ver)
            + "&charge=" + String(nvram.nvram7 & NVRAM7_CHARGE)
            + "&ms=" + String(millis());
+  if (bmp.begin()) {
+    + "&qiya=" + String(bmp.readPressure());
+  }
   if (wendu > -300.0) {
     url0 += "&temp=" + String(wendu);
   }
