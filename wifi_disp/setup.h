@@ -7,11 +7,16 @@ void setup_setup() {
   nvram.change = 1;
   save_nvram();
   pcb_ver_detect();
-  get_value();
+  if (nvram.have_dht == 1) {
+    dht();
+  } else {
+    get_value();
+  }
   if (nvram.pcb_ver > 0) { //v2.0, v3.0
     if (nvram.have_lora > -5 && lora_init())
       lora_sleep();
   }
+  add_limit_millis();
   _myTicker.attach(1, timer1s);
   wait_connected(10000); //等待连接
   if (!WiFi.localIP()) {
