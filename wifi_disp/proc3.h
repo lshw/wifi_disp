@@ -39,7 +39,7 @@ void proc3_setup() {
       snprintf(disp_buf, sizeof(disp_buf), "%f", (float)bmp.readPressure() / 1000);
     } else {
       if (shidu >= 0.0 && shidu <= 100.0)
-        snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%02d-%02d"), wendu, shidu);
+        snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%02d-%02d"), int(wendu), int(shidu));
       else
         snprintf(disp_buf, sizeof(disp_buf), "%4.2f", wendu);
     }
