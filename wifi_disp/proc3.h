@@ -6,8 +6,16 @@ void proc3_setup() {
   int32_t qiya = -10e6;
   set_hostname();
   hello();
-  get_value();
+  pcb_ver_detect();
+  if (nvram.have_dht) {
+    if (wendu > -299.0 && !dht())
+      dht();
+    wifi_set_opmode(STATION_MODE);
+    wifi_station_connect();
+  }
+  _myTicker.attach(1, timer1s);
   wait_connected(10000);
+  get_value();
   fix_proc3_set();
   shan();
   nvram.nvram7 |= NVRAM7_CHARGE; //充电
