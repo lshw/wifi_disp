@@ -101,8 +101,6 @@ void setup()
       }
       init1();
       disp((char *)" P3 ");
-      pcb_ver_detect();
-      _myTicker.attach(1, timer1s);
       proc3_setup();
       break;
     case SETUP_MODE:
@@ -110,7 +108,6 @@ void setup()
       nvram.change = 1;
       save_nvram();
       system_deep_sleep_set_option(4); //下次开机关闭wifi
-      _myTicker.attach(1, timer1s);
       set_hostname();
       hello();
       setup_setup();

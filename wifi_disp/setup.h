@@ -12,6 +12,7 @@ void setup_setup() {
     if (nvram.have_lora > -5 && lora_init())
       lora_sleep();
   }
+  _myTicker.attach(1, timer1s);
   wait_connected(10000); //等待连接
   if (!WiFi.localIP()) {
     wifi_config();
