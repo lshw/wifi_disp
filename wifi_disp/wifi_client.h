@@ -16,7 +16,7 @@
 extern bool power_in;
 extern float shidu, wendu;
 void AP();
-bool http_update();
+bool http_update(String update_url);
 void poweroff(uint32_t);
 void web_cmd(String str);
 void web_cmd_a(String str);
@@ -283,7 +283,7 @@ void update_progress(int cur, int total) {
   disp(disp_buf);
 }
 
-bool http_update()
+bool http_update(String update_url)
 {
   if (get_batt() < 3.6) {
     Serial.println(F("电压太低,不做升级"));
@@ -297,7 +297,15 @@ bool http_update()
   }
   upgrading = true;
   disp((char *)"H UP. ");
-  String update_url = "http://wifi_disp.anheng.com.cn/firmware.php?type=WIFI_DISP&SN=" + hostname + "&GIT=" GIT_VER "&ver=" VER;
+  if (update_url.length() == 0)
+    update_url = "http://wifi_disp.anheng.com.cn/firmware.php?";
+  else {
+    if (update_url.indexOf('?') == -1)
+      update_url += "?";
+    else
+      update_url += "&";
+  }
+  update_url += "type=WIFI_DISP&SN=" + hostname + "&GIT=" GIT_VER "&ver=" VER;
   Serial.print(F("下载firmware from "));
   Serial.println(update_url);
   ESPhttpUpdate.onProgress(update_progress);
@@ -323,6 +331,7 @@ bool http_update()
     case HTTP_UPDATE_OK:
       Serial.println(F("HTTP_UPDATE_OK"));
       upgrading = false;
+      ht16c21_cmd(0x88, 1); //0-不闪 1-2hz 2-1hz 3-0.5hz
       return true;
       break;
   }
@@ -342,22 +351,23 @@ void web_cmd(String str) { //处理下发的web命令
   }
 }
 void web_cmd_a(String str) {
-  String cmd;
+  String cmd, argv;
   str.trim();
   int16_t i = str.indexOf('=');
   int16_t len = str.length();
   if (i < 0) i = len;
+  else argv = str.substring(i + 1, len);
   cmd = str.substring(0, i);
   Serial.print(F("cmd:["));
   Serial.print(cmd);
   Serial.println(']');
   if (cmd == "UPDATE") {
     ht16c21_cmd(0x88, 0); //停闪烁
-    SPIFFS.begin();
-    if (http_update() == false)
-      http_update();
+    if (http_update(argv) == false)
+      http_update(argv);
     poweroff(1800);
   } else if (cmd == "WIFI_SET_ADD") {
+    SPIFFS.begin();
     int16_t i0;
     i0 = str.indexOf(':');
     if (i0 > i) {
