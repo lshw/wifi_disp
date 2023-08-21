@@ -8,7 +8,7 @@ void setup_setup() {
   save_nvram();
   pcb_ver_detect();
   if (nvram.have_dht == 1) {
-    dht();
+    dht_();
   } else {
     get_value();
   }

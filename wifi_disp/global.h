@@ -43,7 +43,7 @@ bool WiFi_isConnected();
 extern bool connected_is_ok;
 uint16_t http_get(uint8_t);
 bool ds_init();
-bool dht();
+bool dht_();
 bool sht4x_load();
 float sht4x_rh();
 float sht4x_temp();
@@ -519,7 +519,7 @@ void get_value() {
         sht4x_rh();
         Serial.printf_P(PSTR("温度:%3.1f,湿度:%3.1f%%\r\n"), wendu, shidu);
       } else if (nvram.have_dht > 0 ) { //用dht
-        if (!dht() &&  !dht()) {
+        if (!dht_()) {
           nvram.have_dht = 0;
           if (nvram.ds18b20_pin == -2)
             nvram.pcb_ver = -1; //重新诊断pcb_ver
@@ -640,7 +640,7 @@ uint8_t pcb_ver_detect() {
     nvram.ds18b20_pin = -1;
   }
   if (nvram.have_dht == -1) {
-    if (!dht() &&  !dht())  {//无dht
+    if (!dht_())  {//无dht
       Serial.println("have not dht");
       nvram.have_dht = 0;
     } else {

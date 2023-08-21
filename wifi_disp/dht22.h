@@ -3,21 +3,22 @@
 
 extern float wendu, shidu;
 uint8_t temp_data[6];
-uint32_t dht_next = 500;
+uint32_t dht_next = 600;
 #define DHT_PIN 0
 bool dht() {
   uint8_t p1, dat[40];
   // empty output data.
   pinMode(DHT_PIN, INPUT_PULLUP);
   if (dht_next > millis()) {
-    if (dht_next > millis() + 500)
-      dht_next = millis() + 500;
+    if (dht_next > millis() + 600)
+      dht_next = millis() + 600;
+    Serial.printf_P(PSTR("delay(%ld)\r\n"), dht_next - millis());
     while (dht_next > millis()) {
       delay(100);
       yield();
     }
   }
-  dht_next = millis() + 500;
+  dht_next = millis() + 600;
 
   // According to protocol: http://akizukidenshi.com/download/ds/aosong/AM2302.pdf
   // notify DHT22 to start:
@@ -83,5 +84,10 @@ bool dht() {
     Serial.println(F("数据校验错"));
     return false;
   }
+}
+bool dht_() {
+  if ( !dht() && !dht() && !dht())
+    return dht();
+  return true;
 }
 #endif

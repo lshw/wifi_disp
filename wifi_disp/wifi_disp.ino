@@ -186,8 +186,8 @@ void setup()
       nvram.change = 1;
       save_nvram();
       pcb_ver_detect();
-      if (nvram.have_dht == 1)
-        dht(); //dht必须在wifi打开之前
+      if (nvram.have_dht == 1 && wendu < -299.0)
+        dht_(); //dht必须在wifi打开之前
       wifi_set_opmode(STATION_MODE);
       wifi_station_connect();
       set_hostname();

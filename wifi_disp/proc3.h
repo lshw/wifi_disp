@@ -8,12 +8,16 @@ void proc3_setup() {
   pcb_ver_detect();
   if (nvram.have_dht) {
     if (wendu < -299.0)
-      dht();
+      dht_();
     wifi_set_opmode(STATION_MODE);
     wifi_station_connect();
   }
   _myTicker.attach(1, timer1s);
   wait_connected(10000);
+  if (nvram.have_dht) {
+    if (wendu < -299.0)
+      dht_();
+  }
   get_value();
   fix_proc3_set();
   shan();
