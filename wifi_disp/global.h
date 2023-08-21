@@ -480,6 +480,7 @@ void hello() {
   Serial.flush();
 }
 void get_value() {
+  if (wendu > -300.0) return;
   switch (nvram.pcb_ver) {
     case 2: //sht4x测温湿度, 气压探头
       Serial.println("is pcb2");
