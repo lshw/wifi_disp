@@ -168,7 +168,8 @@ void handleRoot() {
   if (wendu > -300.0)
     wifi_stat += "温度:<mark>" + String(wendu) + "</mark>&#8451<br>";
   body = "SN:<mark>" + hostname + "</mark> &nbsp; "
-         "版本:<mark>" VER "</mark>"
+         "硬件版本:<mark>" + String(nvram.pcb_ver) + "</mark> &nbsp; "
+         "软件版本:<mark>" VER "</mark>"
          "&nbsp;<a href=/proc3.php><button>其它设置</button></a>"
          "<hr>"
          + wifi_stat + "<hr>" + wifi_scan +
