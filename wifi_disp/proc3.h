@@ -26,8 +26,10 @@ void proc3_setup() {
   Serial.flush();
   if (WiFi_isConnected()) {
     delay(100);
-    if (wendu < -40 && !get_temp())
-      wendu = -300.0;
+    if (wendu < -299.0 || wendu == 85.0) {
+      if (nvram.ds18b20_pin >= 0)
+        get_temp();
+    }
     if (bmp.begin()) {
       if (wendu > -300.0)
         wendu0 = (wendu + bmp.readTemperature()) / 2;
