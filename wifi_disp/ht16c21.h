@@ -5,6 +5,9 @@
 char ram_buf[10];
 void send_ram();
 void load_ram();
+void charge_off();
+void charge_on();
+extern bool power_in;
 void ht16c21_cmd(uint8_t cmd, uint8_t dat) {
   Wire.beginTransmission(HT1621);
   Wire.write(byte(cmd));
@@ -45,7 +48,17 @@ void disp(char *str) {
     0x11, 0x13, 0x12, 0x14, 0x16, 0x15, 0x17, 0x10  //第5位数字...
   };
   uint8_t dispbyte, ram, i, dian;
+  if (nvram.pcb_ver == 1) {
+    charge_off();
+    Serial.begin(115200);
+    Serial.println();
+  }
   Serial.printf_P(PSTR("disp [%s]\r\n"), str);
+  if (nvram.pcb_ver == 1 && power_in) {
+    Serial.flush();
+    Serial.end();
+    charge_on();
+  }
   i = strlen(str);
   if (i > 10)
     i = 10;
@@ -154,7 +167,6 @@ void load_ram() {
   Wire.endTransmission();
   Serial.println();
 }
-extern bool power_in;
 void send_ram() {
   uint8_t i;
   if (power_in) //外接电源，点亮左上角的三角形
