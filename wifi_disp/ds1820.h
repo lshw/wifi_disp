@@ -15,8 +15,6 @@ bool ds_init() {
   temp[0] = -999.0;
   if (nvram.ds18b20_pin == 12) { //pcb_ver0 18b20需要gpio14供电
     pinMode(14, OUTPUT);
-    digitalWrite(14, LOW);
-    delay(50);
     digitalWrite(14, HIGH);
     delay(50);
   }
@@ -108,8 +106,6 @@ bool get_temp() {
   }
   if (ret == true) {
     digitalWrite(nvram.ds18b20_pin, LOW);
-    if (nvram.ds18b20_pin == 12)
-      digitalWrite(14, LOW);
   } else {
     oneWire.reset();
     oneWire.skip(); //广播
