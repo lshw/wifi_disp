@@ -39,10 +39,6 @@ void setup()
   load_nvram(); //从esp8266的nvram载入数据
   nvram.boot_count++;
   nvram.change = 1;
-  if (nvram.pcb_ver == -1)
-    get_value();
-  get_batt();
-  check_batt_low();
   if (millis() > 5000) { //升级程序后第一次启动
     Serial.println(F("升级完成，重启"));
     nvram.proc = GENERAL_MODE;
@@ -51,6 +47,18 @@ void setup()
     save_nvram();
     poweroff(2);
   }
+  if (nvram.have_dht == 0 && nvram.pcb_ver >= 0) { //dht与wifi_station_connect冲突
+    if (nvram.proc == PROC3_MODE || nvram.proc == GENERAL_MODE) {
+      wifi_set_opmode(STATION_MODE);
+      wifi_station_connect();
+    }
+  } else {
+    pcb_ver_detect();
+  }
+  if (nvram.ds18b20_pin >= 0)
+    ds_init();
+  get_batt();
+  check_batt_low();
   add_limit_millis();
   proc = nvram.proc; //保存当前模式
   switch (proc) { //尽快进行模式切换
@@ -85,20 +93,19 @@ void setup()
       }
       break;
     case PROC3_MODE:
-      wifi_set_opmode(STATION_MODE);
-      wifi_station_connect();
       if (power_in) { //只有插着电， 才可以换运行模式
         nvram.proc = SETUP_MODE;
         nvram.change = 1;
         save_nvram();
         system_deep_sleep_set_option(1); //下次开机wifi校准
       }
+      init1();
+      disp((char *)" P3 ");
+      pcb_ver_detect();
       _myTicker.attach(1, timer1s);
       proc3_setup();
       break;
     case SETUP_MODE:
-      wifi_set_opmode(STATIONAP_MODE);
-      wifi_station_connect();
       nvram.proc = OFF_MODE;
       nvram.change = 1;
       save_nvram();
@@ -171,22 +178,36 @@ void setup()
       }
     case GENERAL_MODE:
     default:
+      proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
+      init1();
+      snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
+      disp(disp_buf);
+      nvram.proc = PROC2_MODE;
+      nvram.change = 1;
+      save_nvram();
+      pcb_ver_detect();
+      if (nvram.have_dht == 1)
+        dht(); //dht必须在wifi打开之前
       wifi_set_opmode(STATION_MODE);
       wifi_station_connect();
       set_hostname();
       hello();
-      proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
-      nvram.proc = PROC2_MODE;
-      nvram.change = 1;
-      save_nvram();
       system_deep_sleep_set_option(4); //下次开机关闭wifi
       _myTicker.attach(1, timer1s);
-      init1();
       Serial.println(F("测温模式"));
-      snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
-      disp(disp_buf);
+      if (nvram.have_dht == 0)
+        get_value();
+      if (wendu == 85.00 && nvram.ds18b20_pin >= 0) {
+        for (uint8_t i = 0 ; i < 10; i++) {
+          if (get_temp()) {
+            Serial.printf_P(PSTR("get_temp() %d\r\n"), i);
+            break;
+          }
+          yield();
+          delay(100);
+        }
+      }
       WiFi_isConnected();
-      get_value();
       if (nvram.pcb_ver > 0 && nvram.have_lora > -5) {
         if (lora_init())
           lora.sleep();

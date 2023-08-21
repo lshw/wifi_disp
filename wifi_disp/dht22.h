@@ -9,11 +9,13 @@ bool dht() {
   uint8_t p1, dat[40];
   // empty output data.
   pinMode(DHT_PIN, INPUT_PULLUP);
-  if ( millis()  < dht_next) {
-    dht_next = dht_next - millis();
-    if (dht_next > 500) dht_next = 500;
-    Serial.printf_P(PSTR("delay(%d)\r\n"), dht_next);
-    delay(dht_next);
+  if (dht_next > millis()) {
+    if (dht_next > millis() + 500)
+      dht_next = millis() + 500;
+    while (dht_next > millis()) {
+      delay(100);
+      yield();
+    }
   }
   dht_next = millis() + 500;
 
@@ -24,6 +26,7 @@ bool dht() {
   //    3. SET TO INPUT or INPUT_PULLUP.
   pinMode(DHT_PIN, OUTPUT);
   digitalWrite(DHT_PIN, LOW);
+  cli();
   delayMicroseconds(20000);
   // Pull high and set to input, before wait 40us.
   // @see https://github.com/winlinvip/SimpleDHT/issues/4
@@ -38,12 +41,14 @@ bool dht() {
   //levelTime(pin, LOW);
   //levelTime(pin, HIGH);
   p1 = pulseIn(DHT_PIN, HIGH, 200);
-  if (p1 > 120) return false;
+  if (p1 > 120) {
+    sei();
+    return false;
+  }
   // DHT22 data transmite:
   //    1. T(LOW), 1bit start, PULL LOW 50us(48-55us).
   //    2. T(H0), PULL HIGH 26us(22-30us), bit(0)
   //    3. T(H1), PULL HIGH 70us(68-75us), bit(1)
-  cli();
   for (int j = 0; j < 40; j++) {
     dat[j] = pulseIn(DHT_PIN, HIGH, 200);
   }
@@ -70,7 +75,7 @@ bool dht() {
     shidu = 0.1 * (temp_data[0] << 8 | temp_data[1]);
     if ((temp_data[2] & 0x80 ) != 0)
       wendu = -wendu;
-    Serial.printf_P(PSTR("温度=%.1f, 湿度=%.1f%%\r\n"), wendu, shidu);
+    Serial.printf_P(PSTR("millis()=%ld, 温度=%.1f, 湿度=%.1f%%\r\n"), millis(), wendu, shidu);
     return true;
   } else {
     wendu = -999.0;

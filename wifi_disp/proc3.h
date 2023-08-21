@@ -4,8 +4,6 @@ void proc3_setup() {
   WiFiUDP udp;
   float wendu0 = -300.0;
   int32_t qiya = -10e6;
-  init1();
-  disp((char *)" P3 ");
   set_hostname();
   hello();
   get_value();

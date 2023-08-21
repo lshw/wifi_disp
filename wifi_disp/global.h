@@ -50,6 +50,7 @@ float sht4x_temp();
 extern uint8_t temp_data[6];
 extern String hostname;
 void httpd_listen();
+uint8_t pcb_ver_detect();
 void charge_off();
 void charge_on();
 void lora_sleep();
@@ -58,7 +59,6 @@ bool run_zmd = true;
 char zmd_disp[ZMD_BUF_SIZE];
 uint8_t zmd_offset = 0, zmd_size = 0;
 char disp_buf[22];
-extern uint8_t ds_pin ;
 extern bool power_in ;
 extern bool ap_client_linked ;
 extern float wendu, shidu;
@@ -480,43 +480,55 @@ void hello() {
   Serial.flush();
 }
 void get_value() {
-  if (sht4x_load()) {
-    pinMode(0, INPUT_PULLUP);
-    nvram.pcb_ver = 2;
-    nvram.change = 1;
-    ds_pin = 0;//DHT22使用V2.0的硬件
-    for (uint8_t i = 0; i < 6; i++)
-      Serial.printf_P(PSTR(" %02x"), temp_data[i]);
-    Serial.println();
-    sht4x_temp();
-    sht4x_rh();
-    Serial.printf_P(PSTR("温度:%3.1f,湿度:%3.1f%%\r\n"), wendu, shidu);
-  } else {
-    if (nvram.have_dht > 0 ) {
-      if (!dht() &&  !dht()) {
-        nvram.have_dht = 0;
+  switch (nvram.pcb_ver) {
+    case 2: //sht4x测温湿度, 气压探头
+      Serial.println("is pcb2");
+      if (sht4x_load()) {
+        for (uint8_t i = 0; i < 6; i++)
+          Serial.printf_P(PSTR(" %02x"), temp_data[i]);
+        Serial.println();
+        sht4x_temp();
+        sht4x_rh();
+        Serial.printf_P(PSTR("温度:%3.1f,湿度:%3.1f%%\r\n"), wendu, shidu);
+      } else {
+        Serial.println("detect pcb_ver");
+        nvram.pcb_ver = -1; //重新诊断pcb_ver
         nvram.change = 1;
       }
-    }
-    if (nvram.have_dht <= 0) {
-      if (!ds_init()  && !ds_init()) {
-        nvram.have_dht = 1;
+      break;
+    case 1: //pcb1 ds_pin = 0, have dht, sht4x
+      if (sht4x_load()) { //用sht4x
+        for (uint8_t i = 0; i < 6; i++)
+          Serial.printf_P(PSTR(" %02x"), temp_data[i]);
+        Serial.println();
+        sht4x_temp();
+        sht4x_rh();
+        Serial.printf_P(PSTR("温度:%3.1f,湿度:%3.1f%%\r\n"), wendu, shidu);
+      } else if (nvram.have_dht > 0 ) { //用dht
+        if (!dht() &&  !dht()) {
+          nvram.have_dht = 0;
+          if (nvram.ds18b20_pin == -2)
+            nvram.pcb_ver = -1; //重新诊断pcb_ver
+          nvram.change = 1;
+        }
+      } else if (nvram.ds18b20_pin == 0) {
+        pinMode(nvram.ds18b20_pin, INPUT_PULLUP);
+        get_temp();
+      } else { //无dht 无 ds18b20
+        nvram.pcb_ver = -1; //重新诊断pcb_ver
         nvram.change = 1;
       }
-    }
-    if (nvram.have_dht <= 0)
-      get_temp();
-    else {
-      pinMode(0, INPUT_PULLUP);
-      ds_pin = 0;//DHT22使用V2.0的硬件
-    }
-    if (ds_pin == 0)
-      nvram.pcb_ver = 1;
-    else
-      nvram.pcb_ver = 0;
-    nvram.change = 1;
+      break;
+    case 0: //pcb0 only ds_pin = 12;
+      if (nvram.ds18b20_pin != 12) {
+        nvram.pcb_ver = -1; //重新诊断pcb_ver
+        nvram.change = 1;
+      } else {
+        pinMode(nvram.ds18b20_pin, INPUT_PULLUP);
+        get_temp();
+      }
+      break;
   }
-  Serial.printf_P(PSTR("pcb ver = %d\r\n"), nvram.pcb_ver);
 }
 void check_batt_low() {
   if (power_in) {
@@ -607,5 +619,44 @@ void add_limit_millis() {
     run_millis_limit = millis() + 3600000; //插着电， 续命3600s
   else
     run_millis_limit = millis() + 200000; //没插电， 续命200s
+}
+uint8_t pcb_ver_detect() {
+  if (nvram.pcb_ver == -1) {
+    nvram.have_dht = -1;
+    nvram.ds18b20_pin = -1;
+  }
+  if (nvram.have_dht == -1) {
+    if (!dht() &&  !dht())  {//无dht
+      Serial.println("have not dht");
+      nvram.have_dht = 0;
+    } else {
+      Serial.println("have dht");
+      nvram.have_dht = 1;
+      nvram.pcb_ver  = 1; //只有pcb_ver1 才安装dht,
+      nvram.ds18b20_pin = -2; //有dht就 无 ds18b20
+    }
+    nvram.change = 1;
+  }
+  if (nvram.ds18b20_pin == -1) {
+    nvram.ds18b20_pin = 12;
+    if (!ds_init()) {
+      nvram.ds18b20_pin = 0;
+      if (!ds_init()) {
+        nvram.ds18b20_pin = -2;
+      }
+    }
+    if (nvram.ds18b20_pin == 0)
+      nvram.pcb_ver = 1;
+    else if (nvram.ds18b20_pin == 12)
+      nvram.pcb_ver = 0;
+    nvram.change = 1;
+  }
+  if (nvram.pcb_ver == -1 && nvram.ds18b20_pin == -2) {
+    nvram.pcb_ver = 2; //没有18b20的就是ver2
+    nvram.change = 1;
+  }
+  save_nvram();
+  Serial.printf_P(PSTR("detect:pcb_ver =%d\r\n"), nvram.pcb_ver);
+  return nvram.pcb_ver;
 }
 #endif

@@ -17,8 +17,9 @@ struct {
   char proc3_host[34];
   uint16_t proc3_sec; //多少秒测一次
   int8_t pcb_ver;
-  uint8_t baoliu;
+  int8_t ds18b20_pin;
   uint32_t boot_count;
+  uint32_t baoliu;
   uint32_t crc32;
 }  nvram;
 
@@ -35,8 +36,9 @@ void load_nvram() {
         fp.close();
         nvram.boot_count = 0;
         nvram.have_lora = 0;
-        nvram.have_dht = 0;
-        nvram.pcb_ver = -1;
+        nvram.ds18b20_pin = -1; //需要自检
+        nvram.have_dht = -1; //需要自检
+        nvram.pcb_ver = -1;  //需要自检
         nvram.change = 1;
         save_nvram();
       }
@@ -51,7 +53,11 @@ void load_nvram() {
     nvram.proc3_sec = 20;
     strcpy(nvram.proc3_host, "192.168.2.4");
     nvram.proc3_port = 8888;
-    nvram.pcb_ver = -1;
+    nvram.ds18b20_pin = -1; //需要自检
+    nvram.have_dht = -1; //需要自检
+    nvram.pcb_ver = -1;  //需要自检
+    nvram.change = 1;
+    save_nvram();
   } else if (nvram.ch > 0 && nvram.ch <= 14) {
     Serial.printf_P(PSTR("\r\nwifi channel=%d, proc=%d\r\n"), nvram.ch, nvram.proc);
     WRITE_PERI_REG(0x600011f4, 1 << 16 | nvram.ch);

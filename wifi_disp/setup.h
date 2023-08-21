@@ -3,10 +3,11 @@
 void setup_setup() {
   init1();
   disp((char *)"SETUP");
-  get_value();
   nvram.nvram7 |= NVRAM7_CHARGE; //充电
   nvram.change = 1;
   save_nvram();
+  pcb_ver_detect();
+  get_value();
   if (nvram.pcb_ver > 0) { //v2.0, v3.0
     if (nvram.have_lora > -5 && lora_init())
       lora_sleep();

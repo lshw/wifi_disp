@@ -2,27 +2,18 @@
 #define __DS1820_H__
 #include <OneWire.h>
 OneWire  oneWire(12);
-float wendu, shidu = 101.0;
+float wendu = -300, shidu = 101.0;
 byte dsn[32][8]; //ds1820 sn
 float temp[32];
-uint8_t ds_pin = 12;
 
+uint32_t last_load_temp = 0;
 bool ds_init() {
   uint8_t i;
   File fp;
   bool save = false;
   char key[17];
-  SPIFFS.begin();
-  if (!SPIFFS.exists("/ds_pin.txt")) {
-    save = true;
-    ds_pin = 12;
-  } else {
-    fp = SPIFFS.open("/ds_pin.txt", "r");
-    ds_pin = fp_gets(fp).toInt();
-    fp.close();
-  }
   temp[0] = -999.0;
-  if (ds_pin != 0) {
+  if (nvram.ds18b20_pin == 12) { //pcb_ver0 18b20需要gpio14供电
     pinMode(14, OUTPUT);
     digitalWrite(14, LOW);
     delay(50);
@@ -30,21 +21,13 @@ bool ds_init() {
     delay(50);
   }
   memset(dsn, 0, sizeof(dsn));
-  oneWire.begin(ds_pin);
+  oneWire.begin(nvram.ds18b20_pin);
   if (oneWire.search(dsn[0])) {
-    i = 0;
     Serial.printf_P(PSTR("DS18B20[%d]="), i);
     snprintf_P(key, sizeof(key), PSTR("%02x%02x%02x%02x%02x%02x%02x%02x"), dsn[i][0], dsn[i][1], dsn[i][2], dsn[i][3], dsn[i][4], dsn[i][5], dsn[i][6], dsn[i][7]);
     Serial.println(key);
-    i = 1;
-  } else {
-    if (ds_pin != 0) ds_pin = 0;
-    else ds_pin = 12;
-    save = true;
-    oneWire.begin(ds_pin);
-    i = 0;
-  }
-  Serial.printf_P(PSTR("ds_pin=%d\r\n"), ds_pin);
+  } else
+    return false;
   for (; i < 32; i++) {
     if (!oneWire.search(dsn[i]))
       break;
@@ -62,20 +45,14 @@ bool ds_init() {
   oneWire.skip(); //广播
   oneWire.write(0x44, 1);
   if (dsn[1][0] != 0) { //有多个探头时，外接探头是信号线供电， 测温期间，要对12进行上拉。
-    pinMode(ds_pin, OUTPUT);
-    digitalWrite(ds_pin, HIGH);
+    pinMode(nvram.ds18b20_pin, OUTPUT);
+    digitalWrite(nvram.ds18b20_pin, HIGH);
   }
-  if (save) {
-    fp = SPIFFS.open("/ds_pin.txt", "w");
-    fp.println(ds_pin);
-    fp.close();
-  }
-  SPIFFS.end();
   return true;
 }
-uint32_t last_load_temp = 0;
 bool get_temp() {
   uint8_t i, n;
+  if (nvram.ds18b20_pin < 0) return false;
   if (last_load_temp + 200 > millis()) return false;
   last_load_temp = millis();
   bool ret = true;
@@ -130,16 +107,16 @@ bool get_temp() {
     }
   }
   if (ret == true) {
-    digitalWrite(ds_pin, LOW);
-    if (ds_pin != 0)
+    digitalWrite(nvram.ds18b20_pin, LOW);
+    if (nvram.ds18b20_pin == 12)
       digitalWrite(14, LOW);
   } else {
     oneWire.reset();
     oneWire.skip(); //广播
     oneWire.write(0x44, 1);//再读一次
     if (dsn[1][0] != 0) { //有多个探头时，外接探头是信号线供电， 测温期间，要对12进行上拉。
-      pinMode(ds_pin, OUTPUT);
-      digitalWrite(ds_pin, HIGH);
+      pinMode(nvram.ds18b20_pin, OUTPUT);
+      digitalWrite(nvram.ds18b20_pin, HIGH);
     }
   }
   wendu = temp[0];

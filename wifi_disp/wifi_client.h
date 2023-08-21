@@ -196,6 +196,8 @@ uint16_t http_get(uint8_t no) {
   if (bmp.begin()) {
     + "&qiya=" + String(bmp.readPressure());
   }
+  if (wendu < -299.0 || wendu == 85.00)
+    get_temp();
   if (wendu > -300.0) {
     url0 += "&temp=" + String(wendu);
   }
