@@ -398,7 +398,11 @@ void zmd() {  //1s 一次Ticker
 
 #define __DAY__ ((__DATE__[4]==' '?0:__DATE__[4]-'0')*10 \
                  +(__DATE__[5]-'0'))
-
+String build_date() {
+  char ymd[sizeof("2023-08-22") + 1 ];
+  snprintf_P(ymd, sizeof(ymd), PSTR("%04d-%02d-%02d"), __YEAR__, __MONTH__, __DAY__);
+  return String(ymd);
+}
 void wifi_set_clean() {
   if (SPIFFS.begin()) {
     SPIFFS.remove("/ssid.txt");
