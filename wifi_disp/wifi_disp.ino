@@ -51,6 +51,9 @@ void setup()
     if (nvram.proc == PROC3_MODE || nvram.proc == GENERAL_MODE) {
       wifi_set_opmode(STATION_MODE);
       wifi_station_connect();
+    } else if (nvram.proc == SETUP_MODE) {
+      wifi_set_opmode(STATIONAP_MODE);
+      wifi_station_connect();
     }
   } else {
     pcb_ver_detect();
