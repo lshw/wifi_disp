@@ -64,6 +64,20 @@ extern bool ap_client_linked ;
 extern float wendu, shidu;
 float get_batt();
 float v;
+bool Serial_begined = false;
+void Serial_begin() {
+  if (Serial_begined == false) {
+    Serial.begin(115200);
+    Serial_begined = true;
+  }
+}
+void Serial_end() {
+  if (Serial_begined == true) {
+    Serial.flush();
+    Serial.end();
+    Serial_begined = false;
+  }
+}
 bool power_off = false;
 void poweroff(uint32_t sec) {
   if (nvram.proc != PROC2_MODE && nvram.proc != PROC3_MODE) {
@@ -115,7 +129,7 @@ void poweroff(uint32_t sec) {
     }
   }
   if (nvram.pcb_ver == 1) {
-    Serial.begin(115200);
+    Serial_begin();
     Serial.println();
   }
   if ((nvram.nvram7 & NVRAM7_CHARGE) && power_in)
@@ -221,8 +235,9 @@ float get_batt0() {//锂电池电压
   return v;
 }
 float get_batt() {
-  if (nvram.pcb_ver == 1)
-    Serial.end(); //pcb1 用TX做充电控制腿
+  if (nvram.pcb_ver == 1) {
+    Serial_end(); //pcb1 用TX做充电控制腿
+  }
   charge_off();
   delay(1);
   if (get_batt0() < 1.0) //电压低于1.0v但是还能运行，使用的是外接电源
@@ -267,7 +282,7 @@ float get_batt() {
     }
   }
   if (nvram.pcb_ver == 1) {
-    Serial.begin(115200); //pcb1 用TX做充电控制腿
+    Serial_begin(); //pcb1 用TX做充电控制腿
   }
   Serial.printf_P(PSTR("电池电压%.2f\r\n"), v);
   return v;
@@ -431,8 +446,7 @@ void charge_on() {
       break;
     default:
     case 1: //pcb1
-      Serial.flush();
-      Serial.end();
+      Serial_end();
       pinMode(1, OUTPUT);
       digitalWrite(1, HIGH);
       break;
@@ -450,8 +464,7 @@ void charge_off() {
       break;
     default:
     case 1: //pcb1
-      Serial.flush();
-      Serial.end();
+      Serial_end();
       pinMode(1, OUTPUT);
       digitalWrite(1, LOW);
       break;

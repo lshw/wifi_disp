@@ -5,10 +5,9 @@ void proc3_setup() {
   float wendu0 = -300.0;
   int32_t qiya = -10e6;
   set_hostname();
-  hello();
   pcb_ver_detect();
   if (nvram.have_dht) {
-    if (wendu > -299.0 && !dht())
+    if (wendu < -299.0)
       dht();
     wifi_set_opmode(STATION_MODE);
     wifi_station_connect();

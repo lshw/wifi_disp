@@ -35,7 +35,7 @@ void delay_more() {
 }
 void setup()
 {
-  Serial.begin(115200);
+  Serial_begin();
   load_nvram(); //从esp8266的nvram载入数据
   nvram.boot_count++;
   nvram.change = 1;
@@ -131,7 +131,7 @@ void setup()
       if (nvram.pcb_ver > 0) { //v2.0
         if (nvram.have_lora > -5 & lora_init())
           lora.sleep();
-        Serial.begin(115200);
+        Serial_begin();
       }
       if (nvram.have_lora < 0) {
         nvram.have_lora = 0;
@@ -299,11 +299,11 @@ void loop()
   get_batt();
   yield();
   if (proc == SETUP_MODE && nvram.pcb_ver == 1) {
-    Serial.end();
+    Serial_end();
     charge_on();
     delay(350);
     charge_off();
-    Serial.begin(115200);
+    Serial_begin();
   } else
     delay(350);
 }

@@ -8,6 +8,7 @@ void load_ram();
 void charge_off();
 void charge_on();
 extern bool power_in;
+void Serial_begin();
 void ht16c21_cmd(uint8_t cmd, uint8_t dat) {
   Wire.beginTransmission(HT1621);
   Wire.write(byte(cmd));
@@ -49,16 +50,10 @@ void disp(char *str) {
   };
   uint8_t dispbyte, ram, i, dian;
   if (nvram.pcb_ver == 1) {
-    charge_off();
-    Serial.begin(115200);
-    Serial.println();
+    Serial_begin();
+    Serial.print(F("\r\n"));
   }
   Serial.printf_P(PSTR("disp [%s]\r\n"), str);
-  if (nvram.pcb_ver == 1 && power_in) {
-    Serial.flush();
-    Serial.end();
-    charge_on();
-  }
   i = strlen(str);
   if (i > 10)
     i = 10;

@@ -38,7 +38,7 @@ void hexprint(uint8_t dat) {
 void onClientConnected(const WiFiEventSoftAPModeStationConnected& evt) {
   add_limit_millis();
   ap_client_linked = true;
-  Serial.begin(115200);
+  Serial_begin();
   Serial.print(F("\r\nclient linked:"));
   for (uint8_t i = 0; i < 6; i++)
     hexprint(evt.mac[i]);
