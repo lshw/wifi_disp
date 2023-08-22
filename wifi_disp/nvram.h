@@ -13,6 +13,7 @@ struct {
   uint8_t bw;
   uint8_t cr;
   uint8_t sf;
+  uint32_t lora_hz;
   uint16_t proc3_port;
   char proc3_host[34];
   uint16_t proc3_sec; //多少秒测一次
@@ -50,6 +51,7 @@ void load_nvram() {
     nvram.bw = LR_BW_125k;
     nvram.cr = LR_CODINGRATE_2;
     nvram.sf = LR_SPREADING_FACTOR_12;
+    nvram.lora_hz = 434500000L;
     nvram.proc3_sec = 20;
     strcpy(nvram.proc3_host, "192.168.2.4");
     nvram.proc3_port = 8888;

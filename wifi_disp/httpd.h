@@ -23,7 +23,8 @@ String select_option(uint8_t value, uint8_t dat, String str) {
 String lora_set() {
   if (lora_version == 255 || lora_version == 0) return "";
   return F("<hr>"
-           "lora扩频调制带宽:<select name=lora_bw>")
+           "lora频率(hz):<input type=text name=lora_hz size=10 value='")
+         + String(nvram.lora_hz) + F("'>&nbsp;lora扩频调制带宽:<select name=lora_bw>")
          + select_option(0x00, nvram.bw, String(F("LR_BW_7p8k")))
          + select_option(0x10, nvram.bw, String(F("LR_BW_10p4k")))
          + select_option(0x20, nvram.bw, String(F("LR_BW_15p6k")))
@@ -329,6 +330,23 @@ void httpsave() {
         fp.println(url);
         fp.close();
       }
+    } else if (httpd.argName(i).compareTo(F("lora_hz")) == 0) {
+      nvram.lora_hz = httpd.arg(i).toInt();
+      if (nvram.lora_hz < 137000000L)
+        nvram.lora_hz = 137000000L;
+      else if (nvram.lora_hz > 175000000L && nvram.lora_hz < (410000000L - 175000000L) / 2 + 175000000L)
+        nvram.lora_hz = 175000000L;
+      else if (nvram.lora_hz > (410000000L - 175000000L) / 2 + 175000000L  && nvram.lora_hz < 410000000L)
+        nvram.lora_hz = 410000000L;
+      else if (nvram.lora_hz >  525000000L && nvram.lora_hz < (862000000L - 525000000L) / 2 + 525000000L)
+        nvram.lora_hz = 525000000L;
+      else if (nvram.lora_hz > (862000000L - 525000000L) / 2 + 525000000L && nvram.lora_hz < 862000000L)
+        nvram.lora_hz = 862000000L;
+      else if (nvram.lora_hz > 1020000000L)
+        nvram.lora_hz = 1020000000L;
+      nvram.change = 1;
+      save_nvram();
+      nvram_update = true;
     } else if (httpd.argName(i).compareTo(F("lora_bw")) == 0) {
       nvram.bw = httpd.arg(i).toInt();
       nvram.bw = nvram.bw & 0xf0;

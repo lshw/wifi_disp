@@ -54,11 +54,11 @@ void AP() {
   WiFi.softAP("disp", "");
   Serial.print(F("IP地址: "));
   Serial.println(WiFi.softAPIP());
-  Serial.flush();
   ConnectedHandler = WiFi.onSoftAPModeStationConnected(&onClientConnected);
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(53, "*", WiFi.softAPIP());
   Serial.println(F("泛域名dns服务器启动"));
+  Serial.flush();
   yield();
 }
 
