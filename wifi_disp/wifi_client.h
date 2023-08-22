@@ -179,7 +179,10 @@ bool WiFi_isConnected() {
 
 uint16_t http_get(uint8_t no) {
   char key[17];
-  String url0 = get_url(no);
+  String url0;
+  url0.reserve(260);
+  url0 = get_url(no);
+
   if (url0.indexOf('?') > 0)
     url0 += '&';
   else
@@ -231,6 +234,8 @@ uint16_t http_get(uint8_t no) {
       continue;
     }
     // httpCode will be negative on error
+    url0 = "";
+    url0.reserve(1);
     if (httpCode >= 200 && httpCode <= 299) {
       // HTTP header has been send and Server response header has been handled
       Serial.printf_P(PSTR("[HTTP] GET... code:%d\r\n"), httpCode);
