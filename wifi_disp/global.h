@@ -620,15 +620,6 @@ bool wifi_config() {
   else
     wifi_setup_time = 200;
   WiFi.beginSmartConfig();
-  while (wifi_setup_time > 0) {
-    if (WiFi.smartConfigDone()) {
-      save_ssid();
-      setup_mode = NONE_MODE;
-      return true;
-    }
-    delay(100);
-  }
-  setup_mode = NONE_MODE;
   return false;
 }
 

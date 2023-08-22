@@ -19,11 +19,11 @@ void setup_setup() {
   add_limit_millis();
   _myTicker.attach(1, timer1s);
   wait_connected(10000); //等待连接
+  httpd_listen();
+  ota_setup();
   if (!WiFi.localIP()) {
     wifi_config();
   }
-  httpd_listen();
-  ota_setup();
 }
 
 bool httpd_up = false;
@@ -52,5 +52,6 @@ void setup_loop() {
     nvram.change = 1;
     system_deep_sleep_set_option(2); //重启时不校准无线电
   }
+  add_limit_millis();
 }
 #endif //__SETUP_H__

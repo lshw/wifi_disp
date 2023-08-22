@@ -295,6 +295,16 @@ void loop()
         break;
       }
   }
+
+  if (setup_mode == SMARTCONFIG_MODE) {
+    if (WiFi.smartConfigDone()) {
+      yield();
+      save_ssid();
+      setup_mode = NONE_MODE;
+      WiFi.stopSmartConfig();
+    }
+    setup_loop();
+  }
   if (nvram.change) save_nvram();
   get_batt();
   yield();
@@ -306,4 +316,5 @@ void loop()
     Serial_begin();
   } else
     delay(350);
+  yield();
 }
