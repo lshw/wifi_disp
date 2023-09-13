@@ -8,6 +8,13 @@ extern char disp_buf[22];
 void lora_sleep() {
   lora.sleep();
 }
+void lora_send_wendu() {
+  String msg;
+  msg = val_str();
+  lora.setPayloadLength(msg.length());
+  lora.sendPackage((uint8_t *)msg.c_str(), msg.length()); // sending data
+  lora.idle();    // turn to standby mode
+}
 void lora_send_loop() {
   if (millis() < send_delay) return;
   send_delay = millis() + 200;

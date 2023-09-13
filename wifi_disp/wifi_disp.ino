@@ -65,6 +65,30 @@ void setup()
   add_limit_millis();
   proc = nvram.proc; //保存当前模式
   switch (proc) { //尽快进行模式切换
+    case PROC4_MODE: //lora发送测量值模式, 插电做网关， 不插电做远端.
+      if (nvram.have_lora > -5 && lora_init()) {
+        init1();
+        if (power_in) {
+          Serial.println(F("lora 网关模式"));
+          disp((char *)" P4-L ");
+          wifi_set_opmode(STATION_MODE);
+          wifi_station_connect();
+          set_hostname();
+          hello();
+        } else {
+          Serial.println(F("lora 远端模式"));
+          disp((char *)" P4-S ");
+          lora_send_wendu();
+          delay(100);
+          poweroff(nvram.proc3_sec);
+        }
+      } else {
+        nvram.proc = GENERAL_MODE;
+        nvram.change = 1;
+        save_nvram();
+        ESP.reset();
+      }
+      break;
     case PROC2_MODE:
       if (power_in)
         nvram.proc = PROC3_MODE; //只有插着电，才可以切换到PROC3
