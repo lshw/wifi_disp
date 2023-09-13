@@ -200,7 +200,7 @@ uint16_t http_get(uint8_t no) {
   if (proc == PROC4_MODE && rxLen > 0)
     url0 += "&lora=" + base64::encode(rxBuf, rxLen);
   if (bmp.begin()) {
-    + "&qiya=" + String(bmp.readPressure());
+    url0 += "&qiya=" + String(bmp.readPressure());
   }
   if (wendu < -299.0 || wendu == 85.00)
     get_temp();
