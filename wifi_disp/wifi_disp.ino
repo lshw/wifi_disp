@@ -75,6 +75,10 @@ void setup()
           wifi_station_connect();
           set_hostname();
           hello();
+          if (!wait_connected(30000)) {
+            poweroff(10);
+          }
+
         } else {
           Serial.println(F("lora 远端模式"));
           disp((char *)" P4-S ");
@@ -86,7 +90,7 @@ void setup()
         nvram.proc = GENERAL_MODE;
         nvram.change = 1;
         save_nvram();
-        ESP.reset();
+        poweroff(10);
       }
       break;
     case PROC2_MODE:
@@ -302,12 +306,25 @@ void loop()
     case SETUP_MODE:
       setup_loop();
       break;
+    case PROC4_MODE:
+      if (nvram.pcb_ver > 0 && nvram.have_lora > -5) {
+        add_limit_millis();
+        if (lora_init()) {
+          lora_receive_proc4();
+          if (rxLen > 0) {
+            wget();
+            rxLen = 0;
+            rxBuf[0] = 0;
+          }
+        } else delay(200);
+        break;
+      }
     case LORA_RECEIVE_MODE:
       if (nvram.pcb_ver > 0 && nvram.have_lora > -5) {
         add_limit_millis();
         if (lora_init())
           lora_receive_loop();
-        else delay(100);
+        else delay(200);
         break;
       }
     case LORA_SEND_MODE:

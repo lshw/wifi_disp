@@ -1,7 +1,8 @@
 #include <SPI.h>
 #include "sx1278.h"
+
 LoRa lora;
-uint8_t rxBuf[256];
+uint8_t rxBuf[250] = {0}, rxLen = 0;
 uint32_t send_delay = 0;
 uint16_t lora_count = 0;
 extern char disp_buf[22];
@@ -26,16 +27,33 @@ void lora_send_loop() {
   yield();
 }
 uint8_t lora_rxtx = 0; //1:rx 2:tx
-void lora_receive_loop() {
-  uint8_t len;
+void lora_receive_proc4() {
   if (lora_rxtx != 1) {
     lora.rxInit();
     lora_rxtx = 1;
   }
   if (lora.waitIrq()) {
     lora.clearIRQFlags();
-    len = lora.receivePackage(rxBuf);
-    Serial.write(rxBuf, len);
+    rxLen = lora.receivePackage(rxBuf);
+    if (rxLen < sizeof(rxBuf))
+      rxBuf[rxLen] = 0;
+    Serial.printf_P(PSTR("%ld lora recv:[%s]\r\n"), millis(), rxBuf);
+    Serial.write(rxBuf, rxLen);
+    Serial.println();
+    snprintf_P(disp_buf, sizeof(disp_buf), PSTR("P4.%d"), rxLen);
+    disp(disp_buf);
+  }
+  yield();
+}
+void lora_receive_loop() {
+  if (lora_rxtx != 1) {
+    lora.rxInit();
+    lora_rxtx = 1;
+  }
+  if (lora.waitIrq()) {
+    lora.clearIRQFlags();
+    rxLen = lora.receivePackage(rxBuf);
+    Serial.write(rxBuf, rxLen);
     Serial.println();
     uint8_t rssi = 137 - lora.readRSSI(1);
     snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%3d.%c%c"), rssi, rxBuf[3], rxBuf[4]);

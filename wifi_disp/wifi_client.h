@@ -15,6 +15,7 @@
 #include "ds1820.h"
 extern bool power_in;
 extern float shidu, wendu;
+extern uint8_t rxBuf[250], rxLen;
 void AP();
 bool http_update(String update_url);
 void poweroff(uint32_t);
@@ -196,6 +197,8 @@ uint16_t http_get(uint8_t no) {
            + "&pcb_ver=" + String(nvram.pcb_ver)
            + "&charge=" + String(nvram.nvram7 & NVRAM7_CHARGE)
            + "&ms=" + String(millis());
+  if (proc == PROC4_MODE && rxLen > 0)
+    url0 += "&lora=" + base64::encode(rxBuf, rxLen);
   if (bmp.begin()) {
     + "&qiya=" + String(bmp.readPressure());
   }

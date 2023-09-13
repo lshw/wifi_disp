@@ -570,12 +570,13 @@ void check_batt_low() {
     return;
   }
 }
-void wait_connected(uint16_t ms) {
+bool wait_connected(uint16_t ms) {
   while (millis() < ms && !WiFi_isConnected()) {
     yield();
     Serial.write('.');
     delay(100);
   }
+  return WiFi_isConnected();
 }
 void fix_proc3_set() {
   if (nvram.proc3_host[0] == 0 || nvram.proc3_port < 1024) {
