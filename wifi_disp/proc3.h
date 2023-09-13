@@ -2,8 +2,7 @@
 #define __PROC3_H__
 void proc3_setup() {
   WiFiUDP udp;
-  float wendu0 = -300.0;
-  int32_t qiya = -10e6;
+  String msg;
   set_hostname();
   pcb_ver_detect();
   if (nvram.have_dht) {
@@ -34,39 +33,7 @@ void proc3_setup() {
   Serial.flush();
   if (WiFi_isConnected()) {
     delay(100);
-    if (wendu < -299.0 || wendu == 85.0) {
-      if (nvram.ds18b20_pin >= 0)
-        get_temp();
-    }
-    if (bmp.begin()) {
-      if (wendu > -300.0)
-        wendu0 = (wendu + bmp.readTemperature()) / 2;
-      else
-        wendu0 = bmp.readTemperature();
-      qiya = bmp.readPressure();
-      snprintf(disp_buf, sizeof(disp_buf), "%f", (float)bmp.readPressure() / 1000);
-    } else {
-      if (shidu >= 0.0 && shidu <= 100.0)
-        snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%02d-%02d"), int(wendu), int(shidu));
-      else
-        snprintf(disp_buf, sizeof(disp_buf), "%4.2f", wendu);
-    }
-    disp(disp_buf);
-    wendu0 = wendu;
-    String msg = String(nvram.boot_count) + ',' + String(millis()) + ',' + String(v, 2) + ',';
-    if (wendu0 > -41)
-      msg += String(wendu0) + ',';
-    else
-      msg += "-,";
-    if (shidu >= 0.0 && shidu <= 100.0)
-      msg += String(shidu) + ',';
-    else
-      msg += "-,";
-    if (qiya > -10e6)
-      msg += String(qiya);
-    else
-      msg += '-';
-
+    msg = val_str();
     udp.begin(nvram.proc3_port);
     if (udp.beginPacket(nvram.proc3_host, nvram.proc3_port)
         || udp.beginPacket(nvram.proc3_host, nvram.proc3_port)

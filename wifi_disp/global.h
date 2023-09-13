@@ -668,4 +668,42 @@ uint8_t pcb_ver_detect() {
   Serial.printf_P(PSTR("detect:pcb_ver =%d\r\n"), nvram.pcb_ver);
   return nvram.pcb_ver;
 }
+String val_str() {
+  float wendu0 = -300.0;
+  int32_t qiya = -10e6;
+  String msg;
+  if (wendu < -299.0 || wendu == 85.0) {
+    if (nvram.ds18b20_pin >= 0)
+      get_temp();
+  }
+  if (bmp.begin()) {
+    if (wendu > -300.0)
+      wendu0 = (wendu + bmp.readTemperature()) / 2;
+    else
+      wendu0 = bmp.readTemperature();
+    qiya = bmp.readPressure();
+    snprintf(disp_buf, sizeof(disp_buf), "%f", (float)bmp.readPressure() / 1000);
+  } else {
+    if (shidu >= 0.0 && shidu <= 100.0)
+      snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%02d-%02d"), int(wendu), int(shidu));
+    else
+      snprintf(disp_buf, sizeof(disp_buf), "%4.2f", wendu);
+  }
+  disp(disp_buf);
+  wendu0 = wendu;
+  msg = String(nvram.boot_count) + ',' + String(millis()) + ',' + String(v, 2) + ',';
+  if (wendu0 > -41)
+    msg += String(wendu0) + ',';
+  else
+    msg += "-,";
+  if (shidu >= 0.0 && shidu <= 100.0)
+    msg += String(shidu) + ',';
+  else
+    msg += "-,";
+  if (qiya > -10e6)
+    msg += String(qiya);
+  else
+    msg += '-';
+  return msg;
+}
 #endif
