@@ -49,6 +49,7 @@ bool dht_();
 bool sht4x_load();
 float sht4x_rh();
 float sht4x_temp();
+bool lora_init();
 extern uint8_t temp_data[6];
 extern String hostname;
 void httpd_listen();
@@ -708,5 +709,40 @@ String val_str() {
   else
     msg += '-';
   return msg;
+}
+void switch_proc_begin() { //开始时快速切换
+  if (nvram.pcb_ver != 0 && nvram.have_lora == -5 || !lora_init()) {
+    switch (proc) {
+      case PROC4_MODE:
+      case LORA_RECEIVE_MODE:
+      case LORA_SEND_MODE:
+        proc = GENERAL_MODE;
+        nvram.proc = proc; //无lora
+        nvram.change = 1;
+        save_nvram();
+    }
+  }
+
+  if (power_in) { //上电才可以切换
+    nvram.proc = (nvram.proc + 1) % END_MODE;
+  } else {
+    if (nvram.proc == OFF_MODE)
+      nvram.proc = nvram.old_proc;
+    else
+      nvram.proc = OFF_MODE;
+  }
+  nvram.change = 1;
+  save_nvram();
+}
+void switch_proc_end() { //关机前设定下次启动的程序
+  nvram.proc = proc; //自然关机就再次启动上次的程序
+  nvram.change = 1;
+  save_nvram();
+}
+void switch_proc() {
+  if (millis() < 1000) //开始1秒钟进行快速切换功能
+    switch_proc_begin();
+  else
+    switch_proc_end(); //关机前设定下次启动的程序
 }
 #endif

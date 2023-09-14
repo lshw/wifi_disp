@@ -20,7 +20,8 @@ struct {
   int8_t pcb_ver;
   int8_t ds18b20_pin;
   uint32_t boot_count;
-  uint32_t baoliu;
+  uint8_t old_proc;
+  uint8_t baoliu[3];
   uint32_t crc32;
 }  nvram;
 
