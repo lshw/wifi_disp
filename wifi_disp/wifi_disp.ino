@@ -64,9 +64,9 @@ void setup()
   check_batt_low();
   add_limit_millis();
   proc = nvram.proc; //保存当前模式
+  switch_proc_begin(); //开始时切换
   switch (proc) { //尽快进行模式切换
     case PROC4_MODE: //lora发送测量值模式, 插电做网关， 不插电做远端.
-      if (nvram.have_lora > -5 && lora_init()) {
         init1();
         if (power_in) {
           Serial.println(F("lora 网关模式"));
@@ -86,12 +86,6 @@ void setup()
           delay(100);
           poweroff(nvram.proc3_sec);
         }
-      } else {
-        nvram.proc = GENERAL_MODE;
-        nvram.change = 1;
-        save_nvram();
-        poweroff(10);
-      }
       break;
     case PROC2_MODE:
       if (power_in)
@@ -170,7 +164,6 @@ void setup()
       return;
       break;
     case LORA_SEND_MODE:
-      if (nvram.have_lora > -5) {
         Serial.println(F("lora  发送模式"));
         nvram.proc = LORA_RECEIVE_MODE;
         nvram.change = 1;
@@ -185,9 +178,8 @@ void setup()
           delay(1000);
           return;
         }
-      }
+        poweroff(10);
     case LORA_RECEIVE_MODE:
-      if (nvram.have_lora > -5) {
         Serial.println(F("lora  接收模式"));
         nvram.proc = GENERAL_MODE;
         nvram.change = 1;
@@ -203,7 +195,7 @@ void setup()
           delay(1000);
           return;
         }
-      }
+        poweroff(10);
     case GENERAL_MODE:
     default:
       proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
