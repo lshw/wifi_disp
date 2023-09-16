@@ -88,13 +88,8 @@ void setup()
       }
       break;
     case PROC2_MODE:
-      if (power_in)
-        nvram.proc = PROC3_MODE; //只有插着电，才可以切换到PROC3
-      else
-        nvram.proc = OFF_MODE;
       nvram.change = 1;
       save_nvram();
-      system_deep_sleep_set_option(1); //重启时校准无线电
       init1();
       disp((char *)" P2 ");
       delay(100);
@@ -113,35 +108,20 @@ void setup()
         nvram.proc = GENERAL_MODE;
         nvram.change = 1;
         save_nvram();
-        system_deep_sleep_set_option(2); //重启不校准无线电
         poweroff(2);
       }
       break;
     case PROC3_MODE:
-      if (power_in) { //只有插着电， 才可以换运行模式
-        nvram.proc = SETUP_MODE;
-        nvram.change = 1;
-        save_nvram();
-        system_deep_sleep_set_option(1); //下次开机wifi校准
-      }
       init1();
       disp((char *)" P3 ");
       proc3_setup();
       break;
     case SETUP_MODE:
-      nvram.proc = OFF_MODE;
-      nvram.change = 1;
-      save_nvram();
-      system_deep_sleep_set_option(4); //下次开机关闭wifi
       set_hostname();
       hello();
       setup_setup();
       break;
     case OFF_MODE:
-      nvram.proc = LORA_SEND_MODE;
-      nvram.change = 1;
-      save_nvram();
-      system_deep_sleep_set_option(4); //下次开机关闭wifi
       init1();
       set_hostname();
       hello();
@@ -165,10 +145,6 @@ void setup()
       break;
     case LORA_SEND_MODE:
       Serial.println(F("lora  发送模式"));
-      nvram.proc = LORA_RECEIVE_MODE;
-      nvram.change = 1;
-      save_nvram();
-      system_deep_sleep_set_option(4); //下次开机关闭wifi
       if (lora_init()) {
         init1();
         disp((char *)"S-" VER);
@@ -181,10 +157,6 @@ void setup()
       poweroff(10);
     case LORA_RECEIVE_MODE:
       Serial.println(F("lora  接收模式"));
-      nvram.proc = GENERAL_MODE;
-      nvram.change = 1;
-      save_nvram();
-      system_deep_sleep_set_option(2); //重启时不校准无线电
       init1();
       disp((char *)"L-" VER);
       if (lora_init()) {
@@ -202,9 +174,6 @@ void setup()
       init1();
       snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
       disp(disp_buf);
-      nvram.proc = PROC2_MODE;
-      nvram.change = 1;
-      save_nvram();
       pcb_ver_detect();
       if (nvram.have_dht == 1 && wendu < -299.0)
         dht_(); //dht必须在wifi打开之前
@@ -212,7 +181,6 @@ void setup()
       wifi_station_connect();
       set_hostname();
       hello();
-      system_deep_sleep_set_option(4); //下次开机关闭wifi
       _myTicker.attach(1, timer1s);
       Serial.println(F("测温模式"));
       if (nvram.have_dht == 0)

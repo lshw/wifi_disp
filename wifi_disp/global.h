@@ -710,6 +710,28 @@ String val_str() {
     msg += '-';
   return msg;
 }
+void next_wifi_set() { //设置下一次启动时的wifi状态
+  switch (nvram.proc) {
+    case PROC4_MODE:
+      if (!power_in) {
+        system_deep_sleep_set_option(4); //下次开机关闭wifi
+        break;
+      }
+    case GENERAL_MODE:
+    case PROC3_MODE:
+      system_deep_sleep_set_option(2); //下次开机wifi不校准
+      break;
+    case SETUP_MODE://3设置模式
+      system_deep_sleep_set_option(1); //重启时校准无线电
+      break;
+    case PROC2_MODE: //1 P2模式
+    case OFF_MODE://4关机
+    case LORA_RECEIVE_MODE://lora接收测试
+    case LORA_SEND_MODE://lora发送测试
+      system_deep_sleep_set_option(4); //下次开机关闭wifi
+  }
+}
+
 void switch_proc_begin() { //开始时快速切换
   switch (proc) {
     case PROC4_MODE:
@@ -734,11 +756,13 @@ void switch_proc_begin() { //开始时快速切换
   }
   nvram.change = 1;
   save_nvram();
+  next_wifi_set(); //设置下一次启动时的wifi状态
 }
 void switch_proc_end() { //关机前设定下次启动的程序
   nvram.proc = proc; //自然关机就再次启动上次的程序
   nvram.change = 1;
   save_nvram();
+  next_wifi_set(); //设置下一次启动时的wifi状态
 }
 void switch_proc() {
   if (millis() < 1000) //开始1秒钟进行快速切换功能
