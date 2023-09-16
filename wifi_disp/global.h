@@ -83,11 +83,10 @@ void Serial_end() {
 }
 bool power_off = false;
 void poweroff(uint32_t sec) {
-  if (nvram.proc != PROC2_MODE && nvram.proc != PROC3_MODE) {
-    nvram.proc = GENERAL_MODE;
-    nvram.change = 1;
-  }
 
+  if (v >= 3.50) {
+    switch_proc_end();
+  }
   get_batt();
   Serial.printf_P(PSTR("开机时长:%ld ms\r\n"), (uint32_t)millis());
   if (power_in) Serial.println(F("有外接电源"));
@@ -154,10 +153,6 @@ void poweroff(uint32_t sec) {
   charge_off();
   _myTicker.detach();
   wdt_disable();
-  if (nvram.proc ==  PROC3_MODE || nvram.proc == PROC3_MODE)
-    system_deep_sleep_set_option(4); //下次开机关闭wifi
-  else
-    system_deep_sleep_set_option(2); //下次启动不做无线电校准
   digitalWrite(LED_BUILTIN, LOW);
   if (sec0 == 0) ht16c21_cmd(0x84, 0x2); //lcd off
   save_nvram();
@@ -560,7 +555,7 @@ void check_batt_low() {
     if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != 0) {
       nvram.nvram7 |= NVRAM7_CHARGE; //充电
       nvram.proc = GENERAL_MODE;
-      system_deep_sleep_set_option(2); //重启时不校准无线电
+      system_deep_sleep_set_option(4); //下次开机关闭wifi
       nvram.change = 1; //电压过低
     }
     ht16c21_cmd(0x88, 0); //闪烁
