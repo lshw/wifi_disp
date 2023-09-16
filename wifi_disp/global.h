@@ -711,16 +711,17 @@ String val_str() {
   return msg;
 }
 void switch_proc_begin() { //开始时快速切换
-  if (nvram.pcb_ver != 0 && nvram.have_lora == -5 || !lora_init()) {
-    switch (proc) {
-      case PROC4_MODE:
-      case LORA_RECEIVE_MODE:
-      case LORA_SEND_MODE:
+  switch (proc) {
+    case PROC4_MODE:
+    case LORA_RECEIVE_MODE:
+    case LORA_SEND_MODE:
+      if (nvram.pcb_ver == 0 || nvram.have_lora == -5 || !lora_init()) {
+        //pcb版本0,或者测试了5次都没有lora, 或者测试没有lora,就屏蔽lora功能
         proc = GENERAL_MODE;
         nvram.proc = proc; //无lora
         nvram.change = 1;
         save_nvram();
-    }
+      }
   }
 
   if (power_in) { //上电才可以切换
