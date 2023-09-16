@@ -21,10 +21,6 @@ void proc3_setup() {
     if (wendu < -299.0) {
       if (!dht_()) poweroff(1);
     }
-    nvram.nvram7 |= NVRAM7_CHARGE; //充电
-    nvram.proc = PROC3_MODE;
-    nvram.change = 1;
-    save_nvram();
   }
   get_value();
   fix_proc3_set();
