@@ -65,11 +65,14 @@ void setup()
   proc = nvram.proc; //保存当前模式
   switch_proc_begin(); //开始时切换
   switch (proc) { //尽快进行模式切换
+    case PROC5_MODE:
+      proc5_setup();
+      break;
     case PROC4_MODE: //lora发送测量值模式, 插电做网关， 不插电做远端.
       init1();
       if (power_in) {
         Serial.println(F("lora 网关模式"));
-        disp((char *)" P4-L ");
+        disp(F("P4-L "));
         wifi_set_opmode(STATION_MODE);
         wifi_station_connect();
         set_hostname();
@@ -80,7 +83,7 @@ void setup()
 
       } else {
         Serial.println(F("lora 远端模式"));
-        disp((char *)" P4-S ");
+        disp(F("P4-S "));
         lora_send_wendu();
         delay(100);
         poweroff(nvram.proc3_sec);
@@ -90,7 +93,7 @@ void setup()
       nvram.change = 1;
       save_nvram();
       init1();
-      disp((char *)" P2 ");
+      disp(F(" P2 "));
       delay(100);
       delay_more(); //外插电，就多延迟，方便切换
       if (bmp.begin()) {
@@ -106,7 +109,7 @@ void setup()
       break;
     case PROC3_MODE:
       init1();
-      disp((char *)" P3 ");
+      disp(F(" P3 "));
       proc3_setup();
       break;
     case SETUP_MODE:
@@ -118,9 +121,9 @@ void setup()
       init1();
       set_hostname();
       hello();
-      disp((char *)" OFF ");
+      disp(F(" OFF "));
       delay(2000);
-      disp((char *)"-" VER "-");
+      disp(F("-" VER "-"));
       delay(2000);
       ht16c21_cmd(0x84, 0x02); //关闭ht16c21
       if (nvram.pcb_ver > 0) { //v2.0
@@ -140,7 +143,7 @@ void setup()
       Serial.println(F("lora  发送模式"));
       if (lora_init()) {
         init1();
-        disp((char *)"S-" VER);
+        disp(F("S-" VER));
         wifi_station_disconnect();
         wifi_set_opmode(NULL_MODE);
         WiFi.mode(WIFI_OFF);
@@ -151,9 +154,9 @@ void setup()
     case LORA_RECEIVE_MODE:
       Serial.println(F("lora  接收模式"));
       init1();
-      disp((char *)"L-" VER);
+      disp(F("L-" VER));
       if (lora_init()) {
-        disp((char *)"L-" VER);
+        disp(F("L-" VER));
         wifi_station_disconnect();
         wifi_set_opmode(NULL_MODE);
         WiFi.mode(WIFI_OFF);

@@ -249,7 +249,7 @@ uint16_t http_get(uint8_t no) {
         char ch = payload.charAt(0);
         if ( ch < '0' || ch > '9') { //非数字， 就是web下发的命令
           web_cmd(payload);
-          disp((char *) "8.8.8.8.8.");
+          disp(F("8.8.8.8.8."));
           break;
         }
 
@@ -304,7 +304,7 @@ bool http_update(String update_url)
     save_nvram();
   }
   upgrading = true;
-  disp((char *)"H UP. ");
+  disp(F("H UP. "));
   if (update_url.length() == 0)
     update_url = "http://wifi_disp.anheng.com.cn/firmware.php?";
   else {

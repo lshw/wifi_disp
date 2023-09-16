@@ -146,6 +146,9 @@ void disp(char *str) {
   //0,3,4,7,8 未用
   send_ram();
 }
+void disp(const __FlashStringHelper *str) {
+  disp((char *)String(str).c_str());
+}
 void load_ram() {
   Wire.beginTransmission(HT1621);//读
   Wire.write(byte(0x80));//
