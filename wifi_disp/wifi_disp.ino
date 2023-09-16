@@ -67,25 +67,25 @@ void setup()
   switch_proc_begin(); //开始时切换
   switch (proc) { //尽快进行模式切换
     case PROC4_MODE: //lora发送测量值模式, 插电做网关， 不插电做远端.
-        init1();
-        if (power_in) {
-          Serial.println(F("lora 网关模式"));
-          disp((char *)" P4-L ");
-          wifi_set_opmode(STATION_MODE);
-          wifi_station_connect();
-          set_hostname();
-          hello();
-          if (!wait_connected(30000)) {
-            poweroff(10);
-          }
-
-        } else {
-          Serial.println(F("lora 远端模式"));
-          disp((char *)" P4-S ");
-          lora_send_wendu();
-          delay(100);
-          poweroff(nvram.proc3_sec);
+      init1();
+      if (power_in) {
+        Serial.println(F("lora 网关模式"));
+        disp((char *)" P4-L ");
+        wifi_set_opmode(STATION_MODE);
+        wifi_station_connect();
+        set_hostname();
+        hello();
+        if (!wait_connected(30000)) {
+          poweroff(10);
         }
+
+      } else {
+        Serial.println(F("lora 远端模式"));
+        disp((char *)" P4-S ");
+        lora_send_wendu();
+        delay(100);
+        poweroff(nvram.proc3_sec);
+      }
       break;
     case PROC2_MODE:
       if (power_in)
@@ -164,38 +164,38 @@ void setup()
       return;
       break;
     case LORA_SEND_MODE:
-        Serial.println(F("lora  发送模式"));
-        nvram.proc = LORA_RECEIVE_MODE;
-        nvram.change = 1;
-        save_nvram();
-        system_deep_sleep_set_option(4); //下次开机关闭wifi
-        if (lora_init()) {
-          init1();
-          disp((char *)"S-" VER);
-          wifi_station_disconnect();
-          wifi_set_opmode(NULL_MODE);
-          WiFi.mode(WIFI_OFF);
-          delay(1000);
-          return;
-        }
-        poweroff(10);
-    case LORA_RECEIVE_MODE:
-        Serial.println(F("lora  接收模式"));
-        nvram.proc = GENERAL_MODE;
-        nvram.change = 1;
-        save_nvram();
-        system_deep_sleep_set_option(2); //重启时不校准无线电
+      Serial.println(F("lora  发送模式"));
+      nvram.proc = LORA_RECEIVE_MODE;
+      nvram.change = 1;
+      save_nvram();
+      system_deep_sleep_set_option(4); //下次开机关闭wifi
+      if (lora_init()) {
         init1();
+        disp((char *)"S-" VER);
+        wifi_station_disconnect();
+        wifi_set_opmode(NULL_MODE);
+        WiFi.mode(WIFI_OFF);
+        delay(1000);
+        return;
+      }
+      poweroff(10);
+    case LORA_RECEIVE_MODE:
+      Serial.println(F("lora  接收模式"));
+      nvram.proc = GENERAL_MODE;
+      nvram.change = 1;
+      save_nvram();
+      system_deep_sleep_set_option(2); //重启时不校准无线电
+      init1();
+      disp((char *)"L-" VER);
+      if (lora_init()) {
         disp((char *)"L-" VER);
-        if (lora_init()) {
-          disp((char *)"L-" VER);
-          wifi_station_disconnect();
-          wifi_set_opmode(NULL_MODE);
-          WiFi.mode(WIFI_OFF);
-          delay(1000);
-          return;
-        }
-        poweroff(10);
+        wifi_station_disconnect();
+        wifi_set_opmode(NULL_MODE);
+        WiFi.mode(WIFI_OFF);
+        delay(1000);
+        return;
+      }
+      poweroff(10);
     case GENERAL_MODE:
     default:
       proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
