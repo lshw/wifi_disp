@@ -41,7 +41,6 @@ void setup()
   nvram.change = 1;
   if (millis() > 5000) { //升级程序后第一次启动
     Serial.println(F("升级完成，重启"));
-    nvram.proc = GENERAL_MODE;
     nvram.nvram7 |= NVRAM7_CHARGE;
     nvram.change = 1;
     save_nvram();
@@ -98,16 +97,10 @@ void setup()
         snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%f"), bmp.readAltitude());
         disp(disp_buf);
         shan();
-        nvram.proc = PROC2_MODE;
-        nvram.change = 1;
-        save_nvram();
         poweroff(60);
         return;
         break;
       } else {
-        nvram.proc = GENERAL_MODE;
-        nvram.change = 1;
-        save_nvram();
         poweroff(2);
       }
       break;
@@ -203,10 +196,6 @@ void setup()
       Serial.println();
       wait_connected(5000);
       shan();
-      nvram.proc = GENERAL_MODE;
-      system_deep_sleep_set_option(2); //下次开机wifi不校准
-      nvram.change = 1;
-      save_nvram();
       wait_connected(30000);
       Serial.println();
       if (WiFi_isConnected()) {
@@ -220,11 +209,6 @@ void setup()
         Serial.print(millis());
         Serial.println(F("ms,not link to ap,reboot 3600s"));
         ht16c21_cmd(0x88, 3); //慢闪烁
-        if (nvram.proc != GENERAL_MODE) {
-          nvram.proc = GENERAL_MODE;
-          nvram.change = 1;
-          system_deep_sleep_set_option(2); //重启时不校准无线电
-        }
         poweroff(3600);
       }
       break;

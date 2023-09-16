@@ -44,6 +44,7 @@ enum {
 bool WiFi_isConnected();
 extern bool connected_is_ok;
 uint16_t http_get(uint8_t);
+void switch_proc_end();
 bool ds_init();
 bool dht_();
 bool sht4x_load();

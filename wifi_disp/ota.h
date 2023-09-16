@@ -13,10 +13,6 @@ void ota_setup() {
     } else { // U_SPIFFS
       type = "filesystem";
     }
-    if (nvram.proc != GENERAL_MODE) {
-      nvram.proc = GENERAL_MODE;
-      nvram.change = 1;
-    }
     // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
     Serial.print(F("Start updating "));
     Serial.println(type);

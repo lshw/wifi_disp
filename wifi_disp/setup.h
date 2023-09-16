@@ -47,11 +47,6 @@ void setup_loop() {
     run_zmd = false;
     zmd();
   }
-  if (nvram.proc != GENERAL_MODE && millis() > 5000) { //OTA5秒后， 如果再重启， 就进入测温程序
-    nvram.proc = GENERAL_MODE;
-    nvram.change = 1;
-    system_deep_sleep_set_option(2); //重启时不校准无线电
-  }
   add_limit_millis();
 }
 #endif //__SETUP_H__

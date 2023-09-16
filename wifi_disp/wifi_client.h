@@ -382,9 +382,6 @@ void web_cmd_a(String str) {
       wifi_set_add(str.substring(i + 1, i0).c_str(), str.substring(i0 + 1, len).c_str());
     }
   } else if (cmd == "OFF") {
-    nvram.proc = GENERAL_MODE;
-    nvram.change = 1;
-    save_nvram();
     memset(disp_buf, ' ', sizeof(disp_buf));
     disp(disp_buf);
     poweroff(0);

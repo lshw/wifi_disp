@@ -14,7 +14,6 @@ void proc3_setup() {
   _myTicker.attach(1, timer1s);
   wait_connected(10000);
   nvram.nvram7 |= NVRAM7_CHARGE; //充电
-  nvram.proc = PROC3_MODE;
   nvram.change = 1;
   save_nvram();
   if (nvram.have_dht) {
@@ -25,7 +24,6 @@ void proc3_setup() {
   get_value();
   fix_proc3_set();
   shan();
-  system_deep_sleep_set_option(2); //下次开机wifi不校准
   Serial.flush();
   if (WiFi_isConnected()) {
     delay(100);
