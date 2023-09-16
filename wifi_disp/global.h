@@ -742,6 +742,10 @@ void switch_proc_begin() { //开始时快速切换
   }
 
   if (power_in) { //上电才可以切换
+    if (nvram.proc == SETUP_MODE)
+      nvram.old_proc = GENERAL_MODE;
+    else
+      nvram.old_proc = nvram.proc;
     nvram.proc = (nvram.proc + 1) % END_MODE;
   } else {
     if (nvram.proc == OFF_MODE)
@@ -754,6 +758,8 @@ void switch_proc_begin() { //开始时快速切换
   next_wifi_set(); //设置下一次启动时的wifi状态
 }
 void switch_proc_end() { //关机前设定下次启动的程序
+  if (proc == SETUP_MODE)
+    nvram.proc = nvram.old_proc;
   nvram.proc = proc; //自然关机就再次启动上次的程序
   nvram.change = 1;
   save_nvram();
