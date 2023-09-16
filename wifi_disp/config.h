@@ -11,7 +11,7 @@
 #ifndef GIT_VER
 #define GIT_VER "test"
 #endif
-
+#define DOWNLOAD_KEY 0
 #ifndef BUILD_SET
 #define BUILD_SET "default"
 #endif

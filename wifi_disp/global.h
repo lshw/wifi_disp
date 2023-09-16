@@ -36,7 +36,8 @@ enum {
   PROC3_MODE, //2 P3模式
   SETUP_MODE,//3设置模式
   OFF_MODE,//4关机
-  PROC4_MODE, // P3模式
+  PROC4_MODE, // P4模式
+  PROC5_MODE, // P5模式
   LORA_RECEIVE_MODE,//lora接收测试
   LORA_SEND_MODE,//lora发送测试
   END_MODE

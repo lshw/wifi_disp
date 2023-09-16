@@ -21,6 +21,7 @@ String hostname = HOSTNAME;
 #include "sht4x.h"
 #include "setup.h"
 #include "proc3.h"
+#include "proc5.h"
 bool power_in = false;
 void init1() {
   ht16c21_setup(); //180ms
