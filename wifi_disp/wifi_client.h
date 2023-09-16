@@ -295,7 +295,7 @@ bool http_update(String update_url)
 {
   if (get_batt() < 3.6) {
     Serial.println(F("电压太低,不做升级"));
-    ESP.restart();
+    poweroff(1);
     return false;
   }
   if (nvram.nvram7 & NVRAM7_CHARGE == 0) {
@@ -323,12 +323,7 @@ bool http_update(String update_url)
   switch (ret) {
     case HTTP_UPDATE_FAILED:
       Serial.printf_P(PSTR("HTTP_UPDATE_FAILD Error (%d): %s\r\n"), ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-      if (nvram.proc != GENERAL_MODE) {
-        nvram.proc = GENERAL_MODE;
-        nvram.change = 1;
-        save_nvram();
-      }
-      ESP.restart();
+      poweroff(10);
       break;
 
     case HTTP_UPDATE_NO_UPDATES:

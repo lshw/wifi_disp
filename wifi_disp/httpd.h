@@ -395,10 +395,7 @@ void httpsave() {
   httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/');</script></body></html>");
   yield();
   if (reboot_now) {
-    nvram.proc = GENERAL_MODE;
-    nvram.change = 1;
-    save_nvram();
-    ESP.restart();
+    poweroff(1);
   }
 }
 void httpd_listen() {
@@ -437,7 +434,7 @@ void httpd_listen() {
       Serial.flush();
       ht16c21_cmd(0x88, 1); //闪烁
       delay(5);
-      ESP.restart();
+      poweroff(1);
     } else {
       body = "升级失败 <a href=/><buttom>返回首页</buttom></a>";
       httpd_send_200("");
