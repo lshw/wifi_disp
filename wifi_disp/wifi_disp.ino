@@ -21,7 +21,12 @@ String hostname = HOSTNAME;
 #include "sht4x.h"
 #include "setup.h"
 #include "proc3.h"
+#if __has_include("proc4.h")
+#include "proc4.h"
+#endif
+#if __has_include("proc5.h")
 #include "proc5.h"
+#endif
 bool power_in = false;
 void init1() {
   ht16c21_setup(); //180ms
@@ -59,30 +64,16 @@ void setup()
   proc = nvram.proc; //保存当前模式
   switch_proc_begin(); //开始时切换
   switch (proc) { //尽快进行模式切换
+#if __has_include("proc5.h")
     case PROC5_MODE:
       proc5_setup();
       break;
+#endif
+#if __has_include("proc4.h")
     case PROC4_MODE: //lora发送测量值模式, 插电做网关， 不插电做远端.
-      init1();
-      if (power_in) {
-        Serial.println(F("lora 网关模式"));
-        disp(F("P4-L "));
-        wifi_set_opmode(STATION_MODE);
-        wifi_station_connect();
-        set_hostname();
-        hello();
-        if (!wait_connected(30000)) {
-          poweroff(10);
-        }
-
-      } else {
-        Serial.println(F("lora 远端模式"));
-        disp(F("P4-S "));
-        lora_send_wendu();
-        delay(100);
-        poweroff(nvram.proc3_sec);
-      }
+      proc4_setup();
       break;
+#endif
     case PROC2_MODE:
       nvram.change = 1;
       save_nvram();
