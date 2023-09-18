@@ -33,6 +33,8 @@ void proc5_setup() {
     poweroff(2);
   }
   pinMode(DOWNLOAD_KEY, INPUT_PULLUP);
+  delay_more();
+  switch_proc_end();
   ht16c21_cmd(0x88, 0); //0-不闪 1-2hz 2-1hz 3-0.5hz
   if (power_in) { //插电，是采样模式
     String ssid;

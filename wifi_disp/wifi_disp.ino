@@ -27,13 +27,6 @@ void init1() {
   ht16c21_setup(); //180ms
   ht16c21_cmd(0x88, 1); //闪烁2hz
 }
-void delay_more() {
-  if (power_in) {
-    Serial.println(F("外插电,延迟1秒，方便切换"));
-    if (millis() < 900)
-      delay(1000 - millis());
-  }
-}
 void setup()
 {
   Serial_begin();

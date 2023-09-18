@@ -777,4 +777,11 @@ void switch_proc() {
   else
     switch_proc_end(); //关机前设定下次启动的程序
 }
+void delay_more() {
+  if (power_in) {
+    Serial.println(F("外插电,延迟1秒，方便切换"));
+    if (millis() < 900)
+      delay(1000 - millis());
+  }
+}
 #endif
