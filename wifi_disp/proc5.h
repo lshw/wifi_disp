@@ -20,9 +20,6 @@ void proc5_setup() {
   File fp;
   int8_t rc;
   struct ssid_mac macs[MACS];
-  uint8_t offset = 0;
-  uint8_t offset1 = 0;
-  _myTicker.attach(1, timer1s);
   init1();
   if (power_in)
     disp(F("P5S-0"));
@@ -52,6 +49,9 @@ void proc5_setup() {
     memset(macs, 0, sizeof(macs));
     bool download_key_last;
     while (1) {
+      system_soft_wdt_feed ();
+      yield();
+      delay(100);
       rc = WiFi.scanNetworks();
       for (uint8_t i = 0; i < rc; i++ ) {
         WiFi.getNetworkInfo(i, ssid, encryptionType, rssi, bssid, channel, hidden);
@@ -138,6 +138,7 @@ void proc5_setup() {
         disp((char *) disp_buf);
         freeMem();
         for (uint8_t i = 0; i < 20; i++) { //2秒换一个ssid
+          system_soft_wdt_feed ();
           yield();
           delay(100);
         }
