@@ -1,10 +1,10 @@
 #ifndef __PROC3_H__
 #define __PROC3_H__
+//发送温度湿度压力到tcp服务器
 void proc3_setup() {
   WiFiUDP udp;
   String msg;
   set_hostname();
-  pcb_ver_detect();
   if (nvram.have_dht) {
     if (wendu < -299.0)
       dht_();
