@@ -728,8 +728,10 @@ void next_wifi_set() { //设置下一次启动时的wifi状态
       system_deep_sleep_set_option(4); //下次开机关闭wifi
   }
 }
-
+bool switch_proc_begin_runed = false;
 void switch_proc_begin() { //开始时快速切换
+  if (switch_proc_begin_runed) return;
+  switch_proc_begin_runed = true;
   switch (proc) {
     case PROC4_MODE:
     case LORA_RECEIVE_MODE:
