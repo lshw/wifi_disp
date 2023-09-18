@@ -760,8 +760,10 @@ void switch_proc_begin() { //开始时快速切换
   next_wifi_set(); //设置下一次启动时的wifi状态
 }
 void switch_proc_end() { //关机前设定下次启动的程序
-  if (proc == SETUP_MODE)
+  if (proc == SETUP_MODE && nvram.proc != nvram.old_proc) {
     nvram.proc = nvram.old_proc;
+  }
+  if (nvram.proc == proc) return;
   nvram.proc = proc; //自然关机就再次启动上次的程序
   nvram.change = 1;
   save_nvram();
