@@ -784,4 +784,8 @@ void delay_more() {
       delay(1000 - millis());
   }
 }
+void freeMem() {
+  Serial.print(F("剩余ram:"));
+  Serial.println(ESP.getFreeHeap());
+}
 #endif

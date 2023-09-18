@@ -136,6 +136,7 @@ void proc5_setup() {
         wifi_set_macaddr(SOFTAP_IF, macs[i].bssid);
         snprintf_P(disp_buf, sizeof(disp_buf), PSTR("P5L-%d"), i);
         disp((char *) disp_buf);
+        freeMem();
         for (uint8_t i = 0; i < 20; i++) { //2秒换一个ssid
           yield();
           delay(100);
