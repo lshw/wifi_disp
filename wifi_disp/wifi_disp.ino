@@ -243,10 +243,11 @@ void loop()
         add_limit_millis();
         if (lora_init()) {
           lora_receive_proc4();
-          if (rxLen > 0) {
+          if (rxLen > 0 && send_limit < 80) {
             wget();
             rxLen = 0;
             rxBuf[0] = 0;
+            send_limit += 20; //猝发4次后每20秒发送一次
           }
         } else delay(200);
         break;
