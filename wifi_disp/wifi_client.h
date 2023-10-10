@@ -84,6 +84,7 @@ void wifi_setup() {
     AP();
   else
     WiFi.mode(WIFI_STA);
+  dump_ap_config();
   WiFi.setAutoConnect(true);//自动链接上次
   if (SPIFFS.begin()) {
     if (!SPIFFS.exists("/ssid.txt")) {
@@ -154,6 +155,7 @@ bool WiFi_isConnected() {
     if (WiFi.localIP()) {
       connected_is_ok = true;
       Serial.printf_P(PSTR("\r\n用上次wifi设置登陆ap成功, millis()=%ld\r\n"), millis());
+      dump_ap_config();
     }
   } else if (WiFi.localIP()) {
     uint8_t ap_id = wifi_station_get_current_ap_id();

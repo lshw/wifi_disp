@@ -790,4 +790,82 @@ void freeMem() {
   Serial.print(F("剩余ram:"));
   Serial.println(ESP.getFreeHeap());
 }
+/*
+  station_config {
+    uint8 ssid[32];
+    uint8 password[64];
+    uint8 channel;
+    uint8 bssid_set;    // Note: If bssid_set is 1, station will just connect to the router
+                        // with both ssid[] and bssid[] matched. Please check about this.
+    uint8 bssid[6];
+    wifi_fast_scan_threshold_t threshold;
+    bool open_and_wep_mode_disable; // Can connect to open/wep router by default.
+    bool all_channel_scan;
+  };
+*/
+void print_s(String str, uint8_t len) {
+  uint8_t i;
+  if (str.length() >= len) {
+    Serial.print(str);
+    return;
+  }
+  for (i = 0; i < (len - str.length()) / 2; i++) Serial.write(' ');
+  i += str.length();
+  Serial.print(str);
+  for (; i < len; i++) Serial.write(' ');
+}
+bool is_az(char * str) {
+  uint8_t len = strlen(str);
+  for (uint8_t i = 0; i < len; i++)
+    if (str[i] <= ' ' || str[i] >= 0x7f) return false;
+  return true;
+}
+void dump_ap_config() {
+  struct station_config config[5];
+  wifi_station_get_ap_info(config);
+  uint8_t ssid_t = sizeof(" ssid ");
+  uint8_t password_t = sizeof(" passwd ");
+  for (uint8_t i = 0; i < 5; i++) {
+    // if (config[i].channel > 14) continue;
+    if (!is_az((char *)config[i].ssid)) continue;
+    if (!is_az((char *)config[i].password)) continue;
+    if (ssid_t < strlen((char *)config[i].ssid)) ssid_t = strlen((char *)config[i].ssid);
+    if (password_t < strlen((char *)config[i].password)) password_t = strlen((char *)config[i].password);
+  }
+  Serial.println();
+  print_s(String(F("ssid")), ssid_t);
+  Serial.write('|');
+  print_s(String(F("passwd")), password_t);
+  Serial.write('|');
+  //  print_s(String(F("ch ")), 3);
+  // Serial.write('|');
+  print_s(String(F("bssid_set")), sizeof("bssid_set"));
+  Serial.write('|');
+  print_s(String(F("bssid")), sizeof("00:00:00:00:00:00") - 1);
+  // Serial.write('|');
+  //  print_s(String(F("scan")), sizeof("scan"));
+  Serial.println();
+  for (uint8_t i = 0; i < 5; i++) {
+    //  if (config[i].channel > 14) continue;
+    if (config[i].ssid[0] == 0) continue;
+    if (config[i].password[0] == 0) continue;
+    if (!is_az((char *)config[i].ssid)) continue;
+    if (!is_az((char *)config[i].password)) continue;
+    print_s(String((char *)config[i].ssid), ssid_t);
+    Serial.write('|');
+    print_s(String((char *)config[i].password), password_t);
+    Serial.write('|');
+    //   print_s(String(config[i].channel,DEC), 3);
+    //   Serial.write('|');
+    print_s(String(config[i].bssid_set), sizeof("bssid_set"));
+    Serial.printf_P(PSTR("|%02X"), config[i].bssid[0]);
+    for (uint8_t i0 = 1; i0 < 6; i0++) {
+      Serial.printf_P(PSTR(":%02X"), config[i].bssid[i0]);
+    }
+    //   Serial.write('|');
+    //   print_s(String(config[i].all_channel_scan), sizeof("scan"));
+    Serial.println();
+  }
+  Serial.println();
+}
 #endif
