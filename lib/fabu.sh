@@ -8,7 +8,7 @@ date=`git log --date=short -1 |grep ^Date: |awk '{print $2}' |tr -d '-'`
 ver=$date-${a:0:8}
 echo $ver
 git tag $ver
-export debug=",dbg=Serial,lvl=WIFI"
+export debug=",dbg=Serial,lvl=SSLTLS_MEMHTTP_CLIENTHTTP_SERVERCOREWIFIHTTP_UPDATEUPDATEROTAOOMMDNSHWDT"
 lib/build.sh
 mv lib/wifi_disp.bin lib/wifi_disp_dbg.bin
 export debug=",dbg=Disabled,lvl=None____"
