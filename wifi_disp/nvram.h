@@ -48,7 +48,7 @@ void load_nvram() {
   }
   if (nvram.crc32 != calculateCRC32((uint8_t*) &nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
     memset(&nvram, 0, sizeof(nvram));
-    nvram.ch = 6;
+    nvram.ch = 0;
     nvram.bw = LR_BW_125k;
     nvram.cr = LR_CODINGRATE_2;
     nvram.sf = LR_SPREADING_FACTOR_12;
