@@ -82,13 +82,21 @@ void setup()
       delay(100);
       delay_more(); //外插电，就多延迟，方便切换
       if (bmp.begin()) {
+        if(nvram.have_bmp != 5) {
+          save_nvram();
+          nvram.have_bmp = 5;
+        }
         snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%f"), bmp.readAltitude());
         disp(disp_buf);
         shan();
         poweroff(60);
         return;
-        break;
       } else {
+        if(nvram.have_bmp > -5)
+          nvram.have_bmp--;
+        else
+          nvram.proc = GENERAL_MODE;
+        save_nvram();
         poweroff(2);
       }
       break;

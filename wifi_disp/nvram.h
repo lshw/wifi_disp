@@ -21,7 +21,8 @@ struct {
   int8_t ds18b20_pin;
   uint32_t boot_count;
   uint8_t old_proc;
-  uint8_t baoliu[3];
+  int8_t have_bmp;
+  uint8_t baoliu[2];
   uint32_t crc32;
 }  nvram;
 
@@ -42,6 +43,7 @@ void load_nvram() {
         nvram.have_dht = -1; //需要自检
         nvram.pcb_ver = -1;  //需要自检
         nvram.change = 1;
+        nvram.have_bmp = 1;
         save_nvram();
       }
     }
