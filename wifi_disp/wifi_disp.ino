@@ -82,7 +82,7 @@ void setup()
       delay(100);
       delay_more(); //外插电，就多延迟，方便切换
       if (bmp.begin()) {
-        if(nvram.have_bmp != 5) {
+        if (nvram.have_bmp != 5) {
           save_nvram();
           nvram.have_bmp = 5;
         }
@@ -92,7 +92,7 @@ void setup()
         poweroff(60);
         return;
       } else {
-        if(nvram.have_bmp > -5)
+        if (nvram.have_bmp > -5)
           nvram.have_bmp--;
         else
           nvram.proc = GENERAL_MODE;

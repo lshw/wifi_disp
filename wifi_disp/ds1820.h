@@ -1,6 +1,6 @@
 #ifndef __DS1820_H__
 #define __DS1820_H__
-#include <OneWire.h>
+#include "OneWire.h"
 OneWire  oneWire(12);
 float wendu = -300, shidu = 101.0;
 byte dsn[32][8]; //ds1820 sn
