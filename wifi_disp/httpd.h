@@ -94,7 +94,7 @@ void http_proc3() {
          "<a href=/><button>返回设置</button></a>"
          "<hr>"
          "PROC_3 测试间隔(10-250): <span onclick=modi('/save.php?proc3_sec=','修改测试间隔','" + String(nvram.proc3_sec) + "')><font color = blue>" + String(nvram.proc3_sec) + "</font>秒</span>"
-         "&nbsp;&nbsp;udp服务器: <span onclick=modi('/save.php?proc3_host=','修改服务器,最长32字符','" + String(nvram.proc3_host) + "')><font color = blue>" + String(nvram.proc3_host) + "</font></span>"
+         "&nbsp;&nbsp;<span onclick=modi('/save.php?proc3_host=','修改服务器,最长32字符','" + String(nvram.proc3_host) + "')><font color = blue>udp服务器: " + String(nvram.proc3_host) + "</font></span>"
          "&nbsp;&nbsp;udp端口: <span onclick=modi('/save.php?proc3_port=','修改服务器端口,1025-65535','" + String(nvram.proc3_port) + "')><font color = blue>" + String(nvram.proc3_port) + "</font></span><hr>";
   httpd_send_200("");
 }

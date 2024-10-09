@@ -579,8 +579,7 @@ bool wait_connected(uint16_t ms) {
   return WiFi_isConnected();
 }
 void fix_proc3_set() {
-  if (nvram.proc3_host[0] == 0 || nvram.proc3_port < 1024) {
-    strncpy(nvram.proc3_host, (char *)"192.168.2.4", sizeof(nvram.proc3_host) - 1);
+  if (nvram.proc3_port < 1024) {
     nvram.proc3_port = 8888;
     nvram.change = 1;
     save_nvram();
@@ -768,6 +767,8 @@ void switch_proc_end() { //关机前设定下次启动的程序
     nvram.proc = nvram.old_proc;
   }
   if (nvram.proc == proc) return;
+  if (nvram.proc3_host[0] == 0 && proc == PROC3_MODE) //没有设置host时， 不开启P3
+    proc = GENERAL_MODE;
   nvram.proc = proc; //自然关机就再次启动上次的程序
   nvram.change = 1;
   save_nvram();

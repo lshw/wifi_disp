@@ -84,6 +84,7 @@ void setup()
       if (bmp.begin()) {
         if (nvram.have_bmp != 5) {
           nvram.have_bmp = 5;
+          nvram.change = 1;
           save_nvram();
         }
         snprintf_P(disp_buf, sizeof(disp_buf), PSTR("%f"), bmp.readAltitude());
@@ -94,8 +95,11 @@ void setup()
       } else {
         if (nvram.have_bmp > -5)
           nvram.have_bmp--;
-        else
+        else {
           nvram.proc = GENERAL_MODE;
+          proc = nvram.proc;
+        }
+        nvram.change = 1;
         save_nvram();
         poweroff(2);
       }
