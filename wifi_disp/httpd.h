@@ -191,8 +191,7 @@ void handleRoot() {
          + build_date()
          + " " __TIME__ "</mark></td</tr></table><br>编译参数:[" BUILD_SET "] GCC" + String(__GNUC__) + "." + String(__GNUC_MINOR__)
          + "<hr>";
-  httpd_send_200("<script>"
-                 "function get_passwd(ssid) {"
+  httpd_send_200("function get_passwd(ssid) {"
                  "var passwd=prompt('输入 '+ssid+' 的密码:');"
                  "if(passwd==null) return false;"
                  "if(passwd) location.replace('add_ssid.php?data='+ssid+':'+passwd);"
@@ -201,8 +200,7 @@ void handleRoot() {
                  "}"
                  "function select_ssid(ssid){"
                  "if(confirm('连接到['+ssid+']?')) location.replace('add_ssid.php?data='+ssid);"
-                 "}"
-                 "</script>");
+                 "}");
 }
 void handleNotFound() {
   File fp;
