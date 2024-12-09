@@ -4,7 +4,7 @@
 void proc3_setup() {
   WiFiUDP udp;
   String msg;
-  if(nvram.proc3_host[0] == 0)
+  if (nvram.proc3_host[0] == 0)
     return;
   set_hostname();
   if (nvram.have_dht) {
