@@ -753,8 +753,11 @@ void switch_proc_begin() { //开始时快速切换
       nvram.old_proc = nvram.proc;
     nvram.proc = (nvram.proc + 1) % END_MODE;
   } else {
-    if (nvram.proc == OFF_MODE)
+    if (nvram.proc == OFF_MODE) {
       nvram.proc = nvram.old_proc;
+      if (nvram.proc == OFF_MODE)
+        nvram.proc = GENERAL_MODE;
+    }
     else
       nvram.proc = OFF_MODE;
   }
