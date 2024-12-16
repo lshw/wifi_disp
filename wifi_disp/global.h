@@ -761,12 +761,12 @@ void switch_proc_begin() { //开始时快速切换
     else
       nvram.proc = OFF_MODE;
   }
-  if (nvram.proc3_host[0] == 0 && proc == PROC3_MODE){ //没有设置host时， 不开启P3
-    proc = GENERAL_MODE;
+  if (nvram.proc3_host[0] == 0 && proc == PROC3_MODE) { //没有设置host时， 不开启P3
+    proc = SETUP_MODE;
     nvram.proc = proc;
   }
-  if (nvram.have_bmp <= -5 && proc == PROC2_MODE){ //不开启P2
-    proc = GENERAL_MODE;
+  if (nvram.have_bmp <= -5 && proc == PROC2_MODE) { //不开启P2
+    proc = SETUP_MODE;
     nvram.proc = proc;
   }
   nvram.change = 1;
