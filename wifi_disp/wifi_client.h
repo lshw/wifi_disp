@@ -235,6 +235,7 @@ uint16_t http_get(uint8_t no) {
   for (uint8_t i = 0; i < 3; i++) {
     httpCode = http.GET();
     if (httpCode < 0) {
+      http.begin(client, url0 + "&err=" + String((int)httpCode));  //HTTP提交
       Serial.print(F("err:"));
       Serial.println(httpCode);
       delay(100);
