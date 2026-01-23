@@ -157,18 +157,25 @@ bool WiFi_isConnected() {
   }
   if (fast_wifi) {
     if (WiFi.localIP()) {
-      connected_is_ok = true;
-      Serial.printf_P(PSTR("\r\n用上次wifi设置登陆ap成功, millis()=%ld\r\n"), millis());
       dump_ap_config();
+      uint8_t ap_id = wifi_station_get_current_ap_id();
+      struct station_config config[5];
+      wifi_station_get_ap_info(config);
+      config[ap_id].bssid_set = 1;  //同名ap，mac地址不同
+      config[ap_id].channel = wifi_get_channel();
+      wifi_station_set_config(&config[ap_id]);  //保存成功的ssid,用于下次通讯
+      connected_is_ok = true;
+      Serial.printf_P(PSTR("\r\n用SSID设置登陆ap成功,ch=%d,millis()=%ld\r\n"), config[ap_id].channel, millis());
     }
   } else if (WiFi.localIP()) {
     uint8_t ap_id = wifi_station_get_current_ap_id();
     struct station_config config[5];
     wifi_station_get_ap_info(config);
-    config[ap_id].bssid_set = 1;              //同名ap，mac地址不同
+    config[ap_id].bssid_set = 1;  //同名ap，mac地址不同
+    config[ap_id].channel = wifi_get_channel();
     wifi_station_set_config(&config[ap_id]);  //保存成功的ssid,用于下次通讯
     connected_is_ok = true;
-    Serial.printf_P(PSTR("\r\n用SSID设置登陆ap成功,millis()=%ld\r\n"), millis());
+    Serial.printf_P(PSTR("\r\n用SSID设置登陆ap成功,ch=%d,millis()=%ld\r\n"), config[ap_id].channel, millis());
   }
   if (connected_is_ok == true) {
     Serial.println(WiFi.localIP());

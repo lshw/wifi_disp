@@ -852,8 +852,8 @@ void dump_ap_config() {
   Serial.write('|');
   print_s(String(F("passwd")), password_t);
   Serial.write('|');
-  //  print_s(String(F("ch ")), 3);
-  // Serial.write('|');
+  print_s(String(F("ch ")), 3);
+  Serial.write('|');
   print_s(String(F("bssid_set")), sizeof("bssid_set"));
   Serial.write('|');
   print_s(String(F("bssid")), sizeof("00:00:00:00:00:00") - 1);
@@ -870,8 +870,8 @@ void dump_ap_config() {
     Serial.write('|');
     print_s(String((char *)config[i].password), password_t);
     Serial.write('|');
-    //   print_s(String(config[i].channel,DEC), 3);
-    //   Serial.write('|');
+    print_s(String(config[i].channel, DEC), 3);
+    Serial.write('|');
     print_s(String(config[i].bssid_set), sizeof("bssid_set"));
     Serial.printf_P(PSTR("|%02X"), config[i].bssid[0]);
     for (uint8_t i0 = 1; i0 < 6; i0++) {

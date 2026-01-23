@@ -44,9 +44,13 @@ void setup() {
     save_nvram();
     poweroff(2);
   }
+  //WiFi.setAutoConnect(true);                        //自动链接上次
   if (nvram.have_dht == 0 && nvram.pcb_ver >= 0) {  //dht与wifi_station_connect冲突
     if (nvram.proc == PROC3_MODE || nvram.proc == GENERAL_MODE) {
       wifi_set_opmode(STATION_MODE);
+      struct station_config conf = { 0 };
+      wifi_station_get_config(&conf);
+      wifi_station_set_config_current(&conf);
       wifi_station_connect();
     } else if (nvram.proc == SETUP_MODE) {
       wifi_set_opmode(STATIONAP_MODE);
@@ -164,7 +168,7 @@ void setup() {
     default:
       proc = GENERAL_MODE;  //让后面2个lora在不存在的时候，修正为proc=0
       init1();
-      snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
+      snprintf_P(disp_buf, sizeof(disp_buf), PSTR("-%3.2f-"), v);
       disp(disp_buf);
       pcb_ver_detect();
       if (nvram.have_dht == 1 && wendu < -299.0)
