@@ -1,10 +1,14 @@
 #!/bin/bash
-which arduino-cli
+
+arduino_cli=$( which arduino-cli )
 if [ $? != 0 ] ; then
+arduino_cli=$( find /opt/arduino-ide_* -name "arduino-cli" |sort |tail -n 1 )
+if ! [ -x $arduino_cli ] ; then
  echo 没有找到 arduino-cli
- echo 请到https://github.com/arduino/arduino-cli/releases 下载， 并放到 /usr/local/bin目录下
  exit
 fi
+fi
+
 project=$( basename $( dirname $( realpath $0 )))
 echo $project
 
@@ -44,7 +48,7 @@ fqbn="esp8266:esp8266:generic:xtal=160,vt=flash,exception=disabled,stacksmash=di
 CXXFLAGS=" -DGIT_COMMIT_ID=\"$git_id\" -DGIT_VER=\"$ver\" -DBUILD_SET=\"$fqbn\" "
 
 #esp8266用 extra_flags esp32c3 用defines
-arduino-cli compile \
+$arduino_cli compile \
 --fqbn $fqbn \
 --verbose \
 --build-property compiler.c.extra_flags="$CXXFLAGS" \
@@ -55,7 +59,7 @@ $project 2>&1 |tee /tmp/${me}_info.log
 if [ -e $build/${project}.ino.bin ] ; then
 #esp8266
   tail -n 100 /tmp/${me}_info.log |sed -n "s/^. Instruction RAM (IRAM_ATTR, ICACHE_RAM_ATTR), used \([0-9]*\) .* (\([0-9]*\)%).*$/RAM:使用\1字节(\2%)/p"
-  tail -n 100 /tmp/${me}_info.log |sed -n "s/^. Code in flash (default, ICACHE_FLASH_ATTR), used \([0-9]*\) .* (\(39\)%)$/ROM:使用\1字节(\1%)/p"
+  tail -n 100 /tmp/${me}_info.log |sed -n "s/^. Code in flash (default, ICACHE_FLASH_ATTR), used \([0-9]*\) .* (\(39\)%)$/ROM:使用\1字节(\2%)/p"
 #esp32-c3
   tail -n 100 /tmp/${me}_info.log |sed -n "s/^Global variables use \([0-9]*\) bytes (\([0-9]*\)%) of dynamic memory, leaving \([0-9]*\) bytes for local variables. .*$/RAM:使用\1字节(\2%),全局变量:\2字节/p"
   tail -n 100 /tmp/${me}_info.log |sed -n "s/^Sketch uses \([0-9]*\) bytes (\([0-9]*\)%) of program storage space. Maximum is.*$/ROM:使用\1字节(\2%)/p"
