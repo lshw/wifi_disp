@@ -156,16 +156,10 @@ bool WiFi_isConnected() {
     wifi_setup();
   }
   if (fast_wifi) {
-    if (WiFi.localIP()) {
+    if (WiFi.status() == WL_CONNECTED && WiFi.localIP()) {
       dump_ap_config();
-      uint8_t ap_id = wifi_station_get_current_ap_id();
-      struct station_config config[5];
-      wifi_station_get_ap_info(config);
-      config[ap_id].bssid_set = 1;  //同名ap，mac地址不同
-      config[ap_id].channel = wifi_get_channel();
-      wifi_station_set_config(&config[ap_id]);  //保存成功的ssid,用于下次通讯
       connected_is_ok = true;
-      Serial.printf_P(PSTR("\r\n用SSID设置登陆ap成功,ch=%d,millis()=%ld\r\n"), config[ap_id].channel, millis());
+      Serial.printf_P(PSTR("\r\n用上次的信息登陆ap成功,millis()=%ld\r\n"), millis());
     }
   } else if (WiFi.localIP()) {
     uint8_t ap_id = wifi_station_get_current_ap_id();
@@ -180,25 +174,6 @@ bool WiFi_isConnected() {
   if (connected_is_ok == true) {
     Serial.println(WiFi.localIP());
     ht16c21_cmd(0x88, 0);  //停止闪烁
-    ip_info now_ip;
-    ip_addr_t dns0, dns1;
-    dns0 = *dns_getserver(0);
-    dns1 = *dns_getserver(1);
-    wifi_get_ip_info(STATION_IF, &now_ip);
-    if (!ip_addr_cmp(&now_ip.ip, &nvram.ip.ip)
-        || !ip_addr_cmp(&now_ip.netmask, &nvram.ip.netmask)
-        || !ip_addr_cmp(&now_ip.gw, &nvram.ip.gw)
-        || !ip_addr_cmp(&dns0, &nvram.dns0)
-        || !ip_addr_cmp(&dns1, &nvram.dns1)) {
-      wifi_get_ip_info(STATION_IF, &nvram.ip);
-      nvram.dns0 = *dns_getserver(0);
-      nvram.dns1 = *dns_getserver(1);
-      nvram.change = 1;
-    }
-    if (nvram.ch != wifi_get_channel()) {
-      nvram.ch = wifi_get_channel();
-      nvram.change = 1;
-    }
     return true;
   }
   if (proc != SETUP_MODE)

@@ -52,11 +52,12 @@ void setup() {
       if (!ip_addr_isany(&nvram.ip.ip) && !ip_addr_isany(&nvram.ip.gw) && !ip_addr_isany(&nvram.ip.netmask)) {
         wifi_station_dhcpc_stop();
         wifi_set_ip_info(STATION_IF, &nvram.ip);
-        dns_setserver(0, &saved.dns0);
-        dns_setserver(1, &saved.dns1);
+        dns_setserver(0, &nvram.dns0);
+        dns_setserver(1, &nvram.dns1);
       }
       struct station_config conf = { 0 };
       wifi_station_get_config(&conf);
+      conf.channel = nvram.ch;
       wifi_station_set_config_current(&conf);
       wifi_station_connect();
     } else if (nvram.proc == SETUP_MODE) {
@@ -142,6 +143,10 @@ void setup() {
         nvram.have_lora = 0;
         nvram.change = 1;
       }
+      if (!ip_addr_isany(&nvram.ip.ip)) {
+        memset(&nvram.ip.ip, 0, sizeof(nvram.ip.ip));
+        nvram.change = 1;
+      }
       save_nvram();
       poweroff(0);
       return;
@@ -198,6 +203,7 @@ void setup() {
           delay(100);
         }
       }
+      delay_more();  //外插电，就多延迟，方便切换
       WiFi_isConnected();
       if (nvram.pcb_ver > 0 && nvram.have_lora > -5) {
         if (lora_init())
@@ -228,6 +234,26 @@ void setup() {
 void wput() {
   uint16_t httpCode = wget();
   if (httpCode >= 200 || httpCode < 400) {
+    ip_info now_ip;
+    ip_addr_t dns0, dns1;
+    dns0 = *dns_getserver(0);
+    dns1 = *dns_getserver(1);
+    wifi_get_ip_info(STATION_IF, &now_ip);
+    if (!ip_addr_cmp(&now_ip.ip, &nvram.ip.ip)
+        || !ip_addr_cmp(&now_ip.netmask, &nvram.ip.netmask)
+        || !ip_addr_cmp(&now_ip.gw, &nvram.ip.gw)
+        || !ip_addr_cmp(&dns0, &nvram.dns0)
+        || !ip_addr_cmp(&dns1, &nvram.dns1)) {
+      wifi_get_ip_info(STATION_IF, &nvram.ip);
+      nvram.dns0 = *dns_getserver(0);
+      nvram.dns1 = *dns_getserver(1);
+      nvram.change = 1;
+      Serial.println(F("保存当前net信息"));
+    }
+    if (nvram.ch != wifi_get_channel()) {
+      nvram.ch = wifi_get_channel();
+      nvram.change = 1;
+    }
     Serial.print(F("uptime="));
     Serial.print(millis());
     if (next_disp < 60) next_disp = 1800;
@@ -237,7 +263,10 @@ void wput() {
     poweroff(next_disp);
   } else {
     Serial.print(millis());
+    Serial.println(F("删除上次net信息"));
     Serial.println(F("ms,web error,reboot 3600s"));
+    memset(&nvram.ip.ip, 0, sizeof(nvram.ip.ip));
+    nvram.change = 1;
     ht16c21_cmd(0x88, 3);  //慢闪烁
     poweroff(3600);
   }

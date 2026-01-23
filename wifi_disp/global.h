@@ -842,8 +842,8 @@ void dump_ap_config() {
   uint8_t password_t = sizeof(" passwd ");
   for (uint8_t i = 0; i < 5; i++) {
     // if (config[i].channel > 14) continue;
-    if (!is_az((char *)config[i].ssid)) continue;
-    if (!is_az((char *)config[i].password)) continue;
+    //if (!is_az((char *)config[i].ssid)) continue;
+    //if (!is_az((char *)config[i].password)) continue;
     if (ssid_t < strlen((char *)config[i].ssid)) ssid_t = strlen((char *)config[i].ssid);
     if (password_t < strlen((char *)config[i].password)) password_t = strlen((char *)config[i].password);
   }
