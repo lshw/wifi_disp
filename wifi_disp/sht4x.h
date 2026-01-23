@@ -45,13 +45,13 @@ bool sht4x_load() {
 float sht4x_temp() {
   if (crc8(temp_data, 2) != temp_data[2]) wendu = -999.0;
   else
-    wendu = 175.0 * (((uint16_t) temp_data[0] << 8) + temp_data[1]) / 65536.0 - 45.0;
+    wendu = 175.0 * (((uint16_t)temp_data[0] << 8) + temp_data[1]) / 65536.0 - 45.0;
   return wendu;
 }
 float sht4x_rh() {
   if (crc8(&temp_data[3], 2) != temp_data[5]) shidu = 101.0;
   else
-    shidu = 125.0 * (((uint16_t) temp_data[3] << 8) + temp_data[4]) / 65536.0 - 6.0;
+    shidu = 125.0 * (((uint16_t)temp_data[3] << 8) + temp_data[4]) / 65536.0 - 6.0;
   return shidu;
 }
-#endif //__SHT4X_H__
+#endif  //__SHT4X_H__

@@ -2,7 +2,7 @@
 #include "sx1278.h"
 
 LoRa lora;
-uint8_t rxBuf[250] = {0}, rxLen = 0;
+uint8_t rxBuf[250] = { 0 }, rxLen = 0;
 uint32_t send_delay = 0;
 uint16_t lora_count = 0;
 extern char disp_buf[22];
@@ -13,8 +13,8 @@ void lora_send_wendu() {
   String msg;
   msg = val_str();
   lora.setPayloadLength(msg.length());
-  lora.sendPackage((uint8_t *)msg.c_str(), msg.length()); // sending data
-  lora.idle();    // turn to standby mode
+  lora.sendPackage((uint8_t *)msg.c_str(), msg.length());  // sending data
+  lora.idle();                                             // turn to standby mode
 }
 void lora_send_loop() {
   if (millis() < send_delay) return;
@@ -22,11 +22,11 @@ void lora_send_loop() {
   lora_count++;
   snprintf_P(disp_buf, sizeof(disp_buf), PSTR("S%4d"), lora_count % 10000);
   disp(disp_buf);
-  lora.sendPackage((uint8_t *)disp_buf, 5); // sending data
-  lora.idle();    // turn to standby mode
+  lora.sendPackage((uint8_t *)disp_buf, 5);  // sending data
+  lora.idle();                               // turn to standby mode
   yield();
 }
-uint8_t lora_rxtx = 0; //1:rx 2:tx
+uint8_t lora_rxtx = 0;  //1:rx 2:tx
 void lora_receive_proc4() {
   if (lora_rxtx != 1) {
     lora.rxInit();
@@ -66,11 +66,11 @@ void lora_receive_loop() {
 }
 bool lora_init() {
   if (lora_version != 255 && lora_version != 0) return true;
-  lora.init(2); //cs=2
+  lora.init(2);  //cs=2
   if (lora_version == 255 || lora_version == 0) {
     if (nvram.have_lora > -5) {
       nvram.change = 1;
-      nvram.have_lora --;
+      nvram.have_lora--;
     }
     return false;
   }
@@ -78,14 +78,14 @@ bool lora_init() {
     nvram.have_lora = 1;
     nvram.change = 1;
   }
-  lora.setFrequency(434500000); //434Mhz
-  lora.setRFpara(nvram.bw, nvram.cr, nvram.sf, LR_PAYLOAD_CRC_ON); //BW带宽,CR编码率,SF扩频因子，CRC
+  lora.setFrequency(434500000);                                     //434Mhz
+  lora.setRFpara(nvram.bw, nvram.cr, nvram.sf, LR_PAYLOAD_CRC_ON);  //BW带宽,CR编码率,SF扩频因子，CRC
   // preamble length is 6~65535
-  lora.setPreambleLen(12); //前导12
-  lora.setPayloadLength(10);//数据长度10
-  lora.setTxPower(15); //default 最大发送20db
+  lora.setPreambleLen(12);    //前导12
+  lora.setPayloadLength(10);  //数据长度10
+  lora.setTxPower(15);        //default 最大发送20db
   // mode LR_IMPLICIT_HEADER_MODE or LR_EXPLICIT_HEADER_MODE
-  lora.setHeaderMode(LR_EXPLICIT_HEADER_MODE);//不要header
-  lora.idle();    // turn to standby mode
+  lora.setHeaderMode(LR_EXPLICIT_HEADER_MODE);  //不要header
+  lora.idle();                                  // turn to standby mode
   return true;
 }

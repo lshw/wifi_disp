@@ -55,7 +55,7 @@ bool dht() {
   }
   sei();
   for (int j = 0; j < 40; j++) {
-    temp_data[j / 8] = (temp_data[j / 8] << 1) | (dat[j] > 40 ? 1 : 0);    // specs: 22-30us -> 0, 70us -> 1
+    temp_data[j / 8] = (temp_data[j / 8] << 1) | (dat[j] > 40 ? 1 : 0);  // specs: 22-30us -> 0, 70us -> 1
   }
   Serial.printf_P(PSTR("start=%d, %02x%02x %02x%02x %02x\r\n"), p1,
                   temp_data[0],
@@ -70,11 +70,10 @@ bool dht() {
   }
   if (
     ((temp_data[0] + temp_data[1] + temp_data[2] + temp_data[3]) & 0xff) == temp_data[4]
-    && ((temp_data[0] + temp_data[1] + temp_data[2] + temp_data[3] + temp_data[4]) != 0)
-  ) {
+    && ((temp_data[0] + temp_data[1] + temp_data[2] + temp_data[3] + temp_data[4]) != 0)) {
     wendu = 0.1 * ((temp_data[2] & 0x7f) << 8 | temp_data[3]);
     shidu = 0.1 * (temp_data[0] << 8 | temp_data[1]);
-    if ((temp_data[2] & 0x80 ) != 0)
+    if ((temp_data[2] & 0x80) != 0)
       wendu = -wendu;
     Serial.printf_P(PSTR("millis()=%ld, 温度=%.1f, 湿度=%.1f%%\r\n"), millis(), wendu, shidu);
     return true;
@@ -86,7 +85,7 @@ bool dht() {
   }
 }
 bool dht_() {
-  if ( !dht() && !dht() && !dht())
+  if (!dht() && !dht() && !dht())
     return dht();
   return true;
 }

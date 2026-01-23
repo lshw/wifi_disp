@@ -53,31 +53,30 @@ String lora_set() {
          + F("</select>");
 }
 void httpd_send_200(String javascript) {
-  httpd.sendHeader( "charset", "utf-8" );
+  httpd.sendHeader("charset", "utf-8");
   httpd.send(200, "text/html", "<html>"
-             "<head>"
-             "<title>" + hostname + " " + GIT_VER + "</title>"
-             "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
-             "<script>"
-             "function gotoif(url)"
-             "{"
-             "if (confirm('确定?')) {"
-             "location.replace(url);"
-             "}"
-             "}"
+                               "<head>"
+                               "<title>"
+                                 + hostname + " " + GIT_VER + "</title>"
+                                                              "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
+                                                              "<script>"
+                                                              "function gotoif(url)"
+                                                              "{"
+                                                              "if (confirm('确定?')) {"
+                                                              "location.replace(url);"
+                                                              "}"
+                                                              "}"
 
-             "function modi(url,text,Defaulttext) {"
-             "var data=prompt(text,Defaulttext);"
-             "if (data==null) {return false;}"
-             "location.replace(url+data);"
-             "}"
-             + javascript +
-             "</script>"
-             "</head>"
-             "<body>"
-             + body +
-             "</body>"
-             "</html>");
+                                                              "function modi(url,text,Defaulttext) {"
+                                                              "var data=prompt(text,Defaulttext);"
+                                                              "if (data==null) {return false;}"
+                                                              "location.replace(url+data);"
+                                                              "}"
+                                 + javascript + "</script>"
+                                                "</head>"
+                                                "<body>"
+                                 + body + "</body>"
+                                          "</html>");
   httpd.client().stop();
 }
 
@@ -93,9 +92,12 @@ void http_proc3() {
          "<hr>"
          "<a href=/><button>返回设置</button></a>"
          "<hr>"
-         "PROC_3 测试间隔(10-250): <span onclick=modi('/save.php?proc3_sec=','修改测试间隔','" + String(nvram.proc3_sec) + "')><font color = blue>" + String(nvram.proc3_sec) + "</font>秒</span>"
-         "&nbsp;&nbsp;<span onclick=modi('/save.php?proc3_host=','修改服务器,最长32字符','" + String(nvram.proc3_host) + "')><font color = blue>udp服务器: " + String(nvram.proc3_host) + "</font></span>"
-         "&nbsp;&nbsp;udp端口: <span onclick=modi('/save.php?proc3_port=','修改服务器端口,1025-65535','" + String(nvram.proc3_port) + "')><font color = blue>" + String(nvram.proc3_port) + "</font></span><hr>";
+         "PROC_3 测试间隔(10-250): <span onclick=modi('/save.php?proc3_sec=','修改测试间隔','"
+         + String(nvram.proc3_sec) + "')><font color = blue>" + String(nvram.proc3_sec) + "</font>秒</span>"
+                                                                                          "&nbsp;&nbsp;<span onclick=modi('/save.php?proc3_host=','修改服务器,最长32字符','"
+         + String(nvram.proc3_host) + "')><font color = blue>udp服务器: " + String(nvram.proc3_host) + "</font></span>"
+                                                                                                       "&nbsp;&nbsp;udp端口: <span onclick=modi('/save.php?proc3_port=','修改服务器端口,1025-65535','"
+         + String(nvram.proc3_port) + "')><font color = blue>" + String(nvram.proc3_port) + "</font></span><hr>";
   httpd_send_200("");
 }
 void handleRoot() {
@@ -105,7 +107,7 @@ void handleRoot() {
   for (uint8_t i = 0; i < httpd.args(); i++) {
     if (httpd.argName(i).compareTo("i2c_scan") == 0) {
       Wire.begin();
-      for (uint16_t i0 = 1 ; i0 < 0x80; i0++) {
+      for (uint16_t i0 = 1; i0 < 0x80; i0++) {
         Wire.beginTransmission(i0);
         if (Wire.endTransmission() == 0) {
           switch (i0) {
@@ -118,7 +120,7 @@ void handleRoot() {
               i2c_scan += "<br>0x44:SHT44温湿度探头";
               break;
             case 0x77:
-              bmp.begin(); //需要安装Adafruit BMP085 Library 库
+              bmp.begin();  //需要安装Adafruit BMP085 Library 库
               Serial.println(F("0x77:BMP180气压探头"));
               i2c_scan += "<br>0x77:BMP180气压探头  温度:" + String(bmp.readTemperature(), 1)
                           + "摄氏度, 气压:" + String(bmp.readPressure())
@@ -164,30 +166,33 @@ void handleRoot() {
                 + "ip:<mark>" + WiFi.localIP().toString() + "</mark> &nbsp; "
                 + "电池电压:<mark>" + String(v) + "</mark>V &nbsp; ";
   }
-  if ( shidu >= 0.0 && shidu <= 100.0)
+  if (shidu >= 0.0 && shidu <= 100.0)
     wifi_stat += "湿度:<mark>" + String((int8_t)shidu) + "%</mark> &nbsp; ";
   if (wendu > -300.0)
     wifi_stat += "温度:<mark>" + String(wendu) + "</mark>&#8451<br>";
   body = "SN:<mark>" + hostname + "</mark> &nbsp; "
-         "硬件版本:<mark>" + String(nvram.pcb_ver) + "</mark> &nbsp; "
-         "软件版本:<mark>" VER "</mark>"
-         "&nbsp;<a href=/proc3.php><button>其它设置</button></a>"
-         "<hr>"
-         + wifi_stat + "<hr>" + wifi_scan +
-         "<hr><form action=/save.php method=post>"
-         "输入ssid:passwd(可以多行多个)"
-         "<input type=submit value=save><br>"
-         "<textarea  style='width:500px;height:80px;' name=data>" + get_ssid() + "</textarea><br>"
-         "可以设置自己的服务器地址(清空恢复)<br>"
-         "url0:<input maxlength=100  size=50 type=text value='" + get_url(0) + "' name=url><br>"
-         "url1:<input maxlength=100  size=50 type=text value='" + get_url(1) + "' name=url1><br>"
+                                  "硬件版本:<mark>"
+         + String(nvram.pcb_ver) + "</mark> &nbsp; "
+                                   "软件版本:<mark>" VER "</mark>"
+                                   "&nbsp;<a href=/proc3.php><button>其它设置</button></a>"
+                                   "<hr>"
+         + wifi_stat + "<hr>" + wifi_scan + "<hr><form action=/save.php method=post>"
+                                            "输入ssid:passwd(可以多行多个)"
+                                            "<input type=submit value=save><br>"
+                                            "<textarea  style='width:500px;height:80px;' name=data>"
+         + get_ssid() + "</textarea><br>"
+                        "可以设置自己的服务器地址(清空恢复)<br>"
+                        "url0:<input maxlength=100  size=50 type=text value='"
+         + get_url(0) + "' name=url><br>"
+                        "url1:<input maxlength=100  size=50 type=text value='"
+         + get_url(1) + "' name=url1><br>"
          + lora_set()
          + "<hr><input type=submit name=submit value=save>"
-         "&nbsp;<input type=submit name=reboot value='reboot'>"
-         "</form>"
-         "<hr>"
-         "<form method='POST' action='/update.php' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
-         "<hr><table width=100%><tr><td align=left width=50%>程序源码:<a href=https://github.com/lshw/wifi_disp/releases/tag/V"  GIT_VER " target=_blank>https://github.com/lshw/wifi_disp/release/tag/V" GIT_VER "</a><td><td align=right width=50%>程序编译时间: <mark>"
+           "&nbsp;<input type=submit name=reboot value='reboot'>"
+           "</form>"
+           "<hr>"
+           "<form method='POST' action='/update.php' enctype='multipart/form-data'>上传更新固件firmware:<input type='file' name='update'><input type='submit' value='Update'></form>"
+           "<hr><table width=100%><tr><td align=left width=50%>程序源码:<a href=https://github.com/lshw/wifi_disp/releases/tag/V" GIT_VER " target=_blank>https://github.com/lshw/wifi_disp/release/tag/V" GIT_VER "</a><td><td align=right width=50%>程序编译时间: <mark>"
          + build_date()
          + " " __TIME__ "</mark></td</tr></table><br>编译参数:[" BUILD_SET "] GCC" + String(__GNUC__) + "." + String(__GNUC_MINOR__)
          + "<hr>";
@@ -217,7 +222,7 @@ void handleNotFound() {
         message += (char)ch;
       }
       fp.close();
-      httpd.send ( 200, "text/plain", message );
+      httpd.send(200, "text/plain", message);
       httpd.client().stop();
       message = "";
       return;
@@ -229,10 +234,11 @@ void handleNotFound() {
   message += httpd.uri();
   message += "<br><a href=/?" + String(millis()) + "><button>点击进入首页</button></a>";
   httpd.send(200, "text/html", "<html>"
-             "<head>"
-             "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
-             "</html>"
-             "<body>" + message + "</body></html>");
+                               "<head>"
+                               "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
+                               "</html>"
+                               "<body>"
+                                 + message + "</body></html>");
   httpd.client().stop();
   message = "";
 }
@@ -244,9 +250,9 @@ void http_add_ssid() {
     if (httpd.argName(i).compareTo("data") == 0) {
       data = httpd.arg(i);
       data.trim();
-      data.replace("\xef\xbc\x9a", ":"); //utf8 :
-      data.replace("\xa3\xba", ":"); //gbk :
-      data.replace("\xa1\x47", ":"); //big5 :
+      data.replace("\xef\xbc\x9a", ":");  //utf8 :
+      data.replace("\xa3\xba", ":");      //gbk :
+      data.replace("\xa1\x47", ":");      //big5 :
       break;
     }
   }
@@ -301,9 +307,9 @@ void httpsave() {
     if (httpd.argName(i).compareTo("data") == 0) {
       data = httpd.arg(i);
       data.trim();
-      data.replace("\xef\xbc\x9a", ":"); //utf8 :
-      data.replace("\xa3\xba", ":"); //gbk :
-      data.replace("\xa1\x47", ":"); //big5 :
+      data.replace("\xef\xbc\x9a", ":");  //utf8 :
+      data.replace("\xa3\xba", ":");      //gbk :
+      data.replace("\xa1\x47", ":");      //big5 :
       if (data.length() > 8) {
         Serial.printf_P(PSTR("data:[%s]\r\n"), data.c_str());
         fp = SPIFFS.open("/ssid.txt", "w");
@@ -334,9 +340,9 @@ void httpsave() {
         nvram.lora_hz = 137000000L;
       else if (nvram.lora_hz > 175000000L && nvram.lora_hz < (410000000L - 175000000L) / 2 + 175000000L)
         nvram.lora_hz = 175000000L;
-      else if (nvram.lora_hz > (410000000L - 175000000L) / 2 + 175000000L  && nvram.lora_hz < 410000000L)
+      else if (nvram.lora_hz > (410000000L - 175000000L) / 2 + 175000000L && nvram.lora_hz < 410000000L)
         nvram.lora_hz = 410000000L;
-      else if (nvram.lora_hz >  525000000L && nvram.lora_hz < (862000000L - 525000000L) / 2 + 525000000L)
+      else if (nvram.lora_hz > 525000000L && nvram.lora_hz < (862000000L - 525000000L) / 2 + 525000000L)
         nvram.lora_hz = 525000000L;
       else if (nvram.lora_hz > (862000000L - 525000000L) / 2 + 525000000L && nvram.lora_hz < 862000000L)
         nvram.lora_hz = 862000000L;
@@ -386,7 +392,7 @@ void httpsave() {
   url = "";
   if (nvram_update) {
     fp = SPIFFS.open("/nvram.bin", "w");
-    fp.write((char *) &nvram, sizeof(nvram));
+    fp.write((char *)&nvram, sizeof(nvram));
     fp.close();
   }
   SPIFFS.end();
@@ -403,78 +409,78 @@ void httpd_listen() {
 
   httpd.on("/", handleRoot);
   httpd.on("/proc3.php", http_proc3);
-  httpd.on("/save.php", httpsave); //保存设置
-  httpd.on("/add_ssid.php", http_add_ssid); //保存设置
-  httpd.on("/generate_204", http204);//安卓上网检测
+  httpd.on("/save.php", httpsave);           //保存设置
+  httpd.on("/add_ssid.php", http_add_ssid);  //保存设置
+  httpd.on("/generate_204", http204);        //安卓上网检测
 
-  httpd.on("/update.php", HTTP_POST, []() {
-    httpd.sendHeader("Connection", "close");
-    if (Update.hasError()) {
-      upgrading = false;
-      Serial.println(F("上传失败"));
-      httpd.send(200, "text/html", "<html>"
-                 "<head>"
-                 "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
-                 "</head>"
-                 "<body>"
-                 "升级失败 <a href=/>返回</a>"
-                 "</body>"
-                 "</html>"
-                );
-    } else if (crc.finalize() == CRC_MAGIC) {
-      httpd.send(200, "text/html", "<html>"
-                 "<head>"
-                 "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
-                 "</head>"
-                 "<body>"
-                 "<script>setTimeout(function(){ alert('升级成功!'); }, 15000); </script>"
-                 "</body>"
-                 "</html>"
-                );
-      Serial.println(F("上传成功"));
-      Serial.flush();
-      ht16c21_cmd(0x88, 1); //闪烁
-      delay(5);
-      ESP.restart();
-    } else {
-      body = "升级失败 <a href=/><buttom>返回首页</buttom></a>";
-      httpd_send_200("");
-    }
-    yield();
-  }, []() {
-    HTTPUpload& upload = httpd.upload();
-    if (upload.status == UPLOAD_FILE_START) {
-      ht16c21_cmd(0x88, 0); //停闪烁
-      Serial.setDebugOutput(true);
-      WiFiUDP::stopAll();
-      Serial.printf_P(PSTR("Update: %s\r\n"), upload.filename.c_str());
-      uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-      if (!Update.begin(maxSketchSpace)) { //start with max available size
-        Update.printError(Serial);
-      }
-      crc.reset();
-      upgrading = true;
-    } else if (upload.status == UPLOAD_FILE_WRITE) {
-      crc.update((uint8_t *)upload.buf, upload.currentSize);
-      snprintf_P(disp_buf, sizeof(disp_buf), PSTR("UP.%3d"), upload.totalSize / 1000);
-      disp(disp_buf);
-      Serial.printf_P(PSTR("size:%ld\r\n"), (uint32_t)upload.totalSize);
-      if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-        Update.printError(Serial);
-      }
-    } else if (upload.status == UPLOAD_FILE_END) {
-      if (Update.end(true)) { //true to set the size to the current progress
-        if (crc.finalize() != CRC_MAGIC)
-          Serial.printf_P(PSTR("File Update : %u\r\nCRC32 error ...\r\n"), upload.totalSize);
-        else
-          Serial.printf_P(PSTR("Update Success: %u\r\nRebooting...\r\n"), upload.totalSize);
+  httpd.on(
+    "/update.php", HTTP_POST, []() {
+      httpd.sendHeader("Connection", "close");
+      if (Update.hasError()) {
+        upgrading = false;
+        Serial.println(F("上传失败"));
+        httpd.send(200, "text/html", "<html>"
+                                     "<head>"
+                                     "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
+                                     "</head>"
+                                     "<body>"
+                                     "升级失败 <a href=/>返回</a>"
+                                     "</body>"
+                                     "</html>");
+      } else if (crc.finalize() == CRC_MAGIC) {
+        httpd.send(200, "text/html", "<html>"
+                                     "<head>"
+                                     "<meta http-equiv=Content-Type content='text/html;charset=utf-8'>"
+                                     "</head>"
+                                     "<body>"
+                                     "<script>setTimeout(function(){ alert('升级成功!'); }, 15000); </script>"
+                                     "</body>"
+                                     "</html>");
+        Serial.println(F("上传成功"));
+        Serial.flush();
+        ht16c21_cmd(0x88, 1);  //闪烁
+        delay(5);
+        ESP.restart();
       } else {
-        Update.printError(Serial);
+        body = "升级失败 <a href=/><buttom>返回首页</buttom></a>";
+        httpd_send_200("");
       }
-      Serial.setDebugOutput(false);
-    }
-    yield();
-  });
+      yield();
+    },
+    []() {
+      HTTPUpload &upload = httpd.upload();
+      if (upload.status == UPLOAD_FILE_START) {
+        ht16c21_cmd(0x88, 0);  //停闪烁
+        Serial.setDebugOutput(true);
+        WiFiUDP::stopAll();
+        Serial.printf_P(PSTR("Update: %s\r\n"), upload.filename.c_str());
+        uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+        if (!Update.begin(maxSketchSpace)) {  //start with max available size
+          Update.printError(Serial);
+        }
+        crc.reset();
+        upgrading = true;
+      } else if (upload.status == UPLOAD_FILE_WRITE) {
+        crc.update((uint8_t *)upload.buf, upload.currentSize);
+        snprintf_P(disp_buf, sizeof(disp_buf), PSTR("UP.%3d"), upload.totalSize / 1000);
+        disp(disp_buf);
+        Serial.printf_P(PSTR("size:%ld\r\n"), (uint32_t)upload.totalSize);
+        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+          Update.printError(Serial);
+        }
+      } else if (upload.status == UPLOAD_FILE_END) {
+        if (Update.end(true)) {  //true to set the size to the current progress
+          if (crc.finalize() != CRC_MAGIC)
+            Serial.printf_P(PSTR("File Update : %u\r\nCRC32 error ...\r\n"), upload.totalSize);
+          else
+            Serial.printf_P(PSTR("Update Success: %u\r\nRebooting...\r\n"), upload.totalSize);
+        } else {
+          Update.printError(Serial);
+        }
+        Serial.setDebugOutput(false);
+      }
+      yield();
+    });
   httpd.onNotFound(handleNotFound);
   httpd.begin();
 
@@ -482,6 +488,5 @@ void httpd_listen() {
 }
 
 void ota_loop() {
-
 }
-#endif //__AP_WEB_H__
+#endif  //__AP_WEB_H__

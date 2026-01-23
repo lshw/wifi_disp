@@ -2,7 +2,7 @@
 #define __PROC4_H__
 //lora转发到internet  通过wifi
 uint16_t send_limit = 0;
-void limit_speed() { //令牌桶算法，限制转发的速率
+void limit_speed() {  //令牌桶算法，限制转发的速率
   if (send_limit > 0) send_limit--;
 }
 void proc4_setup() {
@@ -27,4 +27,4 @@ void proc4_setup() {
     poweroff(nvram.proc3_sec);
   }
 }
-#endif //__PROC4_H__
+#endif  //__PROC4_H__

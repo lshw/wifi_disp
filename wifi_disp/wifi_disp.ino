@@ -8,7 +8,7 @@ extern "C" {
 #include "global.h"
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 void init1();
-uint32_t next_disp = 1800; //下次开机
+uint32_t next_disp = 1800;  //下次开机
 String hostname = HOSTNAME;
 
 #include "ota.h"
@@ -29,23 +29,22 @@ String hostname = HOSTNAME;
 #endif
 bool power_in = false;
 void init1() {
-  ht16c21_setup(); //180ms
-  ht16c21_cmd(0x88, 1); //闪烁2hz
+  ht16c21_setup();       //180ms
+  ht16c21_cmd(0x88, 1);  //闪烁2hz
 }
-void setup()
-{
+void setup() {
   Serial_begin();
-  load_nvram(); //从esp8266的nvram载入数据
+  load_nvram();  //从esp8266的nvram载入数据
   nvram.boot_count++;
   nvram.change = 1;
-  if (millis() > 5000) { //升级程序后第一次启动
+  if (millis() > 5000) {  //升级程序后第一次启动
     Serial.println(F("升级完成，重启"));
     nvram.nvram7 |= NVRAM7_CHARGE;
     nvram.change = 1;
     save_nvram();
     poweroff(2);
   }
-  if (nvram.have_dht == 0 && nvram.pcb_ver >= 0) { //dht与wifi_station_connect冲突
+  if (nvram.have_dht == 0 && nvram.pcb_ver >= 0) {  //dht与wifi_station_connect冲突
     if (nvram.proc == PROC3_MODE || nvram.proc == GENERAL_MODE) {
       wifi_set_opmode(STATION_MODE);
       wifi_station_connect();
@@ -61,16 +60,16 @@ void setup()
   get_batt();
   check_batt_low();
   add_limit_millis();
-  proc = nvram.proc; //保存当前模式
-  switch_proc_begin(); //开始时切换
-  switch (proc) { //尽快进行模式切换
+  proc = nvram.proc;    //保存当前模式
+  switch_proc_begin();  //开始时切换
+  switch (proc) {       //尽快进行模式切换
 #if __has_include("proc5.h")
     case PROC5_MODE:
       proc5_setup();
       break;
 #endif
 #if __has_include("proc4.h")
-    case PROC4_MODE: //lora发送测量值模式, 插电做网关， 不插电做远端.
+    case PROC4_MODE:  //lora发送测量值模式, 插电做网关， 不插电做远端.
       proc4_setup();
       break;
 #endif
@@ -80,7 +79,7 @@ void setup()
       init1();
       disp(F(" P2 "));
       delay(100);
-      delay_more(); //外插电，就多延迟，方便切换
+      delay_more();  //外插电，就多延迟，方便切换
       if (bmp.begin()) {
         if (nvram.have_bmp != 5) {
           nvram.have_bmp = 5;
@@ -122,8 +121,8 @@ void setup()
       delay(2000);
       disp(F("-" VER "-"));
       delay(2000);
-      ht16c21_cmd(0x84, 0x02); //关闭ht16c21
-      if (nvram.pcb_ver > 0) { //v2.0
+      ht16c21_cmd(0x84, 0x02);  //关闭ht16c21
+      if (nvram.pcb_ver > 0) {  //v2.0
         if (nvram.have_lora > -5 & lora_init())
           lora.sleep();
         Serial_begin();
@@ -163,13 +162,13 @@ void setup()
       poweroff(10);
     case GENERAL_MODE:
     default:
-      proc = GENERAL_MODE;//让后面2个lora在不存在的时候，修正为proc=0
+      proc = GENERAL_MODE;  //让后面2个lora在不存在的时候，修正为proc=0
       init1();
       snprintf_P(disp_buf, sizeof(disp_buf), PSTR(" %3.2f "), v);
       disp(disp_buf);
       pcb_ver_detect();
       if (nvram.have_dht == 1 && wendu < -299.0)
-        dht_(); //dht必须在wifi打开之前
+        dht_();  //dht必须在wifi打开之前
       wifi_set_opmode(STATION_MODE);
       wifi_station_connect();
       set_hostname();
@@ -179,7 +178,7 @@ void setup()
       if (nvram.have_dht == 0)
         get_value();
       if (wendu == 85.00 && nvram.ds18b20_pin >= 0) {
-        for (uint8_t i = 0 ; i < 10; i++) {
+        for (uint8_t i = 0; i < 10; i++) {
           if (get_temp()) {
             Serial.printf_P(PSTR("get_temp() %d\r\n"), i);
             break;
@@ -200,7 +199,7 @@ void setup()
       Serial.println();
       if (WiFi_isConnected()) {
         wput();
-      } else { //30秒没有连上AP
+      } else {  //30秒没有连上AP
         if (power_in) {
           wifi_config();
           return;
@@ -208,7 +207,7 @@ void setup()
         //10秒超时1小时重试。
         Serial.print(millis());
         Serial.println(F("ms,not link to ap,reboot 3600s"));
-        ht16c21_cmd(0x88, 3); //慢闪烁
+        ht16c21_cmd(0x88, 3);  //慢闪烁
         poweroff(3600);
       }
       break;
@@ -228,20 +227,19 @@ void wput() {
   } else {
     Serial.print(millis());
     Serial.println(F("ms,web error,reboot 3600s"));
-    ht16c21_cmd(0x88, 3); //慢闪烁
+    ht16c21_cmd(0x88, 3);  //慢闪烁
     poweroff(3600);
   }
 }
 
-void loop()
-{
-  system_soft_wdt_feed ();
+void loop() {
+  system_soft_wdt_feed();
   if (power_off) {
     yield();
     delay(1000);
     return;
   }
-  if (run_millis_limit <  millis()) {
+  if (run_millis_limit < millis()) {
     Serial.print(F("超时关机，millis()="));
     Serial.println(millis());
     poweroff(3600);
@@ -259,7 +257,7 @@ void loop()
             wget();
             rxLen = 0;
             rxBuf[0] = 0;
-            send_limit += 20; //猝发4次后每20秒发送一次
+            send_limit += 20;  //猝发4次后每20秒发送一次
           }
         } else delay(200);
         break;

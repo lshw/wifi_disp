@@ -6,11 +6,9 @@
 
 #include "sx1278_reg.h"
 uint8_t lora_version = 255;
-LoRa::LoRa()
-{
+LoRa::LoRa() {
 }
-void LoRa::spiInit()
-{
+void LoRa::spiInit() {
   SPI.begin();
   //init slave select pin
   pinMode(NSSPin, OUTPUT);
@@ -22,13 +20,11 @@ void LoRa::spiInit()
   SPI.setClockDivider(SPI_CLOCK_DIV32);
   SPI.setDataMode(SPI_MODE0);
 }
-void LoRa::pinInit()
-{
+void LoRa::pinInit() {
   //  pinMode(NRESETPin, OUTPUT);
   //  digitalWrite(NRESETPin, LOW);
 }
-bool LoRa::init(uint8_t _NSSPin)
-{
+bool LoRa::init(uint8_t _NSSPin) {
 
   NSSPin = _NSSPin;
 
@@ -48,15 +44,13 @@ bool LoRa::init(uint8_t _NSSPin)
 
   return true;
 }
-void LoRa::powerOnReset()
-{
+void LoRa::powerOnReset() {
   digitalWrite(NRESETPin, LOW);
   delay(10);
   digitalWrite(NRESETPin, HIGH);
   delay(10);
 }
-bool LoRa::config()
-{
+bool LoRa::config() {
   // In setting mode, RF module should turn to sleep mode
   // low frequency mode??sleep mode
   writeRegister(LR_RegOpMode, LR_Mode_SLEEP | LORA_FREQUENCY_BAND);
@@ -103,8 +97,7 @@ bool LoRa::config()
   setPayloadLength(10);
   return true;
 }
-bool LoRa::setFrequency(uint32_t freq)
-{
+bool LoRa::setFrequency(uint32_t freq) {
   uint32_t frf;
   uint32_t temp1;
   uint32_t temp2;
@@ -137,8 +130,7 @@ bool LoRa::setFrequency(uint32_t freq)
     return false;
   return true;
 }
-bool LoRa::setRFpara(uint8_t BW, uint8_t CR, uint8_t SF, uint8_t payloadCRC)
-{
+bool LoRa::setRFpara(uint8_t BW, uint8_t CR, uint8_t SF, uint8_t payloadCRC) {
   // check if the data is correct
   if (((BW & 0x0f) != 0) || ((BW >> 8) > 0x09))
     return false;
@@ -152,15 +144,14 @@ bool LoRa::setRFpara(uint8_t BW, uint8_t CR, uint8_t SF, uint8_t payloadCRC)
   uint8_t temp;
   if (BW <= LR_BW_62p5k) {
     temp = LR_TCXO_INPUT_ON;
-    writeRegister(LR_RegModemConfig3, readRegister(LR_RegModemConfig3) | LR_MOBILE_MODE); //LowDataRateOptimize
+    writeRegister(LR_RegModemConfig3, readRegister(LR_RegModemConfig3) | LR_MOBILE_MODE);  //LowDataRateOptimize
   } else {
-    writeRegister(LR_RegModemConfig3, readRegister(LR_RegModemConfig3) &  ~LR_MOBILE_MODE); //LowDataRateO
+    writeRegister(LR_RegModemConfig3, readRegister(LR_RegModemConfig3) & ~LR_MOBILE_MODE);  //LowDataRateO
     temp = LR_EXT_CRYSTAL;
   }
   writeRegister(LR_RegTCXO, temp);
   //SF=6 must be use in implicit header mode,and have some special setting
-  if (SF == LR_SPREADING_FACTOR_6)
-  {
+  if (SF == LR_SPREADING_FACTOR_6) {
     headerMode = LR_IMPLICIT_HEADER_MODE;
     writeRegister(LR_RegModemConfig1, BW | CR | LR_IMPLICIT_HEADER_MODE);
     temp = readRegister(LR_RegModemConfig2);
@@ -173,9 +164,7 @@ bool LoRa::setRFpara(uint8_t BW, uint8_t CR, uint8_t SF, uint8_t payloadCRC)
     temp |= 0x05;
     writeRegister(0x31, temp);
     writeRegister(0x37, 0x0C);
-  }
-  else
-  {
+  } else {
     temp = readRegister(LR_RegModemConfig2);
     temp = temp & 0x03;
     writeRegister(LR_RegModemConfig1, BW | CR | headerMode);
@@ -183,8 +172,7 @@ bool LoRa::setRFpara(uint8_t BW, uint8_t CR, uint8_t SF, uint8_t payloadCRC)
   }
   return true;
 }
-bool LoRa::setPreambleLen(uint16_t length)
-{
+bool LoRa::setPreambleLen(uint16_t length) {
   // preamble length is 6~65535
   if (length < 6)
     return false;
@@ -193,8 +181,7 @@ bool LoRa::setPreambleLen(uint16_t length)
   writeRegister(LR_RegPreambleLsb, length & 0xff);
   return true;
 }
-bool LoRa::setHeaderMode(uint8_t mode)
-{
+bool LoRa::setHeaderMode(uint8_t mode) {
   if (headerMode > 0x01)
     return false;
   headerMode = mode;
@@ -208,22 +195,19 @@ bool LoRa::setHeaderMode(uint8_t mode)
 }
 // in implict header mode, the payload length is fix len
 // need to set payload length first in this mode
-bool LoRa::setPayloadLength(uint8_t len)
-{
+bool LoRa::setPayloadLength(uint8_t len) {
   payloadLength = len;
   writeRegister(LR_RegPayloadLength, len);
   return true;
 }
-bool LoRa::setTxPower(uint8_t power)
-{
+bool LoRa::setTxPower(uint8_t power) {
   if (power > 0x0f)
     return false;
   writeRegister(LR_RegPaConfig, LR_PASELECT_PA_POOST | 0x70 | power);
   return true;
 }
 // only valid in rx single mode
-bool LoRa::setRxTimeOut(uint16_t symbTimeOut)
-{
+bool LoRa::setRxTimeOut(uint16_t symbTimeOut) {
   //rxtimeout=symbTimeOut*(2^SF*BW)
   if ((symbTimeOut == 0) || (symbTimeOut > 0x3ff))
     return false;
@@ -236,32 +220,28 @@ bool LoRa::setRxTimeOut(uint16_t symbTimeOut)
   return true;
 }
 // RSSI[dBm]=-137+rssi value
-uint8_t LoRa::readRSSI(uint8_t mode)
-{
-  if (!mode)	//read current rssi
+uint8_t LoRa::readRSSI(uint8_t mode) {
+  if (!mode)  //read current rssi
   {
     return readRegister(LR_RegRssiValue);
-  }
-  else			// read rssi of last packet received
+  } else  // read rssi of last packet received
     return readRegister(LR_RegPktRssiValue);
 }
 
-bool LoRa::rxInit()
-{
+bool LoRa::rxInit() {
   if (headerMode == LR_IMPLICIT_HEADER_MODE)
     setPayloadLength(payloadLength);
-  setRxInterrupt();	// enable RxDoneIrq
-  clearIRQFlags();		// clear irq flag
-  setFifoAddrPtr(LR_RegFifoRxBaseAddr);	// set FIFO addr
-  enterRxMode();		// start rx
+  setRxInterrupt();                      // enable RxDoneIrq
+  clearIRQFlags();                       // clear irq flag
+  setFifoAddrPtr(LR_RegFifoRxBaseAddr);  // set FIFO addr
+  enterRxMode();                         // start rx
   return true;
 }
-bool LoRa::sendPackage(uint8_t* sendbuf, uint8_t sendLen)
-{
+bool LoRa::sendPackage(uint8_t* sendbuf, uint8_t sendLen) {
   uint8_t temp;
 
-  setTxInterrupt();	// enable TxDoneIrq
-  clearIRQFlags();		// clear irq flag
+  setTxInterrupt();  // enable TxDoneIrq
+  clearIRQFlags();   // clear irq flag
   writeFifo(sendbuf, sendLen);
   enterTxMode();
 
@@ -269,11 +249,9 @@ bool LoRa::sendPackage(uint8_t* sendbuf, uint8_t sendLen)
 
   // you should make sure the tx timeout is greater than the max time on air
   txTimer = LORA_TX_TIMEOUT;
-  while (txTimer--)
-  {
+  while (txTimer--) {
     // wait for txdone
-    if (waitIrq(LR_TXDONE_MASK))
-    {
+    if (waitIrq(LR_TXDONE_MASK)) {
       idle();
       clearIRQFlags();
       return true;
@@ -284,13 +262,11 @@ bool LoRa::sendPackage(uint8_t* sendbuf, uint8_t sendLen)
   init();
   return false;
 }
-uint8_t LoRa::receivePackage(uint8_t* recvbuf)
-{
+uint8_t LoRa::receivePackage(uint8_t* recvbuf) {
   // read data from fifo
   return readFifo(recvbuf);
 }
-bool LoRa::waitIrq(uint8_t irqMask)
-{
+bool LoRa::waitIrq(uint8_t irqMask) {
   uint8_t flag;
   // read irq flag
   flag = readRegister(LR_RegIrqFlags);
@@ -299,37 +275,31 @@ bool LoRa::waitIrq(uint8_t irqMask)
     return true;
   return false;
 }
-void LoRa::setFifoAddrPtr(uint8_t addrReg)
-{
+void LoRa::setFifoAddrPtr(uint8_t addrReg) {
   uint8_t addr;
   // read BaseAddr
   addr = readRegister(addrReg);
   // BaseAddr->FifoAddrPtr
   writeRegister(LR_RegFifoAddrPtr, addr);
 }
-void LoRa::enterRxMode()
-{
+void LoRa::enterRxMode() {
   // enter rx continuous mode
   writeRegister(LR_RegOpMode, LR_LongRangeMode_LORA | LR_Mode_RXCONTINUOUS | LORA_FREQUENCY_BAND);
 }
-void LoRa::enterTxMode()
-{
+void LoRa::enterTxMode() {
   // enter tx mode
   writeRegister(LR_RegOpMode, LR_LongRangeMode_LORA | LR_Mode_TX | LORA_FREQUENCY_BAND);
 }
-void LoRa::idle()
-{
+void LoRa::idle() {
   // enter Standby mode
   writeRegister(LR_RegOpMode, 0x89);
 }
-void LoRa::sleep()
-{
+void LoRa::sleep() {
   // enter sleep mode
   writeRegister(LR_RegOpMode, 0x89);
   writeRegister(LR_RegOpMode, 0x88);
 }
-void LoRa::writeFifo(uint8_t* databuf, uint8_t length)
-{
+void LoRa::writeFifo(uint8_t* databuf, uint8_t length) {
   // set packet length
   if (headerMode == LR_EXPLICIT_HEADER_MODE)
     writeRegister(LR_RegPayloadLength, length);
@@ -338,8 +308,7 @@ void LoRa::writeFifo(uint8_t* databuf, uint8_t length)
   // fill data into fifo
   writeData(0x00, databuf, length);
 }
-uint8_t LoRa::readFifo(uint8_t* databuf)
-{
+uint8_t LoRa::readFifo(uint8_t* databuf) {
   uint8_t readLen;
 
   // set Fifo addr
@@ -354,27 +323,23 @@ uint8_t LoRa::readFifo(uint8_t* databuf)
 
   return readLen;
 }
-void LoRa::setTxInterrupt()
-{
+void LoRa::setTxInterrupt() {
   // DIO0=TxDone,DIO1=RxTimeout,DIO3=ValidHeader
   writeRegister(LR_RegDIOMAPPING1, LR_DIO0_TXDONE);
   // enable txdone irq
   writeRegister(LR_RegIrqFlagsMask, 0xff ^ LR_TXDONE_MASK);
 }
-void LoRa::setRxInterrupt()
-{
+void LoRa::setRxInterrupt() {
   //DIO0=00, DIO1=00, DIO2=00, DIO3=01  DIO0=00--RXDONE
   writeRegister(LR_RegDIOMAPPING1, LR_DIO0_RXDONE);
   // enable rxdone irq
   writeRegister(LR_RegIrqFlagsMask, 0xff ^ LR_RXDONE_MASK);
 }
-void LoRa::clearIRQFlags()
-{
+void LoRa::clearIRQFlags() {
   writeRegister(LR_RegIrqFlags, 0xff);
 }
 // SPI read register
-uint8_t LoRa::readRegister(uint8_t addr)
-{
+uint8_t LoRa::readRegister(uint8_t addr) {
   uint8_t data;
 
   digitalWrite(NSSPin, LOW);
@@ -388,24 +353,20 @@ uint8_t LoRa::readRegister(uint8_t addr)
 }
 
 // SPI write register
-void LoRa::writeRegister(uint8_t addr, uint8_t value)
-{
+void LoRa::writeRegister(uint8_t addr, uint8_t value) {
   digitalWrite(NSSPin, LOW);
   // write register address
   SPI.transfer(addr | LORA_SPI_WNR);
   // write register value
   SPI.transfer(value);
   digitalWrite(NSSPin, HIGH);
-
 }
-void LoRa::readData(uint8_t addr, uint8_t *ptr, uint8_t len)
-{
+void LoRa::readData(uint8_t addr, uint8_t* ptr, uint8_t len) {
   uint8_t i;
   // length>1,use burst mode
   if (len <= 1)
     return;
-  else
-  {
+  else {
     digitalWrite(NSSPin, LOW);
     SPI.transfer(addr);
     for (i = 0; i < len; i++)
@@ -413,14 +374,12 @@ void LoRa::readData(uint8_t addr, uint8_t *ptr, uint8_t len)
     digitalWrite(NSSPin, HIGH);
   }
 }
-void LoRa::writeData(uint8_t addr, uint8_t *ptr, uint8_t len)
-{
+void LoRa::writeData(uint8_t addr, uint8_t* ptr, uint8_t len) {
   uint8_t i;
   // length>1,use burst mode
   if (len <= 1)
     return;
-  else
-  {
+  else {
     digitalWrite(NSSPin, LOW);
     SPI.transfer(addr | LORA_SPI_WNR);
     for (i = 0; i < len; i++)

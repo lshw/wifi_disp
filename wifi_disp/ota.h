@@ -10,7 +10,7 @@ void ota_setup() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {
       type = "sketch";
-    } else { // U_SPIFFS
+    } else {  // U_SPIFFS
       type = "filesystem";
     }
     // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
@@ -20,15 +20,15 @@ void ota_setup() {
     type = "";
   });
   ArduinoOTA.onEnd([]() {
-    ht16c21_cmd(0x88, 1); //闪烁
+    ht16c21_cmd(0x88, 1);  //闪烁
     Serial.println(F("\nEnd"));
     upgrading = false;
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
     add_limit_millis();
     Serial.printf_P(PSTR("Progress: %u%%\r"), (progress / (total / 100)));
-    snprintf_P(disp_buf, sizeof(disp_buf), PSTR("OTA.%2d"), progress * 99 / total );
-    ht16c21_cmd(0x88, 0); //停闪烁
+    snprintf_P(disp_buf, sizeof(disp_buf), PSTR("OTA.%2d"), progress * 99 / total);
+    ht16c21_cmd(0x88, 0);  //停闪烁
     disp(disp_buf);
   });
   ArduinoOTA.onError([](ota_error_t error) {
@@ -49,4 +49,4 @@ void ota_setup() {
   Serial.println(F("OTA Ready"));
 }
 
-#endif //__OTA_H__
+#endif  //__OTA_H__

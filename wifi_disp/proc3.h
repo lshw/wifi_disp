@@ -15,7 +15,7 @@ void proc3_setup() {
   }
   _myTicker.attach(1, timer1s);
   wait_connected(10000);
-  nvram.nvram7 |= NVRAM7_CHARGE; //充电
+  nvram.nvram7 |= NVRAM7_CHARGE;  //充电
   nvram.change = 1;
   save_nvram();
   if (nvram.have_dht) {
@@ -47,4 +47,4 @@ void proc3_setup() {
   delay(100);
   poweroff(nvram.proc3_sec);
 }
-#endif //__PROC3_H__
+#endif  //__PROC3_H__

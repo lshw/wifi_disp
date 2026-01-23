@@ -16,4 +16,4 @@
 #define BUILD_SET "default"
 #endif
 
-#endif //_CONFIG_H_
+#endif  //_CONFIG_H_

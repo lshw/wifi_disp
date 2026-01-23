@@ -28,7 +28,7 @@ HTTPClient http;
 String ssid, passwd;
 bool ap_client_linked = false;
 uint8_t hex2ch(char dat) {
-  dat |= 0x20; //41->61 A->a
+  dat |= 0x20;  //41->61 A->a
   if (dat >= 'a') return dat - 'a' + 10;
   return dat - '0';
 }
@@ -45,13 +45,13 @@ void onClientConnected(const WiFiEventSoftAPModeStationConnected& evt) {
     hexprint(evt.mac[i]);
   Serial.println();
   Serial.flush();
-  ht16c21_cmd(0x88, 0); //停止闪烁
+  ht16c21_cmd(0x88, 0);  //停止闪烁
 }
 
 WiFiEventHandler ConnectedHandler;
 
 void AP() {
-  WiFi.mode(WIFI_AP_STA); //开AP
+  WiFi.mode(WIFI_AP_STA);  //开AP
   WiFi.softAP("disp", "");
   Serial.print(F("IP地址: "));
   Serial.println(WiFi.softAPIP());
@@ -85,7 +85,7 @@ void wifi_setup() {
   else
     WiFi.mode(WIFI_STA);
   dump_ap_config();
-  WiFi.setAutoConnect(true);//自动链接上次
+  WiFi.setAutoConnect(true);  //自动链接上次
   if (SPIFFS.begin()) {
     if (!SPIFFS.exists("/ssid.txt")) {
       fp = SPIFFS.open("/ssid.txt", "w");
@@ -106,8 +106,10 @@ void wifi_setup() {
           case 0xd:
           case 0xa:
             if (ssid != "") {
-              Serial.print(F("Ssid:")); Serial.println(ssid);
-              Serial.print(F("Passwd:")); Serial.println(passwd);
+              Serial.print(F("Ssid:"));
+              Serial.println(ssid);
+              Serial.print(F("Passwd:"));
+              Serial.println(passwd);
               WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
               Serial.println(F("-----"));
             }
@@ -127,9 +129,11 @@ void wifi_setup() {
         }
       }
       if (ssid != "" && passwd != "") {
-        if (count < 5) count ++;
-        Serial.print(F("Ssid:")); Serial.println(ssid);
-        Serial.print(F("Passwd:")); Serial.println(passwd);
+        if (count < 5) count++;
+        Serial.print(F("Ssid:"));
+        Serial.println(ssid);
+        Serial.print(F("Passwd:"));
+        Serial.println(passwd);
         WiFiMulti.addAP(ssid.c_str(), passwd.c_str());
         Serial.println(F("-----"));
       }
@@ -146,9 +150,9 @@ bool fast_wifi = true;
 bool WiFi_isConnected() {
   if (connected_is_ok)
     return connected_is_ok;
-  if (proc == SETUP_MODE && ap_client_linked) return false; //ota有wifi客户连上来,就不再尝试链接AP了
+  if (proc == SETUP_MODE && ap_client_linked) return false;  //ota有wifi客户连上来,就不再尝试链接AP了
   if (fast_wifi && millis() > 6000) {
-    fast_wifi = false; //5秒钟没有登陆， 就要用常规登陆了
+    fast_wifi = false;  //5秒钟没有登陆， 就要用常规登陆了
     wifi_setup();
   }
   if (fast_wifi) {
@@ -161,22 +165,22 @@ bool WiFi_isConnected() {
     uint8_t ap_id = wifi_station_get_current_ap_id();
     struct station_config config[5];
     wifi_station_get_ap_info(config);
-    config[ap_id].bssid_set = 1; //同名ap，mac地址不同
-    wifi_station_set_config(&config[ap_id]); //保存成功的ssid,用于下次通讯
+    config[ap_id].bssid_set = 1;              //同名ap，mac地址不同
+    wifi_station_set_config(&config[ap_id]);  //保存成功的ssid,用于下次通讯
     connected_is_ok = true;
     Serial.printf_P(PSTR("\r\n用SSID设置登陆ap成功,millis()=%ld\r\n"), millis());
   }
   if (connected_is_ok == true) {
     Serial.println(WiFi.localIP());
-    ht16c21_cmd(0x88, 0); //停止闪烁
-    if (nvram.ch != wifi_get_channel() ) {
-      nvram.ch =  wifi_get_channel();
+    ht16c21_cmd(0x88, 0);  //停止闪烁
+    if (nvram.ch != wifi_get_channel()) {
+      nvram.ch = wifi_get_channel();
       nvram.change = 1;
     }
     return true;
   }
   if (proc != SETUP_MODE)
-    ht16c21_cmd(0x88, 1); //开始闪烁
+    ht16c21_cmd(0x88, 1);  //开始闪烁
   return false;
 }
 
@@ -190,15 +194,15 @@ uint16_t http_get(uint8_t no) {
     url0 += '&';
   else
     url0 += '?';
-  url0 +=  "GIT=" GIT_VER "&ver=" VER "&sn=" + hostname
-           + "&ssid=" + String(WiFi.SSID())
-           + "&bssid=" + WiFi.BSSIDstr()
-           + "&batt=" + String(v)
-           + "&rssi=" + String(WiFi.RSSI())
-           + "&power=" + String(power_in)
-           + "&pcb_ver=" + String(nvram.pcb_ver)
-           + "&charge=" + String(nvram.nvram7 & NVRAM7_CHARGE)
-           + "&ms=" + String(millis());
+  url0 += "GIT=" GIT_VER "&ver=" VER "&sn=" + hostname
+          + "&ssid=" + String(WiFi.SSID())
+          + "&bssid=" + WiFi.BSSIDstr()
+          + "&batt=" + String(v)
+          + "&rssi=" + String(WiFi.RSSI())
+          + "&power=" + String(power_in)
+          + "&pcb_ver=" + String(nvram.pcb_ver)
+          + "&charge=" + String(nvram.nvram7 & NVRAM7_CHARGE)
+          + "&ms=" + String(millis());
   if (proc == PROC4_MODE && rxLen > 0)
     url0 += "&lora=" + base64::encode(rxBuf, rxLen);
   if (bmp.begin()) {
@@ -227,8 +231,8 @@ uint16_t http_get(uint8_t no) {
     }
   }
 
-  Serial.println(url0); //串口输出
-  http.begin(client, url0 ); //HTTP提交
+  Serial.println(url0);      //串口输出
+  http.begin(client, url0);  //HTTP提交
   http.setTimeout(4000);
   int httpCode;
   for (uint8_t i = 0; i < 10; i++) {
@@ -249,15 +253,15 @@ uint16_t http_get(uint8_t no) {
         String payload = http.getString();
         payload.trim();
         char ch = payload.charAt(0);
-        if ( ch < '0' || ch > '9') { //非数字， 就是web下发的命令
+        if (ch < '0' || ch > '9') {  //非数字， 就是web下发的命令
           web_cmd(payload);
           disp(F("8.8.8.8.8."));
           break;
         }
 
         memset(disp_buf, 0, sizeof(disp_buf));
-        payload.toCharArray(disp_buf, sizeof(disp_buf) - 1); //.1.2.3.4.5,1800
-        uint8_t    i1 = payload.indexOf(',');
+        payload.toCharArray(disp_buf, sizeof(disp_buf) - 1);  //.1.2.3.4.5,1800
+        uint8_t i1 = payload.indexOf(',');
         Serial.println(disp_buf);
         next_disp = atoi(&disp_buf[i1 + 1]);
         if (next_disp < 6)
@@ -289,19 +293,18 @@ void update_progress(int cur, int total) {
   add_limit_millis();
   Serial.printf_P(PSTR("HTTP update process at %d of %d bytes...\r\n"), cur, total);
   snprintf_P(disp_buf, sizeof(disp_buf), PSTR("HUP%2d"), cur * 99 / total);
-  ht16c21_cmd(0x88, 0); //停闪烁
+  ht16c21_cmd(0x88, 0);  //停闪烁
   disp(disp_buf);
 }
 
-bool http_update(String update_url)
-{
+bool http_update(String update_url) {
   if (get_batt() < 3.6) {
     Serial.println(F("电压太低,不做升级"));
     ESP.restart();
     return false;
   }
   if (nvram.nvram7 & NVRAM7_CHARGE == 0) {
-    nvram.nvram7 |= NVRAM7_CHARGE; //开充电模式
+    nvram.nvram7 |= NVRAM7_CHARGE;  //开充电模式
     nvram.change = 1;
     save_nvram();
   }
@@ -319,7 +322,7 @@ bool http_update(String update_url)
   Serial.print(F("下载firmware from "));
   Serial.println(update_url);
   ESPhttpUpdate.onProgress(update_progress);
-  t_httpUpdate_return  ret = ESPhttpUpdate.update(client, update_url);
+  t_httpUpdate_return ret = ESPhttpUpdate.update(client, update_url);
   update_url = "";
 
   switch (ret) {
@@ -341,20 +344,20 @@ bool http_update(String update_url)
     case HTTP_UPDATE_OK:
       Serial.println(F("HTTP_UPDATE_OK"));
       upgrading = false;
-      ht16c21_cmd(0x88, 1); //0-不闪 1-2hz 2-1hz 3-0.5hz
+      ht16c21_cmd(0x88, 1);  //0-不闪 1-2hz 2-1hz 3-0.5hz
       return true;
       break;
   }
   delay(1000);
   return false;
 }
-void web_cmd(String str) { //处理下发的web命令
+void web_cmd(String str) {  //处理下发的web命令
   String str0;
   int16_t i;
   str0 = str;
   while (str0 != "") {
     i = str0.indexOf(0xa);
-    if (i  < 0) i = str0.length();
+    if (i < 0) i = str0.length();
     web_cmd_a(str0.substring(0, i));
     if (i == str0.length()) break;
     str0 = str0.substring(i, str0.length());
@@ -372,7 +375,7 @@ void web_cmd_a(String str) {
   Serial.print(cmd);
   Serial.println(']');
   if (cmd == "UPDATE") {
-    ht16c21_cmd(0x88, 0); //停闪烁
+    ht16c21_cmd(0x88, 0);  //停闪烁
     if (http_update(argv) == false)
       http_update(argv);
     poweroff(1800);
