@@ -22,7 +22,9 @@ struct {
   uint32_t boot_count;
   uint8_t old_proc;
   int8_t have_bmp;
-  uint8_t baoliu[2];
+  ip_info ip;
+  ip4_addr_t dns0;
+  ip4_addr_t dns1;
   uint32_t crc32;
 } nvram;
 
@@ -30,12 +32,13 @@ uint32_t calculateCRC32(const uint8_t *data, size_t length);
 void save_nvram();
 void load_nvram() {
   File fp;
+  uint32_t size;
   ESP.rtcUserMemoryRead(0, (uint32_t *)&nvram, sizeof(nvram));
   if (nvram.crc32 != calculateCRC32((uint8_t *)&nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
     if (SPIFFS.begin()) {
       if (SPIFFS.exists("/nvram.bin")) {
         fp = SPIFFS.open("/nvram.bin", "r");
-        fp.read((uint8_t *)&nvram, sizeof(nvram));
+        size = fp.read((uint8_t *)&nvram, sizeof(nvram));
         fp.close();
         nvram.boot_count = 0;
         nvram.have_lora = 0;
@@ -47,6 +50,9 @@ void load_nvram() {
         save_nvram();
       }
     }
+  }
+  if (size < sizeof(nvram)) { //nvram升级， 载入以前的设置
+    nvram.crc32 = calculateCRC32((uint8_t *)&nvram, sizeof(nvram) - sizeof(nvram.crc32));
   }
   if (nvram.crc32 != calculateCRC32((uint8_t *)&nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
     memset(&nvram, 0, sizeof(nvram));

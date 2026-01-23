@@ -180,6 +180,21 @@ bool WiFi_isConnected() {
   if (connected_is_ok == true) {
     Serial.println(WiFi.localIP());
     ht16c21_cmd(0x88, 0);  //停止闪烁
+    ip_info now_ip;
+    ip_addr_t dns0, dns1;
+    dns0 = *dns_getserver(0);
+    dns1 = *dns_getserver(1);
+    wifi_get_ip_info(STATION_IF, &now_ip);
+    if (!ip_addr_cmp(&now_ip.ip, &nvram.ip.ip)
+        || !ip_addr_cmp(&now_ip.netmask, &nvram.ip.netmask)
+        || !ip_addr_cmp(&now_ip.gw, &nvram.ip.gw)
+        || !ip_addr_cmp(&dns0, &nvram.dns0)
+        || !ip_addr_cmp(&dns1, &nvram.dns1)) {
+      wifi_get_ip_info(STATION_IF, &nvram.ip);
+      nvram.dns0 = *dns_getserver(0);
+      nvram.dns1 = *dns_getserver(1);
+      nvram.change = 1;
+    }
     if (nvram.ch != wifi_get_channel()) {
       nvram.ch = wifi_get_channel();
       nvram.change = 1;
