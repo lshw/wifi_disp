@@ -48,6 +48,13 @@ void setup() {
   if (nvram.have_dht == 0 && nvram.pcb_ver >= 0) {  //dht与wifi_station_connect冲突
     if (nvram.proc == PROC3_MODE || nvram.proc == GENERAL_MODE) {
       wifi_set_opmode(STATION_MODE);
+      wifi_set_sleep_type(NONE_SLEEP_T);
+      if (!ip_addr_isany(&nvram.ip.ip) && !ip_addr_isany(&nvram.ip.gw) && !ip_addr_isany(&nvram.ip.netmask)) {
+        wifi_station_dhcpc_stop();
+        wifi_set_ip_info(STATION_IF, &nvram.ip);
+        dns_setserver(0, &saved.dns0);
+        dns_setserver(1, &saved.dns1);
+      }
       struct station_config conf = { 0 };
       wifi_station_get_config(&conf);
       wifi_station_set_config_current(&conf);
