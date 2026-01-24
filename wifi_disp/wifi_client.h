@@ -175,18 +175,16 @@ bool WiFi_isConnected() {
 
 int16_t get_content_length(uint16_t& content_length) {
   int16_t httpCode;
-  uint32_t timeoutMs = millis() + 1000;
-  while (client.connected()) {
+  uint32_t timeoutMs = millis() + 10000;
+  while (millis() < timeoutMs) {
     if (!client.available()) {
-      if (millis() > timeoutMs) {
-        return -11;  // header timeout
-      }
-      delay(1);
+      delay(5);
       continue;
     }
 
     String line = client.readStringUntil('\n');
     line.trim();
+    Serial.println(String(millis()) + ":" + line);
 
     // 空行 = header 结束
     if (line.length() == 0) {
@@ -203,7 +201,7 @@ int16_t get_content_length(uint16_t& content_length) {
       content_length = line.substring(15).toInt();
     }
   }
-  return -999;
+  return -11;
 }
 
 int16_t wget() {
@@ -287,7 +285,9 @@ int16_t wget() {
                  + F("User-Agent: wifi_disp\r\n"
                      "Connection: close\r\n\r\n"));
     uint16_t content_length = 0;
+    delay(50);
     httpCode = get_content_length(content_length);
+    Serial.println(F("httpCode=") + String(httpCode) + F(",content_length=") + String(content_length));
     uint32_t ms;
     char ch;
     ms = millis() + 1000;
