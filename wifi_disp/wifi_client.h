@@ -181,16 +181,12 @@ bool WiFi_isConnected() {
   return false;
 }
 
-uint16_t http_get(uint8_t no) {
+int16_t wget() {
   char key[17];
   String url0;
-  url0.reserve(260);
-  url0 = get_url(no);
+  bool no0, no = nvram.nvram7 & NVRAM7_URL;
+  no0 = no;
 
-  if (url0.indexOf('?') > 0)
-    url0 += '&';
-  else
-    url0 += '?';
   url0 += "GIT=" GIT_VER "&ver=" VER "&sn=" + hostname
           + "&ssid=" + String(WiFi.SSID())
           + "&bssid=" + WiFi.BSSIDstr()
@@ -228,61 +224,62 @@ uint16_t http_get(uint8_t no) {
     }
   }
 
-  Serial.println(url0);      //串口输出
-  http.begin(client, url0);  //HTTP提交
-  http.setTimeout(4000);
   int httpCode;
-  for (uint8_t i = 0; i < 3; i++) {
+  String payload;
+  for (uint8_t i = 0; i < 6; i++) {
+    Serial.println(String(millis()) + "ms," + String(i) + "," + String(no) + ":" + get_url(no) + url0);  //串口输出
+    http.begin(client, get_url(no) + url0 + "&try=" + String(i) + "," + String(no));                     //HTTP提交
     httpCode = http.GET();
-    if (httpCode < 0) {
-      http.begin(client, url0 + "&err=" + String((int)httpCode));  //HTTP提交
-      Serial.print(F("err:"));
+    payload = http.getString();
+    payload.trim();
+    if (payload.length() == 0) {
+      no = !no;  //换服务器
+      snprintf_P(disp_buf, sizeof(disp_buf), PSTR(".E%4d"), httpCode);
+      disp(disp_buf);
+      Serial.print(F("http error code "));
       Serial.println(httpCode);
       delay(100);
       continue;
     }
+    Serial.println(payload);
+    if (httpCode < 0) {
+      http.begin(client, url0 + "&err=" + String((int)httpCode));  //HTTP提交
+      Serial.print(String(millis()) + F("err:"));
+      Serial.println(httpCode);
+      delay(100);
+    }
     // httpCode will be negative on error
-    url0 = "";
-    url0.reserve(1);
-    if (httpCode >= 200 && httpCode <= 299) {
+    if (httpCode < 300) {
       // HTTP header has been send and Server response header has been handled
       Serial.printf_P(PSTR("[HTTP] GET... code:%d\r\n"), httpCode);
       // file found at server
-      if (httpCode == HTTP_CODE_OK) {
-        String payload = http.getString();
-        payload.trim();
-        char ch = payload.charAt(0);
-        if (ch < '0' || ch > '9') {  //非数字， 就是web下发的命令
-          web_cmd(payload);
-          disp(F("8.8.8.8.8."));
-          break;
-        }
-
-        memset(disp_buf, 0, sizeof(disp_buf));
-        payload.toCharArray(disp_buf, sizeof(disp_buf) - 1);  //.1.2.3.4.5,1800
-        uint8_t i1 = payload.indexOf(',');
-        Serial.println(disp_buf);
-        next_disp = atoi(&disp_buf[i1 + 1]);
-        if (next_disp < 6)
-          next_disp = 6;
-        if (next_disp > 360 * 24)
-          next_disp = 360 * 24;
-        next_disp = next_disp * 10;
-        disp_buf[i1] = 0;
-        disp(disp_buf);
+      char ch = payload.charAt(0);
+      if ((ch < '0' || ch > '9') && ch != ',') {  //非数字， 就是web下发的命令
+        web_cmd(payload);
+        disp(F("8.8.8.8.8."));
         break;
       }
-    } else {
 
-      if (httpCode > 0)
-        snprintf_P(disp_buf, sizeof(disp_buf), PSTR(".E%4d"), httpCode);
+      memset(disp_buf, 0, sizeof(disp_buf));
+      payload.toCharArray(disp_buf, sizeof(disp_buf) - 1);  //.1.2.3.4.5,1800
+      uint8_t i1 = payload.indexOf(',');
+      Serial.println(disp_buf);
+      next_disp = atoi(&disp_buf[i1 + 1]);
+      if (next_disp < 6)
+        next_disp = 6;
+      if (next_disp > 360 * 24)
+        next_disp = 360 * 24;
+      next_disp = next_disp * 10;
+      disp_buf[i1] = 0;
       disp(disp_buf);
-      Serial.print(F("http error code "));
-      Serial.println(httpCode);
+      if (httpCode >= 200 && no != no0) {
+        nvram.nvram7 ^= (1 << NVRAM7_URL);  //先试试上次成功的url
+        nvram.change = 1;
+        save_nvram();
+      }
       break;
     }
   }
-  //  http.end();
   url0 = "";
   return httpCode;
 }

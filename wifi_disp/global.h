@@ -208,15 +208,6 @@ void timer1s() {
   return;
 }
 
-uint16_t wget() {
-  uint16_t httpCode = http_get(nvram.nvram7 & NVRAM7_URL);  //先试试上次成功的url
-  if (httpCode < 200 || httpCode >= 400) {
-    nvram.nvram7 = (nvram.nvram7 & ~NVRAM7_URL) | (~nvram.nvram7 & NVRAM7_URL);
-    nvram.change = 1;
-    httpCode = http_get(nvram.nvram7 & NVRAM7_URL);  //再试试另一个的url
-  }
-  return httpCode;
-}
 
 float get_batt0() {  //锂电池电压
   uint32_t dat = analogRead(A0);
@@ -289,17 +280,15 @@ float get_batt() {
   return v;
 }
 
-String get_url(uint8_t no) {
+String get_url(bool no) {
   File fp;
   char fn[20];
   String ret;
-  if (no == 0 || no == '0') ret = String(DEFAULT_URL0);
-  else ret = String(DEFAULT_URL1);
   if (SPIFFS.begin()) {
-    if (no == 0 || no == '0')
-      fp = SPIFFS.open("/url.txt", "r");
-    else
+    if (no)
       fp = SPIFFS.open("/url1.txt", "r");
+    else
+      fp = SPIFFS.open("/url0.txt", "r");
     if (fp) {
       ret = fp.readStringUntil('\n');
       ret.trim();
@@ -317,13 +306,18 @@ String get_url(uint8_t no) {
   }
   SPIFFS.end();
   if (ret == "") {
-    if (no == 0 || no == '0')
-      ret = DEFAULT_URL0;
-    else
+    if (no)
       ret = DEFAULT_URL1;
+    else
+      ret = DEFAULT_URL0;
   }
+  if (ret.indexOf('?') > 0)
+    ret += '&';
+  else
+    ret += '?';
   return ret;
 }
+
 String get_ssid() {
   File fp;
   String ssid;

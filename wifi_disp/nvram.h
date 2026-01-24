@@ -51,7 +51,7 @@ void load_nvram() {
       }
     }
   }
-  if (size < sizeof(nvram)) { //nvram升级， 载入以前的设置
+  if (size < sizeof(nvram)) {  //nvram升级， 载入以前的设置
     nvram.crc32 = calculateCRC32((uint8_t *)&nvram, sizeof(nvram) - sizeof(nvram.crc32));
   }
   if (nvram.crc32 != calculateCRC32((uint8_t *)&nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
