@@ -24,7 +24,6 @@ void web_cmd_a(String str);
 void ht16c21_cmd(uint8_t cmd, uint8_t dat);
 ESP8266WiFiMulti WiFiMulti;
 WiFiClient client;
-HTTPClient http;
 String ssid, passwd;
 bool ap_client_linked = false;
 uint8_t hex2ch(char dat) {
@@ -181,6 +180,39 @@ bool WiFi_isConnected() {
   return false;
 }
 
+int16_t get_content_length(uint16_t& content_length) {
+  int16_t httpCode;
+  uint32_t timeoutMs = millis() + 1000;
+  while (client.connected()) {
+    if (!client.available()) {
+      if (millis() > timeoutMs) {
+        return false;  // header timeout
+      }
+      delay(1);
+      continue;
+    }
+
+    String line = client.readStringUntil('\n');
+    line.trim();
+
+    // 空行 = header 结束
+    if (line.length() == 0) {
+      return httpCode;
+    }
+
+    // Status line
+    if (line.startsWith("HTTP/")) {
+      // HTTP/1.0 200 OK
+      httpCode = line.substring(9, 12).toInt();
+    }
+    // Content-Length
+    else if (line.startsWith("Content-Length:")) {
+      content_length = line.substring(15).toInt();
+    }
+  }
+  return -999;
+}
+
 int16_t wget() {
   char key[17];
   String url0;
@@ -228,9 +260,33 @@ int16_t wget() {
   String payload;
   for (uint8_t i = 0; i < 6; i++) {
     Serial.println(String(millis()) + "ms," + String(i) + "," + String(no) + ":" + get_url(no) + url0);  //串口输出
-    http.begin(client, get_url(no) + url0 + "&try=" + String(i) + "," + String(no));                     //HTTP提交
-    httpCode = http.GET();
-    payload = http.getString();
+
+
+    struct ParsedURL u;
+    parseURL(get_url(no), u);
+    if (u.path == "?")
+      u.path = "/?";
+    if (!client.connect(u.host.c_str(), u.port)) {
+      no = !no;
+      continue;
+    }
+    client.print("GET " + u.path + url0 + " HTTP/1.0\r\n"
+                 + "Host: " + u.host + "\r\n"
+                 + "User-Agent: wifi_disp\r\n"
+                 + "Connection: close\r\n\r\n");
+    uint16_t content_length = 0;
+    httpCode = get_content_length(content_length);
+    uint32_t ms;
+    char ch;
+    ms = millis() + 1000;
+    Serial.println("content length: " + String(content_length));
+    while (ms > millis()) {
+      while (client.available()) {
+        ch = client.read();
+        payload += ch;
+      }
+      if (payload.length() >= content_length) break;
+    }
     payload.trim();
     if (payload.length() == 0) {
       no = !no;  //换服务器
@@ -242,12 +298,6 @@ int16_t wget() {
       continue;
     }
     Serial.println(payload);
-    if (httpCode < 0) {
-      http.begin(client, url0 + "&err=" + String((int)httpCode));  //HTTP提交
-      Serial.print(String(millis()) + F("err:"));
-      Serial.println(httpCode);
-      delay(100);
-    }
     // httpCode will be negative on error
     if (httpCode < 300) {
       // HTTP header has been send and Server response header has been handled

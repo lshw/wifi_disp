@@ -877,4 +877,39 @@ void dump_ap_config() {
   }
   Serial.println();
 }
+
+struct ParsedURL {
+  String host;
+  uint16_t port;
+  String path;
+};
+bool parseURL(const String &url, ParsedURL &out) {
+  out.port = 80;  // 默认端口
+  out.path = "/";
+
+  int schemeEnd = url.indexOf("://");
+  if (schemeEnd < 0) return false;
+
+  int hostStart = schemeEnd + 3;
+  int pathStart = url.indexOf('/', hostStart);
+
+  String hostPort;
+  if (pathStart < 0) {
+    hostPort = url.substring(hostStart);
+  } else {
+    hostPort = url.substring(hostStart, pathStart);
+    out.path = url.substring(pathStart);
+  }
+
+  int colon = hostPort.indexOf(':');
+  if (colon >= 0) {
+    out.host = hostPort.substring(0, colon);
+    out.port = hostPort.substring(colon + 1).toInt();
+    if (out.port == 0) return false;
+  } else {
+    out.host = hostPort;
+  }
+
+  return out.host.length() > 0;
+}
 #endif
