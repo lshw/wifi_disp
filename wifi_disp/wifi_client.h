@@ -260,7 +260,7 @@ int16_t wget() {
       u.path = "/?";
     if (no) ip = nvram.ip_addr[1];
     else ip = nvram.ip_addr[0];
-    if (i > 2 || ip == IPAddress(0, 0, 0, 0)) {
+    if (i > 1 || ip == IPAddress(0, 0, 0, 0)) {
       Serial.println(F("dns解析:") + u.host);
       if (WiFi.hostByName(u.host.c_str(), ip)) {
         Serial.println(F("dns解析ok") + String(no) + ip.toString());
