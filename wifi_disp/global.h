@@ -63,7 +63,15 @@ extern bool ap_client_linked;
 extern float wendu, shidu;
 float get_batt();
 float v;
+
+struct {
+  uint8_t dns_ip_change : 1;
+} __attribute__((packed)) set0;  //字节紧凑格式， 不做字对齐
+
 bool Serial_begined = false;
+void load_set0() {
+  set0.dns_ip_change = 0;
+}
 void Serial_begin() {
   if (Serial_begined == false) {
     Serial.begin(115200);

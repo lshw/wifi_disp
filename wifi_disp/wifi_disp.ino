@@ -243,6 +243,7 @@ void wput() {
         || !ip_addr_cmp(&now_ip.netmask, &nvram.ip.netmask)
         || !ip_addr_cmp(&now_ip.gw, &nvram.ip.gw)
         || !ip_addr_cmp(&dns0, &nvram.dns0)
+        || set0.dns_ip_change == 1
         || !ip_addr_cmp(&dns1, &nvram.dns1)) {
       wifi_get_ip_info(STATION_IF, &nvram.ip);
       nvram.dns0 = *dns_getserver(0);
