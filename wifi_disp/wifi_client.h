@@ -280,10 +280,12 @@ int16_t wget() {
       no = !no;
       continue;
     }
-    client.print(F("GET ") + u.path + url0 + F(" HTTP/1.0\r\n"
-                  "Host: ") + u.host + "\r\n"
+    client.print(F("GET ") + u.path + url0
+                 + F(" HTTP/1.0\r\n"
+                     "Host: ")
+                 + u.host + "\r\n"
                  + F("User-Agent: wifi_disp\r\n"
-                  "Connection: close\r\n\r\n"));
+                     "Connection: close\r\n\r\n"));
     uint16_t content_length = 0;
     httpCode = get_content_length(content_length);
     uint32_t ms;
@@ -308,7 +310,7 @@ int16_t wget() {
     }
     Serial.println(payload);
     // httpCode will be negative on error
-    if (httpCode < 300) {
+    if (httpCode >= 200 && httpCode < 300) {
       // HTTP header has been send and Server response header has been handled
       Serial.printf_P(PSTR("[HTTP] GET... code:%d\r\n"), httpCode);
       // file found at server
@@ -414,10 +416,14 @@ void web_cmd(String str) {  //处理下发的web命令
   String str0;
   int16_t i;
   str0 = str;
+  uint8_t count = 0;
   while (str0 != "") {
     i = str0.indexOf(0xa);
     if (i < 0) i = str0.length();
+    if (i == 0) break;
     web_cmd_a(str0.substring(0, i));
+    count++;
+    if (count > 5) break;
     if (i == str0.length()) break;
     str0 = str0.substring(i, str0.length());
   }
