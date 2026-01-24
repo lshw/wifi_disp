@@ -284,33 +284,18 @@ String get_url(bool no) {
   File fp;
   char fn[20];
   String ret;
-  if (SPIFFS.begin()) {
-    if (no)
-      fp = SPIFFS.open("/url1.txt", "r");
-    else
-      fp = SPIFFS.open("/url0.txt", "r");
-    if (fp) {
-      ret = fp.readStringUntil('\n');
-      ret.trim();
-      fp.close();
-      if (ret.startsWith("http://www.cfido.com/")) {
-        SPIFFS.remove("/url.txt");
-        SPIFFS.remove("/url1.txt");
-        ret.replace("www.cfido.com/", "temp.cfido.com:808/");
-      } else if (ret.startsWith("http://www.wf163.com/")) {
-        SPIFFS.remove("/url.txt");
-        SPIFFS.remove("/url1.txt");
-        ret.replace("www.wf163.com/", "temp2.wf163.com:808/");
-      }
-    }
-  }
-  SPIFFS.end();
+  if (no)
+    ret = String(nvram.url[1]);
+  else
+    ret = String(nvram.url[0]);
   if (ret == "") {
     if (no)
       ret = DEFAULT_URL1;
     else
       ret = DEFAULT_URL0;
   }
+  ret.replace("www.wf163.com/", "temp2.wf163.com:808/");
+  ret.replace("www.cfido.com/", "temp.cfido.com:808/");
   if (ret.indexOf('?') > 0)
     ret += '&';
   else

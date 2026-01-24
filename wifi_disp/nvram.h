@@ -25,6 +25,8 @@ struct {
   ip_info ip;
   ip4_addr_t dns0;
   ip4_addr_t dns1;
+  char url[2][32];
+  IPAddress ip_addr[2];
   uint32_t crc32;
 } nvram;
 
@@ -52,7 +54,23 @@ void load_nvram() {
     }
   }
   if (size < sizeof(nvram)) {  //nvram升级， 载入以前的设置
+    fp = SPIFFS.open("/url0.txt", "r");
+    if (fp) {
+      fp.read((uint8_t *)nvram.url[0], sizeof(nvram.url[0]));
+      fp.close();
+      SPIFFS.remove("/url0.txt");
+      nvram.ip0 = IPAddress(0, 0, 0, 0);
+    }
+    fp = SPIFFS.open("/url1.txt", "r");
+    if (fp) {
+      fp.read((uint8_t *)nvram.url[1], sizeof(nvram.url[1]));
+      fp.close();
+      SPIFFS.remove("/url1.txt");
+      nvram.ip1 = IPAddress(0, 0, 0, 0);
+    }
     nvram.crc32 = calculateCRC32((uint8_t *)&nvram, sizeof(nvram) - sizeof(nvram.crc32));
+    nvram.change = 1;
+    save_nvram();
   }
   if (nvram.crc32 != calculateCRC32((uint8_t *)&nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
     memset(&nvram, 0, sizeof(nvram));
@@ -74,6 +92,7 @@ void load_nvram() {
     WRITE_PERI_REG(0x600011f4, 1 << 16 | nvram.ch);
   }
 }
+
 void save_nvram() {
   if (nvram.change == 0) return;
   nvram.change = 0;

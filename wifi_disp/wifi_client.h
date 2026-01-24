@@ -258,11 +258,9 @@ int16_t wget() {
 
   int httpCode;
   String payload;
-  for (uint8_t i = 0; i < 6; i++) {
+  struct ParsedURL u;
+  for (uint8_t i = 0; i < 4; i++) {
     Serial.println(String(millis()) + "ms," + String(i) + "," + String(no) + ":" + get_url(no) + url0);  //串口输出
-
-
-    struct ParsedURL u;
     parseURL(get_url(no), u);
     if (u.path == "?")
       u.path = "/?";

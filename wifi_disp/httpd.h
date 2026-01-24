@@ -183,9 +183,9 @@ void handleRoot() {
          + get_ssid() + "</textarea><br>"
                         "可以设置自己的服务器地址(清空恢复)<br>"
                         "url0:<input maxlength=100  size=50 type=text value='"
-         + get_url(0) + "' name=url><br>"
-                        "url1:<input maxlength=100  size=50 type=text value='"
-         + get_url(1) + "' name=url1><br>"
+         + String(nvram.url[0]) + "' name=url><br>"
+                                  "url1:<input maxlength=100  size=50 type=text value='"
+         + String(nvram.url[1]) + "' name=url1><br>"
          + lora_set()
          + "<hr><input type=submit name=submit value=save>"
            "&nbsp;<input type=submit name=reboot value='reboot'>"
@@ -267,7 +267,6 @@ void http_add_ssid() {
 void httpsave() {
   File fp;
   String url, data;
-  bool nvram_update = false;
   SPIFFS.begin();
   bool reboot_now = false;
   add_limit_millis();
@@ -278,7 +277,6 @@ void httpsave() {
         nvram.proc3_sec = 10;
       nvram.change = 1;
       save_nvram();
-      nvram_update = true;
       continue;
     }
     if (httpd.argName(i).compareTo("proc3_port") == 0) {
@@ -287,7 +285,6 @@ void httpsave() {
         nvram.proc3_port = 1025;
       nvram.change = 1;
       save_nvram();
-      nvram_update = true;
       continue;
     }
     if (httpd.argName(i).compareTo("proc3_host") == 0) {
@@ -297,7 +294,6 @@ void httpsave() {
       strncpy(nvram.proc3_host, data.substring(0, sizeof(nvram.proc3_host) - 1).c_str(), sizeof(nvram.proc3_host) - 1);
       nvram.change = 1;
       save_nvram();
-      nvram_update = true;
       continue;
     }
     if (httpd.argName(i).compareTo("reboot") == 0) {
@@ -325,15 +321,9 @@ void httpsave() {
     } else if (httpd.argName(i).compareTo("url") == 0) {
       url = httpd.arg(i);
       url.trim();
-      if (url.length() == 0) {
-        Serial.println(F("删除url0设置"));
-        SPIFFS.remove("/url.txt");
-      } else {
-        Serial.printf_P(PSTR("url0:[%s]\r\n"), url.c_str());
-        fp = SPIFFS.open("/url.txt", "w");
-        fp.println(url);
-        fp.close();
-      }
+      strncpy((char *)nvram.url[0], url.c_str(), sizeof(nvram.url[0]));
+      nvram.change = 1;
+      nvram.ip0 = IPAddress(0, 0, 0, 0);
     } else if (httpd.argName(i).compareTo(F("lora_hz")) == 0) {
       nvram.lora_hz = httpd.arg(i).toInt();
       if (nvram.lora_hz < 137000000L)
@@ -350,22 +340,17 @@ void httpsave() {
         nvram.lora_hz = 1020000000L;
       nvram.change = 1;
       save_nvram();
-      nvram_update = true;
     } else if (httpd.argName(i).compareTo(F("lora_bw")) == 0) {
       nvram.bw = httpd.arg(i).toInt();
       nvram.bw = nvram.bw & 0xf0;
       if (nvram.bw > LR_BW_500k) nvram.bw = LR_BW_500k;
       nvram.change = 1;
-      save_nvram();
-      nvram_update = true;
     } else if (httpd.argName(i).compareTo(F("lora_cr")) == 0) {
       nvram.cr = httpd.arg(i).toInt();
       nvram.cr &= 0xe;
       if (nvram.cr < LR_CODINGRATE_1p25) nvram.cr = LR_CODINGRATE_1p25;
       if (nvram.cr > LR_CODINGRATE_2) nvram.cr = LR_CODINGRATE_2;
       nvram.change = 1;
-      save_nvram();
-      nvram_update = true;
     } else if (httpd.argName(i).compareTo(F("lora_sf")) == 0) {
       nvram.sf = httpd.arg(i).toInt() & 0xf0;
       if (nvram.sf < LR_SPREADING_FACTOR_6)
@@ -373,29 +358,18 @@ void httpsave() {
       if (nvram.sf > LR_SPREADING_FACTOR_12)
         nvram.sf = LR_SPREADING_FACTOR_12;
       nvram.change = 1;
-      save_nvram();
-      nvram_update = true;
     } else if (httpd.argName(i).compareTo("url1") == 0) {
       url = httpd.arg(i);
       url.trim();
-      if (url.length() == 0) {
-        Serial.println(F("删除url1设置"));
-        SPIFFS.remove("/url1.txt");
-      } else {
-        Serial.printf_P(PSTR("url1:[%s]\r\n"), url.c_str());
-        fp = SPIFFS.open("/url1.txt", "w");
-        fp.println(url);
-        fp.close();
-      }
+      strncpy((char *)nvram.url[1], url.c_str(), sizeof(nvram.url1));
+      nvram.ip1 = IPAddress(0, 0, 0, 0);
+      nvram.change = 1;
     }
   }
   url = "";
-  if (nvram_update) {
-    fp = SPIFFS.open("/nvram.bin", "w");
-    fp.write((char *)&nvram, sizeof(nvram));
-    fp.close();
+  if (nvram.change == 1) {
+    save_nvram();
   }
-  SPIFFS.end();
   httpd.send(200, "text/html", "<html><head></head><body><script>location.replace('/');</script></body></html>");
   yield();
   if (reboot_now) {
