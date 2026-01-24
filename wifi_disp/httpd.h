@@ -323,7 +323,7 @@ void httpsave() {
       url.trim();
       strncpy((char *)nvram.url[0], url.c_str(), sizeof(nvram.url[0]));
       nvram.change = 1;
-      nvram.ip0 = IPAddress(0, 0, 0, 0);
+      nvram.ip_addr[0] = IPAddress(0, 0, 0, 0);
     } else if (httpd.argName(i).compareTo(F("lora_hz")) == 0) {
       nvram.lora_hz = httpd.arg(i).toInt();
       if (nvram.lora_hz < 137000000L)
@@ -361,8 +361,8 @@ void httpsave() {
     } else if (httpd.argName(i).compareTo("url1") == 0) {
       url = httpd.arg(i);
       url.trim();
-      strncpy((char *)nvram.url[1], url.c_str(), sizeof(nvram.url1));
-      nvram.ip1 = IPAddress(0, 0, 0, 0);
+      strncpy((char *)nvram.url[1], url.c_str(), sizeof(nvram.url[1]));
+      nvram.ip_addr[1] = IPAddress(0, 0, 0, 0);
       nvram.change = 1;
     }
   }

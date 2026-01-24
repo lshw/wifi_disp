@@ -259,12 +259,18 @@ int16_t wget() {
   int httpCode;
   String payload;
   struct ParsedURL u;
+  IPAddress ip;
   for (uint8_t i = 0; i < 4; i++) {
     Serial.println(String(millis()) + "ms," + String(i) + "," + String(no) + ":" + get_url(no) + url0);  //串口输出
     parseURL(get_url(no), u);
     if (u.path == "?")
       u.path = "/?";
-    if (!client.connect(u.host.c_str(), u.port)) {
+    if (no) ip = nvram.ip_addr[1];
+    else ip = nvram.ip_addr[0];
+    if (i > 3) {
+      WiFi.hostByName(u.host.c_str(), ip);
+    }
+    if (!client.connect(ip, u.port)) {
       no = !no;
       continue;
     }
