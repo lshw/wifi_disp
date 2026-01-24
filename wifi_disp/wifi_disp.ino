@@ -233,7 +233,7 @@ void setup() {
 
 void wput() {
   uint16_t httpCode = wget();
-  if (httpCode >= 200 || httpCode < 400) {
+  if (httpCode >= 200 && httpCode < 400) {
     ip_info now_ip;
     ip_addr_t dns0, dns1;
     dns0 = *dns_getserver(0);
