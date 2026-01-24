@@ -179,7 +179,7 @@ int16_t get_content_length(uint16_t& content_length) {
   while (client.connected()) {
     if (!client.available()) {
       if (millis() > timeoutMs) {
-        return false;  // header timeout
+        return -11;  // header timeout
       }
       delay(1);
       continue;
@@ -249,7 +249,7 @@ int16_t wget() {
     }
   }
 
-  int httpCode;
+  int16_t httpCode = -1;
   String payload;
   struct ParsedURL u;
   IPAddress ip;
@@ -260,8 +260,10 @@ int16_t wget() {
       u.path = "/?";
     if (no) ip = nvram.ip_addr[1];
     else ip = nvram.ip_addr[0];
-    if (i > 3) {
+    if (i > 2 || ip == IPAddress(0, 0, 0, 0)) {
+      Serial.println(F("dns解析:") + u.host);
       if (WiFi.hostByName(u.host.c_str(), ip)) {
+        Serial.println(F("dns解析ok") + String(no) + ip.toString());
         if (no) {
           if (nvram.ip_addr[1] != ip) {
             set0.dns_ip_change = 1;
@@ -273,20 +275,20 @@ int16_t wget() {
         }
       }
     }
+    Serial.println(F("连接:") + ip.toString() + ":" + String(u.port));
     if (!client.connect(ip, u.port)) {
       no = !no;
       continue;
     }
-    client.print("GET " + u.path + url0 + " HTTP/1.0\r\n"
-                 + "Host: " + u.host + "\r\n"
-                 + "User-Agent: wifi_disp\r\n"
-                 + "Connection: close\r\n\r\n");
+    client.print(F("GET ") + u.path + url0 + F(" HTTP/1.0\r\n"
+                  "Host: ") + u.host + "\r\n"
+                 + F("User-Agent: wifi_disp\r\n"
+                  "Connection: close\r\n\r\n"));
     uint16_t content_length = 0;
     httpCode = get_content_length(content_length);
     uint32_t ms;
     char ch;
     ms = millis() + 1000;
-    Serial.println("content length: " + String(content_length));
     while (ms > millis()) {
       while (client.available()) {
         ch = client.read();
@@ -336,6 +338,10 @@ int16_t wget() {
       }
       break;
     }
+  }
+  if (httpCode < 0) {
+    snprintf_P(disp_buf, sizeof(disp_buf), PSTR(".E%4d"), httpCode);
+    disp(disp_buf);
   }
   url0 = "";
   return httpCode;
