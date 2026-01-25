@@ -17,7 +17,6 @@ http://wx.ai-thinker.com/api/old/wifi/config
 远程显示温度方式:
 温度历史数据地址1:https://temp2.wf163.com:1443/disp
 温度历史数据地址2:https://temp.cfido.com/disp
-微信搜小程序 "惠多气象", 然后把温度计序列号添加进去，添加温度计时，前缀的disp_不要删除
 
 Q&A:
 Q:为啥会显示[ 3.xx ]或者[ 4.xx ]，并闪动?
