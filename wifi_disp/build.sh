@@ -71,6 +71,7 @@ if [ -e $build/${project}.ino.bin ] ; then
   fi
   #把bin文件的crc32值修改为0
   lib/uncrc32 ${project}/${project}.bin $CRC_MAGIC
+  cp ${project}/{$project}.bin lib
 fi
 echo $ver
 exit
