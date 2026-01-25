@@ -65,10 +65,6 @@ if [ -e $build/${project}.ino.bin ] ; then
   tail -n 100 /tmp/${me}_info.log |sed -n "s/^Sketch uses \([0-9]*\) bytes (\([0-9]*\)%) of program storage space. Maximum is.*$/ROM:使用\1字节(\2%)/p"
 
   cp -a $build/${project}.ino.bin ${project}/${project}.bin
-  if [ -x $build/${project}.ino.boorloader.bin ] ; then
-    cp -a $build/${project}.ino.bootloader.bin \
-    $build/${project}.partitions.bin $project
-  fi
   #把bin文件的crc32值修改为0
   lib/uncrc32 ${project}/${project}.bin $CRC_MAGIC
 fi
