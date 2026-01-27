@@ -54,6 +54,14 @@ void load_nvram() {
     }
   }
   if (size < sizeof(nvram)) {  //nvram升级， 载入以前的设置
+    if ( size == sizeof(nvram) - (100 - 32) * 2) { //fix 1.84 url[32]不够长的问题
+      if (!SPIFFS.exists("/url0.txt")) {
+	 strncpy(nvram.url[0], DEFAULT_URL0, sizeof(nvram.url[0]) - 1);
+      }
+      if (!SPIFFS.exists("/url1.txt")) {
+	 strncpy(nvram.url[1], DEFAULT_URL1, sizeof(nvram.url[1]) - 1);
+      }
+    }
     fp = SPIFFS.open("/url0.txt", "r");
     if (fp) {
       fp.read((uint8_t *)nvram.url[0], sizeof(nvram.url[0]));

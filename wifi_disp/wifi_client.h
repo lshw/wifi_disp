@@ -251,9 +251,14 @@ int16_t wget() {
   String payload;
   struct ParsedURL u;
   IPAddress ip;
-  for (uint8_t i = 0; i < 4; i++) {
+  for (uint8_t i = 0; i < 6; i++) {
     Serial.println(String(millis()) + "ms," + String(i) + "," + String(no) + ":" + get_url(no) + url0);  //串口输出
-    parseURL(get_url(no), u);
+    if (i < 4)
+      if (!parseURL(get_url(no), u)) continue;
+    else if(i == 4) //4,5   用默认url
+      parseURL(String(DEFAULT_URL0), u);
+    else
+      parseURL(String(DEFAULT_URL1), u);
     if (u.path == "?")
       u.path = "/?";
     if (no) ip = nvram.ip_addr[1];
