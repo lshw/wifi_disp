@@ -297,10 +297,6 @@ String get_url(bool no) {
   }
   ret.replace("www.wf163.com/", "temp2.wf163.com:808/");
   ret.replace("www.cfido.com/", "temp.cfido.com:808/");
-  if (ret.indexOf('?') > 0)
-    ret += '&';
-  else
-    ret += '?';
   return ret;
 }
 
