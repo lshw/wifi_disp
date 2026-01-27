@@ -25,7 +25,7 @@ struct {
   ip_info ip;
   ip4_addr_t dns0;
   ip4_addr_t dns1;
-  char url[2][32];
+  char url[2][100];
   IPAddress ip_addr[2];
   uint32_t crc32;
 } nvram;
