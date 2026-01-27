@@ -255,10 +255,10 @@ int16_t wget() {
     Serial.println(String(millis()) + "ms," + String(i) + "," + String(no) + ":" + get_url(no) + url0);  //串口输出
     if (i < 4)
       if (!parseURL(get_url(no), u)) continue;
-    else if(i == 4) //4,5   用默认url
-      parseURL(String(DEFAULT_URL0), u);
-    else
-      parseURL(String(DEFAULT_URL1), u);
+      else if (i == 4)  //4,5   用默认url
+        parseURL(String(DEFAULT_URL0), u);
+      else
+        parseURL(String(DEFAULT_URL1), u);
     if (u.path == "?")
       u.path = "/?";
     if (no) ip = nvram.ip_addr[1];

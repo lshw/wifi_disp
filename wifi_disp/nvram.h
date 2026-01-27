@@ -53,13 +53,15 @@ void load_nvram() {
       }
     }
   }
-  if (size < sizeof(nvram)) {  //nvram升级， 载入以前的设置
-    if ( size == sizeof(nvram) - (100 - 32) * 2) { //fix 1.84 url[32]不够长的问题
+  if (size < sizeof(nvram)) {                      //nvram升级， 载入以前的设置
+    if (size == sizeof(nvram) - (100 - 32) * 2) {  //fix 1.84 url[32]不够长的问题
       if (!SPIFFS.exists("/url0.txt")) {
-	 strncpy(nvram.url[0], DEFAULT_URL0, sizeof(nvram.url[0]) - 1);
+        strncpy(nvram.url[0], DEFAULT_URL0, sizeof(nvram.url[0]) - 1);
+        nvram.url[0][sizeof(nvram.url[0]) - 1] = 0;
       }
       if (!SPIFFS.exists("/url1.txt")) {
-	 strncpy(nvram.url[1], DEFAULT_URL1, sizeof(nvram.url[1]) - 1);
+        strncpy(nvram.url[1], DEFAULT_URL1, sizeof(nvram.url[1]) - 1);
+        nvram.url[1][sizeof(nvram.url[1]) - 1] = 0;
       }
     }
     fp = SPIFFS.open("/url0.txt", "r");
@@ -98,6 +100,15 @@ void load_nvram() {
   } else if (nvram.ch > 0 && nvram.ch <= 14) {
     Serial.printf_P(PSTR("\r\nwifi channel=%d, proc=%d\r\n"), nvram.ch, nvram.proc);
     WRITE_PERI_REG(0x600011f4, 1 << 16 | nvram.ch);
+  }
+  if (strncmp(nvram.url[0], "http", 4) != 0 || strncmp(nvram.url[1], "http", 4) != 0) {
+    Serial.print("url default");
+    strncpy((char *)nvram.url[0], DEFAULT_URL0, sizeof(nvram.url[0]) - 1);
+    nvram.url[0][sizeof(nvram.url[0]) - 1] = 0;
+    strncpy((char *)nvram.url[1], DEFAULT_URL0, sizeof(nvram.url[0]) - 1);
+    nvram.url[0][sizeof(nvram.url[1]) - 1] = 0;
+    nvram.change = 1;
+    save_nvram();
   }
 }
 

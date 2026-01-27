@@ -292,6 +292,7 @@ void httpsave() {
       data.trim();
       memset(nvram.proc3_host, 0, sizeof(nvram.proc3_host));
       strncpy(nvram.proc3_host, data.substring(0, sizeof(nvram.proc3_host) - 1).c_str(), sizeof(nvram.proc3_host) - 1);
+      nvram.proc3_host[sizeof(nvram.proc3_host) - 1] = 0;
       nvram.change = 1;
       save_nvram();
       continue;
@@ -321,7 +322,11 @@ void httpsave() {
     } else if (httpd.argName(i).compareTo("url") == 0) {
       url = httpd.arg(i);
       url.trim();
-      strncpy((char *)nvram.url[0], url.c_str(), sizeof(nvram.url[0]));
+      if (url.length() < 4)
+        strncpy((char *)nvram.url[0], DEFAULT_URL0, sizeof(nvram.url[0]) - 1);
+      else
+        strncpy((char *)nvram.url[0], url.c_str(), sizeof(nvram.url[0]) - 1);
+      nvram.url[0][sizeof(nvram.url[0]) - 1] = 0;
       nvram.change = 1;
       nvram.ip_addr[0] = IPAddress(0, 0, 0, 0);
     } else if (httpd.argName(i).compareTo(F("lora_hz")) == 0) {
@@ -361,7 +366,11 @@ void httpsave() {
     } else if (httpd.argName(i).compareTo("url1") == 0) {
       url = httpd.arg(i);
       url.trim();
-      strncpy((char *)nvram.url[1], url.c_str(), sizeof(nvram.url[1]));
+      if (url.length() < 4)
+        strncpy((char *)nvram.url[1], DEFAULT_URL1, sizeof(nvram.url[1]) - 1);
+      else
+        strncpy((char *)nvram.url[1], url.c_str(), sizeof(nvram.url[1]) - 1);
+      nvram.url[1][sizeof(nvram.url[1]) - 1] = 0;
       nvram.ip_addr[1] = IPAddress(0, 0, 0, 0);
       nvram.change = 1;
     }

@@ -81,7 +81,8 @@ void proc5_setup() {
           count = mac_min + 1;
         }
         if (macs[mac_min].ssid[0] == 0 || macs[mac_min].rssi < rssi) {  //保存数据
-          strncpy(macs[mac_min].ssid, ssid.c_str(), sizeof(macs[0].ssid));
+          strncpy(macs[mac_min].ssid, ssid.c_str(), sizeof(macs[0].ssid) - 1);
+          macs[mac_min].ssid[sizeof(macs[0].ssid) - 1] = 0;
           macs[mac_min].encryptionType = encryptionType;
           memcpy(macs[mac_min].bssid, bssid, sizeof(macs[0].bssid));
           macs[mac_min].channel = channel;

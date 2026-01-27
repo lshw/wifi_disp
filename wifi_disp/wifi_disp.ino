@@ -121,11 +121,11 @@ void setup() {
       proc3_setup();
       break;
     case SETUP_MODE:
-      nvram.pcb_ver = -1;
-      pcb_ver_detect();
       set_hostname();
       hello();
       setup_setup();
+      nvram.pcb_ver = -1;
+      pcb_ver_detect();
       break;
     case OFF_MODE:
       init1();

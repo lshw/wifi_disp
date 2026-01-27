@@ -584,8 +584,10 @@ void save_ssid() {
   memset(wps_password, 0, sizeof(wps_password));
   struct station_config config[5];
   wifi_station_get_ap_info(config);
-  strncpy(wps_ssid, (char *)config[ap_id].ssid, 32);
-  strncpy(wps_password, (char *)config[ap_id].password, 64);
+  strncpy(wps_ssid, (char *)config[ap_id].ssid, sizeof(wps_ssid) - 1);
+  wps_ssid[sizeof(wps_ssid) - 1] = 0;
+  strncpy(wps_password, (char *)config[ap_id].password, sizeof(wps_password) - 1);
+  wps_password[sizeof(wps_password) - 1] = 0;
   config[ap_id].bssid_set = 1;              //同名ap，mac地址不同
   wifi_station_set_config(&config[ap_id]);  //保存成功的ssid,用于下次通讯
   wifi_set_add(wps_ssid, wps_password);
