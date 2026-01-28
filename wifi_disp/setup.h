@@ -3,7 +3,7 @@
 void setup_setup() {
   init1();
   disp(F("SETUP"));
-  nvram.nvram7 |= NVRAM7_CHARGE;  //充电
+  nvram.charge = 1;  //充电
   nvram.change = 1;
   save_nvram();
   pcb_ver_detect();

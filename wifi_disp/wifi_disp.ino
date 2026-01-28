@@ -39,7 +39,7 @@ void setup() {
   nvram.change = 1;
   if (millis() > 5000) {  //升级程序后第一次启动
     Serial.println(F("升级完成，重启"));
-    nvram.nvram7 |= NVRAM7_CHARGE;
+    nvram.charge = 1;
     nvram.change = 1;
     save_nvram();
     poweroff(2);

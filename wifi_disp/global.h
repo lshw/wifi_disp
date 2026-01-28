@@ -96,14 +96,14 @@ void poweroff(uint32_t sec) {
   if (power_in) Serial.println(F("有外接电源"));
   else Serial.println(F("无外接电源"));
   Serial.flush();
-  if (nvram.nvram7 & NVRAM7_CHARGE) {
+  if (nvram.charge) {
     if (v > 4.20) {
       Serial.printf_P(PSTR("v=%f,停止充电"), v);
-      nvram.nvram7 &= ~NVRAM7_CHARGE;
+      nvram.charge = 0;
       nvram.change = 1;
     }
   }
-  if (power_in && (nvram.nvram7 & NVRAM7_CHARGE)) {  //如果外面接了电， 保持充电
+  if (power_in && nvram.charge) {  //如果外面接了电， 保持充电
     sec = sec / 2;
     Serial.print(F("休眠"));
     if (sec > 60) {
@@ -138,7 +138,7 @@ void poweroff(uint32_t sec) {
     Serial_begin();
     Serial.println();
   }
-  if ((nvram.nvram7 & NVRAM7_CHARGE) && power_in)
+  if (power_in && nvram.charge)
     Serial.println(F("充电结束"));
   Serial.print(F("关机"));
   if (sec > 0) {
@@ -268,9 +268,9 @@ float get_batt() {
   charge_off();
   delay(1);
   get_batt0();
-  if ((nvram.nvram7 & NVRAM7_CHARGE) == 0) {
+  if (nvram.charge == 0) {
     if (v < 3.8) {
-      nvram.nvram7 |= NVRAM7_CHARGE;
+      nvram.charge = 1;
       nvram.change = 1;
     }
   }
@@ -535,8 +535,8 @@ void check_batt_low() {
   } else if (v < 3.50) {
     snprintf_P(disp_buf, sizeof(disp_buf), PSTR("OFF%f"), v);
     disp(disp_buf);  //电压过低
-    if (nvram.nvram7 & NVRAM7_CHARGE == 0 || nvram.proc != 0) {
-      nvram.nvram7 |= NVRAM7_CHARGE;  //充电
+    if (nvram.charge == 0 || nvram.proc != 0) {
+      nvram.charge = 1;  //充电
       nvram.proc = GENERAL_MODE;
       system_deep_sleep_set_option(4);  //下次开机关闭wifi
       nvram.change = 1;                 //电压过低

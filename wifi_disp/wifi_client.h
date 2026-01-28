@@ -207,7 +207,7 @@ int16_t get_content_length(uint16_t& content_length) {
 int16_t wget() {
   char key[17];
   String url0;
-  uint8_t url_no : 1;
+  uint8_t url_no;
   url_no = nvram.url_no;
 
   url0 += "GIT=" GIT_VER "&ver=" VER "&sn=" + hostname
@@ -217,7 +217,7 @@ int16_t wget() {
           + "&rssi=" + String(WiFi.RSSI())
           + "&power=" + String(power_in)
           + "&pcb_ver=" + String(nvram.pcb_ver)
-          + "&charge=" + String(nvram.nvram7 & NVRAM7_CHARGE)
+          + "&charge=" + String(nvram.charge)
           + "&ms=" + String(millis());
   if (proc == PROC4_MODE && rxLen > 0)
     url0 += "&lora=" + base64::encode(rxBuf, rxLen);
@@ -278,7 +278,8 @@ int16_t wget() {
     }
     Serial.println(F("连接:") + ip.toString() + ":" + String(u.port));
     if (!client.connect(ip, u.port)) {
-      url_no = ~url_no;
+      url_no++;
+      url_no = url_no % 2;
       continue;
     }
     client.print(F("GET ") + u.path + url0
@@ -303,7 +304,8 @@ int16_t wget() {
     }
     payload.trim();
     if (payload.length() == 0) {
-      url_no = ~url_no;  //换服务器
+      url_no++;  //换url
+      url_no = url_no % 2;
       snprintf_P(disp_buf, sizeof(disp_buf), PSTR(".E%4d"), httpCode);
       disp(disp_buf);
       Serial.print(F("http error code "));
@@ -367,8 +369,8 @@ bool http_update(String update_url) {
     ESP.restart();
     return false;
   }
-  if (nvram.nvram7 & NVRAM7_CHARGE == 0) {
-    nvram.nvram7 |= NVRAM7_CHARGE;  //开充电模式
+  if (nvram.charge == 0) {
+    nvram.charge = 1;  //开充电模式
     nvram.change = 1;
     save_nvram();
   }

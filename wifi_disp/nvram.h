@@ -6,7 +6,7 @@ struct {
   uint8_t change;
   int8_t have_dht;
   int8_t have_lora;  //失败一次就减1，减到-5,  设置ota模式， 会清0， 上同
-  uint32_t nvram7;
+  uint32_t baoliu;
   uint8_t ch;
   uint8_t bw;
   uint8_t cr;
@@ -26,6 +26,7 @@ struct {
   char url[2][100];
   IPAddress ip_addr[2];
   uint8_t url_no : 1;
+  uint8_t charge : 1;
   uint32_t crc32;
 } nvram;
 
