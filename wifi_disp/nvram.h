@@ -53,33 +53,6 @@ void load_nvram() {
       }
     }
   }
-  if (size < sizeof(nvram)) {                      //nvram升级， 载入以前的设置
-    if (size == sizeof(nvram) - (100 - 32) * 2) {  //fix 1.84 url[32]不够长的问题
-      if (!SPIFFS.exists("/url0.txt")) {
-        strncpy(nvram.url[0], DEFAULT_URL0, sizeof(nvram.url[0]) - 1);
-        nvram.url[0][sizeof(nvram.url[0]) - 1] = 0;
-      }
-      if (!SPIFFS.exists("/url1.txt")) {
-        strncpy(nvram.url[1], DEFAULT_URL1, sizeof(nvram.url[1]) - 1);
-        nvram.url[1][sizeof(nvram.url[1]) - 1] = 0;
-      }
-    }
-    fp = SPIFFS.open("/url0.txt", "r");
-    if (fp) {
-      fp.read((uint8_t *)nvram.url[0], sizeof(nvram.url[0]));
-      fp.close();
-      nvram.ip_addr[0] = IPAddress(0, 0, 0, 0);
-    }
-    fp = SPIFFS.open("/url1.txt", "r");
-    if (fp) {
-      fp.read((uint8_t *)nvram.url[1], sizeof(nvram.url[1]));
-      fp.close();
-      nvram.ip_addr[1] = IPAddress(0, 0, 0, 0);
-    }
-    nvram.crc32 = calculateCRC32((uint8_t *)&nvram, sizeof(nvram) - sizeof(nvram.crc32));
-    nvram.change = 1;
-    save_nvram();
-  }
   if (nvram.crc32 != calculateCRC32((uint8_t *)&nvram, sizeof(nvram) - sizeof(nvram.crc32))) {
     memset(&nvram, 0, sizeof(nvram));
     nvram.ch = 0;
@@ -100,11 +73,21 @@ void load_nvram() {
     WRITE_PERI_REG(0x600011f4, 1 << 16 | nvram.ch);
   }
   if (strncmp(nvram.url[0], "http", 4) != 0 || strncmp(nvram.url[1], "http", 4) != 0) {
-    Serial.print("url default");
-    strncpy((char *)nvram.url[0], DEFAULT_URL0, sizeof(nvram.url[0]) - 1);
+    Serial.println("\r\nurl default[" + String(nvram.url[0]) + "][" + String(nvram.url[1]) + "]");
+    if (SPIFFS.exists("/url0.txt")) {
+      fp = SPIFFS.open("/url0.txt", "r");
+      fp.read((uint8_t *)&nvram.url[0], sizeof(nvram.url[0]) - 1);
+      fp.close();
+    } else strncpy((char *)nvram.url[0], DEFAULT_URL0, sizeof(nvram.url[0]) - 1);
     nvram.url[0][sizeof(nvram.url[0]) - 1] = 0;
-    strncpy((char *)nvram.url[1], DEFAULT_URL0, sizeof(nvram.url[0]) - 1);
-    nvram.url[0][sizeof(nvram.url[1]) - 1] = 0;
+    nvram.ip_addr[0] = IPAddress(0, 0, 0, 0);
+    if (SPIFFS.exists("/url1.txt")) {
+      fp = SPIFFS.open("/url1.txt", "r");
+      fp.read((uint8_t *)&nvram.url[1], sizeof(nvram.url[1]) - 1);
+      fp.close();
+    } else strncpy((char *)nvram.url[1], DEFAULT_URL0, sizeof(nvram.url[1]) - 1);
+    nvram.url[1][sizeof(nvram.url[1]) - 1] = 0;
+    nvram.ip_addr[1] = IPAddress(0, 0, 0, 0);
     nvram.change = 1;
     save_nvram();
   }
