@@ -68,14 +68,12 @@ void load_nvram() {
     if (fp) {
       fp.read((uint8_t *)nvram.url[0], sizeof(nvram.url[0]));
       fp.close();
-      SPIFFS.remove("/url0.txt");
       nvram.ip_addr[0] = IPAddress(0, 0, 0, 0);
     }
     fp = SPIFFS.open("/url1.txt", "r");
     if (fp) {
       fp.read((uint8_t *)nvram.url[1], sizeof(nvram.url[1]));
       fp.close();
-      SPIFFS.remove("/url1.txt");
       nvram.ip_addr[1] = IPAddress(0, 0, 0, 0);
     }
     nvram.crc32 = calculateCRC32((uint8_t *)&nvram, sizeof(nvram) - sizeof(nvram.crc32));
