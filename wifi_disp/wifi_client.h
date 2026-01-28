@@ -207,8 +207,8 @@ int16_t get_content_length(uint16_t& content_length) {
 int16_t wget() {
   char key[17];
   String url0;
-  bool no0, no = nvram.nvram7 & NVRAM7_URL;
-  no0 = no;
+  uint8_t url_no : 1;
+  url_no = nvram.url_no;
 
   url0 += "GIT=" GIT_VER "&ver=" VER "&sn=" + hostname
           + "&ssid=" + String(WiFi.SSID())
@@ -252,39 +252,33 @@ int16_t wget() {
   struct ParsedURL u;
   IPAddress ip;
   for (uint8_t i = 0; i < 6; i++) {
-    if (i < 4)
-      if (!parseURL(get_url(no), u)) continue;
-      else if (i == 4)  //4,5   用默认url
-        parseURL(String(DEFAULT_URL0), u);
-      else
-        parseURL(String(DEFAULT_URL1), u);
+    if (i < 4) {
+      if (!parseURL(nvram.url[url_no], u)) continue;
+    } else if (i == 4)  //4,5   用默认url
+      parseURL(String(DEFAULT_URL0), u);
+    else
+      parseURL(String(DEFAULT_URL1), u);
     if (u.path == "?")
       u.path = "/?";
-  if (u.path.indexOf('?') > 0)
-    u.path += '&';
-  else
-    u.path += '?';
-    Serial.println(String(millis()) + "ms," + String(i) + "," + String(no) + ",http://" + u.host + ":" + String(u.port) + u.path + url0);  //串口输出
-    if (no) ip = nvram.ip_addr[1];
-    else ip = nvram.ip_addr[0];
+    if (u.path.indexOf('?') > 0)
+      u.path += '&';
+    else
+      u.path += '?';
+    Serial.println(String(millis()) + "ms," + String(i) + "," + String(url_no) + ",http://" + u.host + ":" + String(u.port) + u.path + url0);  //串口输出
+    ip = nvram.ip_addr[url_no];
     if (i > 1 || ip == IPAddress(0, 0, 0, 0)) {
       Serial.println(F("dns解析:") + u.host);
       if (WiFi.hostByName(u.host.c_str(), ip)) {
-        Serial.println(F("dns解析ok") + String(no) + ip.toString());
-        if (no) {
-          if (nvram.ip_addr[1] != ip) {
-            set0.dns_ip_change = 1;
-            nvram.ip_addr[1] = ip;
-          }
-        } else {
+        Serial.println(F("dns解析ok") + String(url_no) + ":" + ip.toString());
+        if (nvram.ip_addr[url_no] != ip) {
           set0.dns_ip_change = 1;
-          nvram.ip_addr[0] = ip;
+          nvram.ip_addr[url_no] = ip;
         }
       }
     }
     Serial.println(F("连接:") + ip.toString() + ":" + String(u.port));
     if (!client.connect(ip, u.port)) {
-      no = !no;
+      url_no = ~url_no;
       continue;
     }
     client.print(F("GET ") + u.path + url0
@@ -309,7 +303,7 @@ int16_t wget() {
     }
     payload.trim();
     if (payload.length() == 0) {
-      no = !no;  //换服务器
+      url_no = ~url_no;  //换服务器
       snprintf_P(disp_buf, sizeof(disp_buf), PSTR(".E%4d"), httpCode);
       disp(disp_buf);
       Serial.print(F("http error code "));
@@ -342,8 +336,8 @@ int16_t wget() {
       next_disp = next_disp * 10;
       disp_buf[i1] = 0;
       disp(disp_buf);
-      if (httpCode >= 200 && no != no0) {
-        nvram.nvram7 ^= (1 << NVRAM7_URL);  //先试试上次成功的url
+      if (httpCode >= 200 && nvram.url_no != url_no) {
+        nvram.url_no = url_no;
         nvram.change = 1;
         save_nvram();
       }

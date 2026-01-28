@@ -1,8 +1,6 @@
 #ifndef __NVRAM__
 #define __NVRAM__
 #include "sx1278_reg.h"
-#define NVRAM7_CHARGE 0b1
-#define NVRAM7_URL 0b10
 struct {
   uint8_t proc;
   uint8_t change;
@@ -27,6 +25,7 @@ struct {
   ip4_addr_t dns1;
   char url[2][100];
   IPAddress ip_addr[2];
+  uint8_t url_no : 1;
   uint32_t crc32;
 } nvram;
 
