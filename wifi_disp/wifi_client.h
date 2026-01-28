@@ -337,7 +337,10 @@ int16_t wget() {
         next_disp = 360 * 24;
       next_disp = next_disp * 10;
       disp_buf[i1] = 0;
-      disp(disp_buf);
+      if (strlen(disp_buf) == 0)
+        disp("-----");
+      else
+        disp(disp_buf);
       if (httpCode >= 200 && nvram.url_no != url_no) {
         nvram.url_no = url_no;
         nvram.change = 1;
