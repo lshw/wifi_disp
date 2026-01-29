@@ -205,62 +205,45 @@ function check_mkdir($dbname)
     chmod($dbname, 0777);
 }
 
+function gp_sleeps() {
+$week = date('w');
+$hm = date("Hi");
+if($week == 0 or $week == 6)  //休市日， 第二天8点30开机
+  return next830();
+if($hm > "1530")
+  return next830();
+if($hm < "0830")
+  return today830();
+if( date('Hi',time() + 1800) > "1530")
+  return today1530();
+return 1800;
+}
+function next830() {
+  $todays = date('H', $t) * 60 * 60 + date('i', $t) * 60 + date('s', $t);
+  $nexts = (8 + 24) * 60 * 60 + 30 * 60;
+  return $nexts - $todays;
+}
+function today830() {
+  $todays = date('H', $t) * 60 * 60 + date('i', $t) * 60 + date('s');
+  $nexts = 8 * 60 * 60 + 30 * 60;
+  return $nexts - $todays;
+}
+function today1530() {
+  $todays = date('H', $t) * 60 * 60 + date('i', $t) * 60 + date('s');
+  $nexts = 15 * 60 * 60 + 30 * 60;
+  return $nexts - $todays;
+}
 function stock($gp_name)
 {
+    $week = date('w');
     $cache_file="/tmp/gp_${gp_name}.txt";
-    $week=date('w');
-    //根据开市时间，计算股票下次更新时间
-    $t8=strtotime(date('Y-m-d 08:00:00'));
-    $t15=strtotime(date('Y-m-d 15:00:00'));
-    if (time() < $t8) { //未开市
-        $next=$t8 - time() + 30;
-        if ($week==6) {
-            $next +=3600*24*2;
-        } else if ($week == 0) {
-            $next += 3600*24;
-        }
-    } else if (time() < $t15) { //开市中
-        if ($week ==6) {
-            $next=$t8+3600*24*2 -time()+ 30; //第三天开市
-        } else if ($week == 0) {
-            $next=$t8+3600*24 -time()+ 30; //第二天开市
-        } else {
-            if (time()+600 < $t15) { //休市在半小时以后
-                 $next=600;
-            } else {
-                $next = $t15 - time() +60; //休市20秒后更新数据
-            }
-        }
-    } else {
-        //休市后
-        $next=$t8+3600*24 -time()+ 30; //第二天开市
-        if ($week == 5) {
-            $next+=3600*24*2;// 周五
-        } else if ($week == 6) {
-            $next+=3600*24;
-        }
-    }
-        $h=date('H');
-    if ($h < 8) {
-        $next=$t8-strtotime(date('Y-m-d 00:00:00'));
-    }
-        //$next 是下次上线需要延迟的秒数， 已经根据周末和开市时间做了调整。
-    $next=round($next/10);
+    $next=round(gp_sleeps()/10);
         //根据休市时间，计算股票更新时间
-    if ($week == 6) {
-        $last=strtotime(date('Y-m-d 15:00:00', time() - 3600*24));
-    } else if ($week ==0) {
-        $last=strtotime(date('Y-m-d 15:00:00', time() - 3600*24 *2));
-    } else {
-        $last=strtotime(date('Y-m-d 15:00:00', time()));
-        if ($last > time()) {
-            $last = time();
-        }
-    }
 
     //$last是股票更新时间
     if (file_exists($cache_file)) { //存在cache文件
         $ctime=filemtime($cache_file); //结果本地缓存半小时
+        echo "filemtime=$ctime, last=$last<br>";
         if ($ctime+600 > $last) {
             echo(file_get_contents($cache_file).",$next");
             return;
@@ -278,7 +261,7 @@ function stock($gp_name)
         $msg=$a[3];
     }
     echo "$msg,$next";
-        file_put_contents($cache_file, $msg);
-        chmod($cache_file,0666);
-        touch($cache_file, $last, $last);
+    file_put_contents($cache_file, $msg);
+    chmod($cache_file, 0666);
 }
+
