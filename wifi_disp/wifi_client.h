@@ -367,6 +367,11 @@ void update_progress(int cur, int total) {
 }
 
 bool http_update(String update_url) {
+  if (nvram.proc != GENERAL_MODE) {
+    nvram.proc = GENERAL_MODE;
+    nvram.change = 1;
+    save_nvram();
+  }
   if (get_batt() < 3.6) {
     Serial.println(F("电压太低,不做升级"));
     ESP.restart();

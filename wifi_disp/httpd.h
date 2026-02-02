@@ -421,6 +421,10 @@ void httpd_listen() {
                                      "</html>");
         Serial.println(F("上传成功"));
         Serial.flush();
+        nvram.proc = GENERAL_MODE;
+        proc = nvram.proc;
+        nvram.change = 1;
+        save_nvram();
         ht16c21_cmd(0x88, 1);  //闪烁
         delay(5);
         ESP.restart();
